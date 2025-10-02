@@ -17,6 +17,7 @@ describe('HistoryService', () => {
     take: jest.fn().mockReturnThis(),
     getMany: jest.fn(),
     getCount: jest.fn(),
+    getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
   };
 
   const mockRepository = {
@@ -62,7 +63,7 @@ describe('HistoryService', () => {
         }
       ];
 
-      mockQueryBuilder.getMany.mockResolvedValue(mockHistories);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockHistories, 1]);
 
       const result = await service.findAll({});
 
@@ -72,8 +73,7 @@ describe('HistoryService', () => {
     });
 
     it('should filter by year', async () => {
-      mockQueryBuilder.getMany.mockResolvedValue([]);
-      mockQueryBuilder.getCount.mockResolvedValue(0);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
       await service.findAll({ year: 2024 });
 
@@ -81,10 +81,9 @@ describe('HistoryService', () => {
     });
 
     it('should sort in ascending order', async () => {
-      mockQueryBuilder.getMany.mockResolvedValue([]);
-      mockQueryBuilder.getCount.mockResolvedValue(0);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
-      await service.findAll({ sortOrder: 'ASC' });
+      await service.findAll({ sort: 'asc' });
 
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('history.year', 'ASC');
     });

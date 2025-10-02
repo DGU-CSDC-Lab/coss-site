@@ -5,20 +5,27 @@ import { NotFoundException } from '@nestjs/common';
 import { BoardService } from './board.service';
 import { BoardPost } from '../entities';
 import { User } from '../../auth/entities';
+import { Category } from '../../category/entities';
 
 describe('BoardService', () => {
   let service: BoardService;
   let postRepository: Repository<BoardPost>;
   let userRepository: Repository<User>;
+  let categoryRepository: Repository<Category>;
 
   const mockQueryBuilder = {
     leftJoinAndSelect: jest.fn().mockReturnThis(),
+    leftJoin: jest.fn().mockReturnThis(),
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
+    groupBy: jest.fn().mockReturnThis(),
+    addGroupBy: jest.fn().mockReturnThis(),
+    select: jest.fn().mockReturnThis(),
     skip: jest.fn().mockReturnThis(),
     take: jest.fn().mockReturnThis(),
     getManyAndCount: jest.fn(),
+    getOne: jest.fn(),
   };
 
   const mockPostRepository = {
@@ -42,8 +49,20 @@ describe('BoardService', () => {
           useValue: mockPostRepository,
         },
         {
+          provide: 'PostFileRepository',
+          useValue: {
+            count: jest.fn().mockResolvedValue(0),
+          },
+        },
+        {
           provide: getRepositoryToken(User),
           useValue: mockUserRepository,
+        },
+        {
+          provide: getRepositoryToken(Category),
+          useValue: {
+            findOne: jest.fn(),
+          },
         },
       ],
     }).compile();
@@ -51,6 +70,7 @@ describe('BoardService', () => {
     service = module.get<BoardService>(BoardService);
     postRepository = module.get<Repository<BoardPost>>(getRepositoryToken(BoardPost));
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    categoryRepository = module.get<Repository<Category>>(getRepositoryToken(Category));
 
     // Reset mocks
     jest.clearAllMocks();
@@ -89,7 +109,7 @@ describe('BoardService', () => {
       
       await service.findAll({ categoryName: '뉴스', page: 1, size: 10 });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('post.categoryId = :categoryId', { categoryId: 'cat1' });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('category.name = :categoryName', { categoryName: '뉴스' });
     });
 
     it('should search by keyword', async () => {
@@ -133,7 +153,7 @@ describe('BoardService', () => {
 
       expect(mockPostRepository.findOne).toHaveBeenCalledWith({ 
         where: { id: '1' },
-        relations: ['author']
+        relations: ['author', 'category', 'files']
       });
       expect(mockPostRepository.save).toHaveBeenCalledWith({ ...mockPost, viewCount: 6 });
       expect(result.contentHtml).toBe('Test content');
@@ -167,10 +187,16 @@ describe('BoardService', () => {
       };
 
       const mockUser = { username: 'testuser' };
+      const mockCategory = { id: 'cat1', name: '공지사항' };
+      const mockResult = { title: 'New Post', author: 'testuser' };
 
       mockPostRepository.create.mockReturnValue(mockPost);
       mockPostRepository.save.mockResolvedValue(mockPost);
       mockUserRepository.findOne.mockResolvedValue(mockUser);
+      (categoryRepository.findOne as jest.Mock).mockResolvedValue(mockCategory);
+      
+      // Spy on findOne method
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockResult as any);
 
       const result = await service.create(createDto, 'user1');
 

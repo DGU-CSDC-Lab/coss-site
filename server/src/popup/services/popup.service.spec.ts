@@ -17,6 +17,7 @@ describe('PopupService', () => {
     take: jest.fn().mockReturnThis(),
     getMany: jest.fn(),
     getCount: jest.fn(),
+    getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
   };
 
   const mockRepository = {
@@ -63,7 +64,7 @@ describe('PopupService', () => {
         }
       ];
 
-      mockQueryBuilder.getMany.mockResolvedValue(mockPopups);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockPopups, 1]);
 
       const result = await service.findAll({});
 
@@ -72,12 +73,11 @@ describe('PopupService', () => {
     });
 
     it('should filter by active status', async () => {
-      mockQueryBuilder.getMany.mockResolvedValue([]);
-      mockQueryBuilder.getCount.mockResolvedValue(0);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
       await service.findAll({ isActive: true });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('popup.isActive = :active', { active: true });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('popup.isActive = :isActive', { isActive: true });
     });
   });
 

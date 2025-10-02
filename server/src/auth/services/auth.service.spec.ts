@@ -67,7 +67,7 @@ describe('AuthService', () => {
       const mockAccount = {
         id: 'account-id',
         email: 'admin@iot.ac.kr',
-        passwordHash: 'password123',
+        passwordHash: '$2b$10$01rMdZzfzLsgr6ulhkl91ep8FA9PxIFb3WmaBD1k2GXxNaJAwEtle',
         users: [{
           id: 'user-id',
           username: 'admin',
@@ -88,6 +88,8 @@ describe('AuthService', () => {
         accessToken: 'access-token',
         refreshToken: 'refresh-token',
         expiresIn: 3600,
+        userId: 'user-id',
+        role: 'ADMIN',
       });
     });
 
@@ -133,7 +135,7 @@ describe('AuthService', () => {
 
       mockJwtService.verify.mockReturnValue(mockPayload);
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      mockJwtService.sign.mockReturnValueOnce('new-access-token').mockReturnValueOnce('new-refresh-token');
+      mockJwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
 
       const result = await service.refresh(refreshToken);
 
@@ -143,9 +145,11 @@ describe('AuthService', () => {
         relations: ['account'],
       });
       expect(result).toEqual({
-        accessToken: 'new-access-token',
-        refreshToken: 'new-refresh-token',
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
         expiresIn: 3600,
+        userId: 'user-id',
+        role: 'ADMIN',
       });
     });
 

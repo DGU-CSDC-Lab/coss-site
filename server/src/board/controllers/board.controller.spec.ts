@@ -70,7 +70,13 @@ describe('BoardController', () => {
 
       const result = await controller.getPosts(query);
 
-      expect(boardService.findAll).toHaveBeenCalledWith(query);
+      expect(boardService.findAll).toHaveBeenCalledWith({
+        categoryName: '공지사항',
+        page: 1,
+        size: 10,
+        keyword: undefined,
+        sort: 'latest',
+      });
       expect(result).toEqual(expectedResult);
     });
   });

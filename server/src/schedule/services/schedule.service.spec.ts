@@ -17,6 +17,7 @@ describe('ScheduleService', () => {
     take: jest.fn().mockReturnThis(),
     getMany: jest.fn(),
     getCount: jest.fn(),
+    getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
   };
 
   const mockRepository = {
@@ -62,7 +63,7 @@ describe('ScheduleService', () => {
         }
       ];
 
-      mockQueryBuilder.getMany.mockResolvedValue(mockSchedules);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockSchedules, 1]);
 
       const result = await service.findAll({});
 
@@ -71,8 +72,7 @@ describe('ScheduleService', () => {
     });
 
     it('should filter by month', async () => {
-      mockQueryBuilder.getMany.mockResolvedValue([]);
-      mockQueryBuilder.getCount.mockResolvedValue(0);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
       await service.findAll({ month: '2024-01' });
 
@@ -83,8 +83,7 @@ describe('ScheduleService', () => {
     });
 
     it('should filter by category', async () => {
-      mockQueryBuilder.getMany.mockResolvedValue([]);
-      mockQueryBuilder.getCount.mockResolvedValue(0);
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
       await service.findAll({ category: ScheduleCategory.ADMISSION });
 
