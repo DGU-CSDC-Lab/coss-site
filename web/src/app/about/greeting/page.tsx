@@ -30,7 +30,7 @@ export default function GreetingPage() {
 
           <div className="space-y-4 leading-relaxed">
             <p>
-              먼저, 급변하는 4차 산업혁명 시대를 맞아 '사물인터넷(IoT)'이라는
+              먼저, 급변하는 4차 산업혁명 시대를 맞아 &apos;사물인터넷(IoT)&apos;이라는
               영역에서 새로운 가치를 창출하고자 하는 저희 사업단의 비전에 깊은
               관심과 아낌없는 성원을 보내주신 여러분께 진심으로 감사드립니다.
             </p>
@@ -72,7 +72,7 @@ export default function GreetingPage() {
             <p>
               올해에도 저희 사업단은{' '}
               <span className="text-orange-500 font-semibold">
-                '지속 가능한 스마트 솔루션'
+                &apos;지속 가능한 스마트 솔루션&apos;
               </span>
               이라는 가치를 중심에 두고, AI·빅데이터·블록체인 등 첨단 기술을
               결합한 IoT 연구를 심화해 나갈 예정입니다. 더불어 지역 중소기업과의

@@ -5,7 +5,7 @@ export enum HeaderAssetType {
   LOGO = 'logo',
   BANNER = 'banner',
   BACKGROUND = 'background',
-  ANNOUNCEMENT = 'announcement'
+  ANNOUNCEMENT = 'announcement',
 }
 
 @Entity('header_assets')

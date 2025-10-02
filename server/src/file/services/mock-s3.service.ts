@@ -16,7 +16,7 @@ export class MockS3Service {
   async generatePresignedUploadUrl(
     fileKey: string,
     contentType: string,
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Promise<string> {
     // Mock presigned URL - 실제로는 로컬 업로드 엔드포인트
     return `http://localhost:3001/api/files/mock-upload/${encodeURIComponent(fileKey)}`;
@@ -37,11 +37,11 @@ export class MockS3Service {
   async handleMockUpload(fileKey: string, buffer: Buffer): Promise<void> {
     const filePath = path.join(this.uploadDir, fileKey);
     const dir = path.dirname(filePath);
-    
+
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
-    
+
     fs.writeFileSync(filePath, buffer);
   }
 

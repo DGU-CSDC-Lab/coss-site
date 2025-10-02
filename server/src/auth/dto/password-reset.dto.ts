@@ -1,4 +1,10 @@
-import { IsEmail, IsString, MinLength, IsNumberString, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  IsNumberString,
+  Length,
+} from 'class-validator';
 
 export class ForgotPasswordRequest {
   @IsEmail()

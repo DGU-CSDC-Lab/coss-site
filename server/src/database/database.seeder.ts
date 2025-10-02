@@ -38,7 +38,7 @@ export class DatabaseSeeder implements OnModuleInit {
     }
 
     const hashedPassword = await bcrypt.hash('admin123!', 10);
-    
+
     const account = new Account();
     account.email = 'admin@iot.ac.kr';
     account.passwordHash = hashedPassword;
@@ -73,19 +73,36 @@ export class DatabaseSeeder implements OnModuleInit {
 
     // 소식 하위 카테고리
     const newsSubCategories = [
-      { name: '장학정보', slug: 'scholarship', description: '장학금 관련 정보', order: 1 },
-      { name: '뉴스', slug: 'news-articles', description: '학과 뉴스', order: 2 },
-      { name: '자료실', slug: 'resources', description: '각종 자료 및 문서', order: 3 },
+      {
+        name: '장학정보',
+        slug: 'scholarship',
+        description: '장학금 관련 정보',
+        order: 1,
+      },
+      {
+        name: '뉴스',
+        slug: 'news-articles',
+        description: '학과 뉴스',
+        order: 2,
+      },
+      {
+        name: '자료실',
+        slug: 'resources',
+        description: '각종 자료 및 문서',
+        order: 3,
+      },
     ];
 
     for (const subCat of newsSubCategories) {
-      await categoryRepository.save(categoryRepository.create({
-        name: subCat.name,
-        slug: subCat.slug,
-        description: subCat.description,
-        parentId: savedNews.id,
-        displayOrder: subCat.order,
-      }));
+      await categoryRepository.save(
+        categoryRepository.create({
+          name: subCat.name,
+          slug: subCat.slug,
+          description: subCat.description,
+          parentId: savedNews.id,
+          displayOrder: subCat.order,
+        }),
+      );
     }
 
     // 공지사항
@@ -109,18 +126,30 @@ export class DatabaseSeeder implements OnModuleInit {
 
     // 공모전/채용 정보 하위 카테고리
     const contestSubCategories = [
-      { name: '공모전 정보', slug: 'contest-info', description: '각종 공모전 정보', order: 1 },
-      { name: '교육/활동/취업 정보', slug: 'education-job', description: '교육, 활동, 취업 관련 정보', order: 2 },
+      {
+        name: '공모전 정보',
+        slug: 'contest-info',
+        description: '각종 공모전 정보',
+        order: 1,
+      },
+      {
+        name: '교육/활동/취업 정보',
+        slug: 'education-job',
+        description: '교육, 활동, 취업 관련 정보',
+        order: 2,
+      },
     ];
 
     for (const subCat of contestSubCategories) {
-      await categoryRepository.save(categoryRepository.create({
-        name: subCat.name,
-        slug: subCat.slug,
-        description: subCat.description,
-        parentId: savedContest.id,
-        displayOrder: subCat.order,
-      }));
+      await categoryRepository.save(
+        categoryRepository.create({
+          name: subCat.name,
+          slug: subCat.slug,
+          description: subCat.description,
+          parentId: savedContest.id,
+          displayOrder: subCat.order,
+        }),
+      );
     }
 
     console.log('Categories seeded successfully');

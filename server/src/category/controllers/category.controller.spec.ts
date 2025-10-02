@@ -118,7 +118,10 @@ describe('CategoryController', () => {
 
       const result = await controller.updateCategory(categoryId, updateDto);
 
-      expect(categoryService.update).toHaveBeenCalledWith(categoryId, updateDto);
+      expect(categoryService.update).toHaveBeenCalledWith(
+        categoryId,
+        updateDto,
+      );
       expect(result).toEqual(expectedCategory);
     });
   });

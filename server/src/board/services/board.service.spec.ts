@@ -68,9 +68,13 @@ describe('BoardService', () => {
     }).compile();
 
     service = module.get<BoardService>(BoardService);
-    postRepository = module.get<Repository<BoardPost>>(getRepositoryToken(BoardPost));
+    postRepository = module.get<Repository<BoardPost>>(
+      getRepositoryToken(BoardPost),
+    );
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    categoryRepository = module.get<Repository<Category>>(getRepositoryToken(Category));
+    categoryRepository = module.get<Repository<Category>>(
+      getRepositoryToken(Category),
+    );
 
     // Reset mocks
     jest.clearAllMocks();
@@ -91,8 +95,8 @@ describe('BoardService', () => {
           viewCount: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
-          author: { username: 'testuser' }
-        }
+          author: { username: 'testuser' },
+        },
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockPosts, 1]);
@@ -106,29 +110,35 @@ describe('BoardService', () => {
 
     it('should filter by category', async () => {
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
-      
+
       await service.findAll({ categoryName: '뉴스', page: 1, size: 10 });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('category.name = :categoryName', { categoryName: '뉴스' });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'category.name = :categoryName',
+        { categoryName: '뉴스' },
+      );
     });
 
     it('should search by keyword', async () => {
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
-      
+
       await service.findAll({ keyword: 'test', page: 1, size: 10 });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         '(post.title LIKE :keyword OR post.content LIKE :keyword)',
-        { keyword: '%test%' }
+        { keyword: '%test%' },
       );
     });
 
     it('should sort by popularity', async () => {
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
-      
+
       await service.findAll({ sort: 'popular', page: 1, size: 10 });
 
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('post.viewCount', 'DESC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'post.viewCount',
+        'DESC',
+      );
     });
   });
 
@@ -143,7 +153,7 @@ describe('BoardService', () => {
         viewCount: 5,
         createdAt: new Date(),
         updatedAt: new Date(),
-        author: { username: 'testuser' }
+        author: { username: 'testuser' },
       };
 
       mockPostRepository.findOne.mockResolvedValue(mockPost);
@@ -151,11 +161,14 @@ describe('BoardService', () => {
 
       const result = await service.findOne('1');
 
-      expect(mockPostRepository.findOne).toHaveBeenCalledWith({ 
+      expect(mockPostRepository.findOne).toHaveBeenCalledWith({
         where: { id: '1' },
-        relations: ['author', 'category', 'files']
+        relations: ['author', 'category', 'files'],
       });
-      expect(mockPostRepository.save).toHaveBeenCalledWith({ ...mockPost, viewCount: 6 });
+      expect(mockPostRepository.save).toHaveBeenCalledWith({
+        ...mockPost,
+        viewCount: 6,
+      });
       expect(result.contentHtml).toBe('Test content');
       expect(result.author).toBe('testuser');
     });
@@ -163,7 +176,9 @@ describe('BoardService', () => {
     it('should throw NotFoundException when post not found', async () => {
       mockPostRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -173,7 +188,7 @@ describe('BoardService', () => {
         title: 'New Post',
         contentHtml: 'New content',
         categoryName: '공지사항',
-        thumbnailUrl: 'thumb.jpg'
+        thumbnailUrl: 'thumb.jpg',
       };
 
       const mockPost = {
@@ -194,7 +209,7 @@ describe('BoardService', () => {
       mockPostRepository.save.mockResolvedValue(mockPost);
       mockUserRepository.findOne.mockResolvedValue(mockUser);
       (categoryRepository.findOne as jest.Mock).mockResolvedValue(mockCategory);
-      
+
       // Spy on findOne method
       jest.spyOn(service, 'findOne').mockResolvedValue(mockResult as any);
 
@@ -209,7 +224,7 @@ describe('BoardService', () => {
     it('should update existing post with author relation', async () => {
       const updateDto = {
         title: 'Updated Post',
-        contentHtml: 'Updated content'
+        contentHtml: 'Updated content',
       };
 
       const mockPost = {
@@ -221,17 +236,21 @@ describe('BoardService', () => {
         viewCount: 0,
         createdAt: new Date(),
         updatedAt: new Date(),
-        author: { username: 'testuser' }
+        author: { username: 'testuser' },
       };
 
       mockPostRepository.findOne.mockResolvedValue(mockPost);
-      mockPostRepository.save.mockResolvedValue({ ...mockPost, ...updateDto, content: updateDto.contentHtml });
+      mockPostRepository.save.mockResolvedValue({
+        ...mockPost,
+        ...updateDto,
+        content: updateDto.contentHtml,
+      });
 
       const result = await service.update('1', updateDto);
 
-      expect(mockPostRepository.findOne).toHaveBeenCalledWith({ 
+      expect(mockPostRepository.findOne).toHaveBeenCalledWith({
         where: { id: '1' },
-        relations: ['author']
+        relations: ['author'],
       });
       expect(result.title).toBe('Updated Post');
     });
@@ -239,7 +258,9 @@ describe('BoardService', () => {
     it('should throw NotFoundException when updating non-existent post', async () => {
       mockPostRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { title: 'Updated' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', { title: 'Updated' }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -256,7 +277,9 @@ describe('BoardService', () => {
     it('should throw NotFoundException when deleting non-existent post', async () => {
       mockPostRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.delete('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

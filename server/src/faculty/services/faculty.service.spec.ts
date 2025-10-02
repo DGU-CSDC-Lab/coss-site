@@ -37,7 +37,9 @@ describe('FacultyService', () => {
     }).compile();
 
     service = module.get<FacultyService>(FacultyService);
-    repository = module.get<Repository<FacultyMember>>(getRepositoryToken(FacultyMember));
+    repository = module.get<Repository<FacultyMember>>(
+      getRepositoryToken(FacultyMember),
+    );
 
     jest.clearAllMocks();
   });
@@ -57,7 +59,7 @@ describe('FacultyService', () => {
           department: 'IoT Engineering',
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockFaculty, 1]);
@@ -76,7 +78,7 @@ describe('FacultyService', () => {
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'faculty.name LIKE :name',
-        { name: '%John%' }
+        { name: '%John%' },
       );
     });
 
@@ -87,7 +89,7 @@ describe('FacultyService', () => {
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'faculty.department LIKE :department',
-        { department: '%IoT%' }
+        { department: '%IoT%' },
       );
     });
   });
@@ -113,7 +115,9 @@ describe('FacultyService', () => {
     it('should throw NotFoundException when faculty not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -123,7 +127,7 @@ describe('FacultyService', () => {
         name: 'Dr. Jane Smith',
         jobTitle: 'Associate Professor',
         email: 'jane@iot.ac.kr',
-        department: 'IoT Engineering'
+        department: 'IoT Engineering',
       };
 
       const mockFaculty = {
@@ -145,13 +149,19 @@ describe('FacultyService', () => {
     it('should throw ConflictException when faculty already exists', async () => {
       const createDto = {
         name: 'Dr. John Doe',
-        email: 'john@iot.ac.kr'
+        email: 'john@iot.ac.kr',
       };
 
-      const existingFaculty = { id: '1', name: 'Dr. John Doe', email: 'john@iot.ac.kr' };
+      const existingFaculty = {
+        id: '1',
+        name: 'Dr. John Doe',
+        email: 'john@iot.ac.kr',
+      };
       mockRepository.findOne.mockResolvedValue(existingFaculty);
 
-      await expect(service.create(createDto)).rejects.toThrow(ConflictException);
+      await expect(service.create(createDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -159,7 +169,7 @@ describe('FacultyService', () => {
     it('should update existing faculty member', async () => {
       const updateDto = {
         jobTitle: 'Full Professor',
-        department: 'Advanced IoT'
+        department: 'Advanced IoT',
       };
 
       const mockFaculty = {
@@ -183,7 +193,9 @@ describe('FacultyService', () => {
     it('should throw NotFoundException when updating non-existent faculty', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { name: 'Updated' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', { name: 'Updated' }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -200,7 +212,9 @@ describe('FacultyService', () => {
     it('should throw NotFoundException when deleting non-existent faculty', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.delete('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

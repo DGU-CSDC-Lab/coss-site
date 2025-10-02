@@ -6,10 +6,7 @@ import { ScheduleController } from './controllers/schedule.controller';
 import { ScheduleService } from './services/schedule.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([AcademicSchedule]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([AcademicSchedule]), AuthModule],
   controllers: [ScheduleController],
   providers: [ScheduleService],
 })

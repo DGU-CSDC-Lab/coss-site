@@ -1,4 +1,10 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { ErrorResponse } from '../dto/response.dto';
 
@@ -17,7 +23,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
+
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
         errorCode = this.getErrorCode(status);
@@ -38,8 +44,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
     }
 
     const traceId = `req-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
-    const errorResponse = new ErrorResponse(errorCode, message, details, traceId);
+
+    const errorResponse = new ErrorResponse(
+      errorCode,
+      message,
+      details,
+      traceId,
+    );
 
     response.status(status).json(errorResponse);
   }

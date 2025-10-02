@@ -1,8 +1,17 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FacultyMember } from '../entities';
-import { FacultyCreate, FacultyUpdate, FacultyResponse, FacultyQuery } from '../dto/faculty.dto';
+import {
+  FacultyCreate,
+  FacultyUpdate,
+  FacultyResponse,
+  FacultyQuery,
+} from '../dto/faculty.dto';
 import { PagedResponse } from '../../common/dto/pagination.dto';
 
 @Injectable()
@@ -14,11 +23,15 @@ export class FacultyService {
 
   async findAll(query: FacultyQuery): Promise<PagedResponse<FacultyResponse>> {
     const { name, department, page = 1, size = 20 } = query;
-    
+
     const queryBuilder = this.facultyRepository.createQueryBuilder('faculty');
 
-    if (name) queryBuilder.andWhere('faculty.name LIKE :name', { name: `%${name}%` });
-    if (department) queryBuilder.andWhere('faculty.department LIKE :department', { department: `%${department}%` });
+    if (name)
+      queryBuilder.andWhere('faculty.name LIKE :name', { name: `%${name}%` });
+    if (department)
+      queryBuilder.andWhere('faculty.department LIKE :department', {
+        department: `%${department}%`,
+      });
 
     const [faculty, totalElements] = await queryBuilder
       .skip((page - 1) * size)
@@ -41,7 +54,7 @@ export class FacultyService {
   async create(createDto: FacultyCreate): Promise<FacultyResponse> {
     if (createDto.email) {
       const existingFaculty = await this.facultyRepository.findOne({
-        where: { email: createDto.email }
+        where: { email: createDto.email },
       });
       if (existingFaculty) {
         throw new ConflictException('Email already exists');
@@ -61,7 +74,7 @@ export class FacultyService {
 
     if (updateDto.email && updateDto.email !== faculty.email) {
       const existingFaculty = await this.facultyRepository.findOne({
-        where: { email: updateDto.email }
+        where: { email: updateDto.email },
       });
       if (existingFaculty) {
         throw new ConflictException('Email already exists');

@@ -2,7 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HeaderAsset, HeaderAssetType } from '../entities';
-import { HeaderAssetCreate, HeaderAssetUpdate, HeaderAssetResponse, HeaderAssetQuery } from '../dto/header-asset.dto';
+import {
+  HeaderAssetCreate,
+  HeaderAssetUpdate,
+  HeaderAssetResponse,
+  HeaderAssetQuery,
+} from '../dto/header-asset.dto';
 import { PagedResponse } from '../../common/dto/pagination.dto';
 
 @Injectable()
@@ -12,16 +17,19 @@ export class HeaderAssetService {
     private headerAssetRepository: Repository<HeaderAsset>,
   ) {}
 
-  async findAll(query: HeaderAssetQuery): Promise<PagedResponse<HeaderAssetResponse>> {
+  async findAll(
+    query: HeaderAssetQuery,
+  ): Promise<PagedResponse<HeaderAssetResponse>> {
     const { type, isActive, page = 1, size = 10 } = query;
-    
-    const queryBuilder = this.headerAssetRepository.createQueryBuilder('asset')
+
+    const queryBuilder = this.headerAssetRepository
+      .createQueryBuilder('asset')
       .where('asset.deletedAt IS NULL');
-    
+
     if (type) {
       queryBuilder.andWhere('asset.type = :type', { type });
     }
-    
+
     if (isActive !== undefined) {
       queryBuilder.andWhere('asset.isActive = :isActive', { isActive });
     }
@@ -30,7 +38,7 @@ export class HeaderAssetService {
     const now = new Date();
     queryBuilder.andWhere(
       '(asset.startDate IS NULL OR asset.startDate <= :now) AND (asset.endDate IS NULL OR asset.endDate >= :now)',
-      { now }
+      { now },
     );
 
     const [assets, totalElements] = await queryBuilder
@@ -46,13 +54,14 @@ export class HeaderAssetService {
 
   async findByType(type: HeaderAssetType): Promise<HeaderAssetResponse[]> {
     const now = new Date();
-    const assets = await this.headerAssetRepository.createQueryBuilder('asset')
+    const assets = await this.headerAssetRepository
+      .createQueryBuilder('asset')
       .where('asset.deletedAt IS NULL')
       .andWhere('asset.type = :type', { type })
       .andWhere('asset.isActive = :isActive', { isActive: true })
       .andWhere(
         '(asset.startDate IS NULL OR asset.startDate <= :now) AND (asset.endDate IS NULL OR asset.endDate >= :now)',
-        { now }
+        { now },
       )
       .orderBy('asset.displayOrder', 'ASC')
       .getMany();
@@ -68,10 +77,15 @@ export class HeaderAssetService {
     return this.toResponse(asset);
   }
 
-  async create(createDto: HeaderAssetCreate, createdById: string): Promise<HeaderAssetResponse> {
+  async create(
+    createDto: HeaderAssetCreate,
+    createdById: string,
+  ): Promise<HeaderAssetResponse> {
     const asset = this.headerAssetRepository.create({
       ...createDto,
-      startDate: createDto.startDate ? new Date(createDto.startDate) : undefined,
+      startDate: createDto.startDate
+        ? new Date(createDto.startDate)
+        : undefined,
       endDate: createDto.endDate ? new Date(createDto.endDate) : undefined,
       createdById,
     });
@@ -80,7 +94,10 @@ export class HeaderAssetService {
     return this.toResponse(saved);
   }
 
-  async update(id: string, updateDto: HeaderAssetUpdate): Promise<HeaderAssetResponse> {
+  async update(
+    id: string,
+    updateDto: HeaderAssetUpdate,
+  ): Promise<HeaderAssetResponse> {
     const asset = await this.headerAssetRepository.findOne({ where: { id } });
     if (!asset) {
       throw new NotFoundException('Header asset not found');
@@ -88,7 +105,9 @@ export class HeaderAssetService {
 
     Object.assign(asset, {
       ...updateDto,
-      startDate: updateDto.startDate ? new Date(updateDto.startDate) : asset.startDate,
+      startDate: updateDto.startDate
+        ? new Date(updateDto.startDate)
+        : asset.startDate,
       endDate: updateDto.endDate ? new Date(updateDto.endDate) : asset.endDate,
     });
 

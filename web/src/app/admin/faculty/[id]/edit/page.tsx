@@ -29,7 +29,6 @@ export default function EditFacultyPage() {
     research: '',
     education: '',
   })
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null)
   const [profileImageUrl, setProfileImageUrl] = useState<string>('')
   const [imageUploading, setImageUploading] = useState(false)
 

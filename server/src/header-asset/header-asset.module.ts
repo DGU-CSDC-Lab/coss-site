@@ -6,10 +6,7 @@ import { HeaderAssetController } from './controllers/header-asset.controller';
 import { HeaderAssetService } from './services/header-asset.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([HeaderAsset]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([HeaderAsset]), AuthModule],
   controllers: [HeaderAssetController],
   providers: [HeaderAssetService],
   exports: [HeaderAssetService],

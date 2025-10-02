@@ -71,7 +71,9 @@ describe('FileService', () => {
 
       mockFileRepository.create.mockReturnValue(mockFile);
       mockFileRepository.save.mockResolvedValue(mockFile);
-      mockS3Service.generatePresignedUploadUrl.mockResolvedValue('https://presigned-url');
+      mockS3Service.generatePresignedUploadUrl.mockResolvedValue(
+        'https://presigned-url',
+      );
       mockS3Service.getFileUrl.mockReturnValue('https://file-url');
 
       const result = await service.generatePresignedUrl(request, 'user1');
@@ -90,7 +92,9 @@ describe('FileService', () => {
         contentType: 'application/exe',
       };
 
-      await expect(service.generatePresignedUrl(request, 'user1')).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generatePresignedUrl(request, 'user1'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw error for file size exceeding limit', async () => {
@@ -101,7 +105,9 @@ describe('FileService', () => {
         fileSize: 11 * 1024 * 1024, // 11MB
       };
 
-      await expect(service.generatePresignedUrl(request, 'user1')).rejects.toThrow(BadRequestException);
+      await expect(
+        service.generatePresignedUrl(request, 'user1'),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -121,7 +127,10 @@ describe('FileService', () => {
       };
 
       mockFileRepository.findOne.mockResolvedValue(mockFile);
-      mockFileRepository.save.mockResolvedValue({ ...mockFile, status: FileStatus.ACTIVE });
+      mockFileRepository.save.mockResolvedValue({
+        ...mockFile,
+        status: FileStatus.ACTIVE,
+      });
       mockS3Service.getFileUrl.mockReturnValue('https://file-url');
 
       const result = await service.completeUpload(request);
@@ -138,7 +147,9 @@ describe('FileService', () => {
 
       mockFileRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.completeUpload(request)).rejects.toThrow(NotFoundException);
+      await expect(service.completeUpload(request)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -150,19 +161,26 @@ describe('FileService', () => {
       };
 
       mockFileRepository.findOne.mockResolvedValue(mockFile);
-      mockFileRepository.save.mockResolvedValue({ ...mockFile, status: FileStatus.DELETED });
+      mockFileRepository.save.mockResolvedValue({
+        ...mockFile,
+        status: FileStatus.DELETED,
+      });
       mockS3Service.deleteObject.mockResolvedValue(undefined);
 
       await service.deleteFile('uploads/test-key.jpg', 'user1');
 
       expect(mockFileRepository.save).toHaveBeenCalled();
-      expect(mockS3Service.deleteObject).toHaveBeenCalledWith('uploads/test-key.jpg');
+      expect(mockS3Service.deleteObject).toHaveBeenCalledWith(
+        'uploads/test-key.jpg',
+      );
     });
 
     it('should throw error if file not found', async () => {
       mockFileRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.deleteFile('nonexistent', 'user1')).rejects.toThrow(NotFoundException);
+      await expect(service.deleteFile('nonexistent', 'user1')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -183,7 +201,9 @@ describe('FileService', () => {
     it('should throw error if file not found', async () => {
       mockFileRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getFile('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.getFile('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

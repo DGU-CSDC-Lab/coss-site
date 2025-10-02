@@ -8,7 +8,6 @@ import {
   UserGroupIcon,
   PhotoIcon,
   AcademicCapIcon,
-  ChartBarIcon,
   ChevronRightIcon,
 } from '@heroicons/react/24/outline'
 import { postsApi } from '@/lib/api/posts'
@@ -18,7 +17,6 @@ import { coursesApi } from '@/lib/api/courses'
 import { headerAssetsApi } from '@/lib/api/headerAssets'
 import Information from '@/components/common/Information'
 import Title from '@/components/common/Title'
-import SubTitle from '@/components/common/SubTitle'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 interface DashboardStats {

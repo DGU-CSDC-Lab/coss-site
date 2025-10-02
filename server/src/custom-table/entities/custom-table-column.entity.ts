@@ -7,7 +7,7 @@ export enum ColumnType {
   NUMBER = 'number',
   DATE = 'date',
   BOOLEAN = 'boolean',
-  JSON = 'json'
+  JSON = 'json',
 }
 
 @Entity('custom_table_columns')

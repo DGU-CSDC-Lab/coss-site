@@ -127,10 +127,10 @@ describe('AuthController', () => {
 
   describe('resetPassword', () => {
     it('should reset password', async () => {
-      const resetDto = { 
-        email: 'admin@iot.ac.kr', 
-        code: '123456', 
-        newPassword: 'newPassword123' 
+      const resetDto = {
+        email: 'admin@iot.ac.kr',
+        code: '123456',
+        newPassword: 'newPassword123',
       };
       const expectedResult = { message: 'Password reset successfully' };
       mockAuthService.resetPassword.mockResolvedValue(expectedResult);
@@ -144,9 +144,9 @@ describe('AuthController', () => {
 
   describe('changePassword', () => {
     it('should change password', async () => {
-      const changeDto: ChangePasswordRequest = { 
-        currentPassword: 'oldPassword', 
-        newPassword: 'newPassword123' 
+      const changeDto: ChangePasswordRequest = {
+        currentPassword: 'oldPassword',
+        newPassword: 'newPassword123',
       };
       const mockRequest = { user: { id: 'user-id' } };
       const expectedResult = { message: 'Password changed successfully' };
@@ -154,7 +154,10 @@ describe('AuthController', () => {
 
       const result = await controller.changePassword(mockRequest, changeDto);
 
-      expect(authService.changePassword).toHaveBeenCalledWith('user-id', changeDto);
+      expect(authService.changePassword).toHaveBeenCalledWith(
+        'user-id',
+        changeDto,
+      );
       expect(result).toEqual(expectedResult);
     });
   });

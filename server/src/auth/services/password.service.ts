@@ -14,7 +14,10 @@ export class PasswordService {
     },
   });
 
-  private verificationCodes = new Map<string, { code: string; expiresAt: Date }>();
+  private verificationCodes = new Map<
+    string,
+    { code: string; expiresAt: Date }
+  >();
 
   async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, 10);
@@ -37,17 +40,17 @@ export class PasswordService {
   verifyCode(email: string, code: string): boolean {
     const stored = this.verificationCodes.get(email);
     if (!stored) return false;
-    
+
     if (new Date() > stored.expiresAt) {
       this.verificationCodes.delete(email);
       return false;
     }
-    
+
     if (stored.code === code) {
       this.verificationCodes.delete(email);
       return true;
     }
-    
+
     return false;
   }
 

@@ -177,7 +177,7 @@ export default function EditCoursePage() {
               <Input
                 type="text"
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={value => setFormData({ ...formData, name: value })}
                 placeholder="과목명을 입력하세요"
                 required
               />
@@ -190,7 +190,7 @@ export default function EditCoursePage() {
               <Input
                 type="text"
                 value={formData.englishName}
-                onChange={e => setFormData({ ...formData, englishName: e.target.value })}
+                onChange={value => setFormData({ ...formData, englishName: value })}
                 placeholder="영문 과목명을 입력하세요"
               />
             </div>
@@ -204,7 +204,7 @@ export default function EditCoursePage() {
               <Input
                 type="text"
                 value={formData.code}
-                onChange={e => setFormData({ ...formData, code: e.target.value })}
+                onChange={value => setFormData({ ...formData, code: value })}
                 placeholder="예: IOT101-01"
                 required
               />
@@ -217,7 +217,7 @@ export default function EditCoursePage() {
               <Input
                 type="text"
                 value={formData.department}
-                onChange={e => setFormData({ ...formData, department: e.target.value })}
+                onChange={value => setFormData({ ...formData, department: value })}
                 placeholder="학과명을 입력하세요"
               />
             </div>

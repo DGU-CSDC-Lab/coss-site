@@ -8,10 +8,7 @@ import { CourseService } from './services/course.service';
 import { CourseUploadService } from './services/course-upload.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Course]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Course]), AuthModule],
   controllers: [CourseController, CourseUploadController],
   providers: [CourseService, CourseUploadService],
 })

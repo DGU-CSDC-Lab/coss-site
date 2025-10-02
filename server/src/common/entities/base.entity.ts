@@ -1,4 +1,9 @@
-import { PrimaryColumn, CreateDateColumn, UpdateDateColumn, BeforeInsert } from 'typeorm';
+import {
+  PrimaryColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  BeforeInsert,
+} from 'typeorm';
 import { randomUUID } from 'crypto';
 
 export abstract class BaseEntity {

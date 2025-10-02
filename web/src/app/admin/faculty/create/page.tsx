@@ -23,7 +23,6 @@ export default function CreateFacultyPage() {
     research: '',
     education: '',
   })
-  const [profileImageFile, setProfileImageFile] = useState<File | null>(null)
   const [profileImageUrl, setProfileImageUrl] = useState<string>('')
   const [imageUploading, setImageUploading] = useState(false)
 

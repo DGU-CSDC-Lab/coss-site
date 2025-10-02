@@ -60,7 +60,7 @@ describe('HistoryService', () => {
           description: 'IoT Department was established',
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockHistories, 1]);
@@ -69,7 +69,10 @@ describe('HistoryService', () => {
 
       expect(result.items).toHaveLength(1);
       expect(result.items[0].title).toBe('Department Founded');
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('history.year', 'DESC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'history.year',
+        'DESC',
+      );
     });
 
     it('should filter by year', async () => {
@@ -77,7 +80,10 @@ describe('HistoryService', () => {
 
       await service.findAll({ year: 2024 });
 
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('history.year = :year', { year: 2024 });
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'history.year = :year',
+        { year: 2024 },
+      );
     });
 
     it('should sort in ascending order', async () => {
@@ -85,7 +91,10 @@ describe('HistoryService', () => {
 
       await service.findAll({ sort: 'asc' });
 
-      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('history.year', 'ASC');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
+        'history.year',
+        'ASC',
+      );
     });
   });
 
@@ -111,7 +120,9 @@ describe('HistoryService', () => {
     it('should throw NotFoundException when history not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -121,7 +132,7 @@ describe('HistoryService', () => {
         year: 2024,
         month: 3,
         title: 'New Event',
-        description: 'A new milestone was achieved'
+        description: 'A new milestone was achieved',
       };
 
       const mockHistory = {
@@ -145,7 +156,7 @@ describe('HistoryService', () => {
     it('should update existing history', async () => {
       const updateDto = {
         title: 'Updated Event',
-        description: 'Updated description'
+        description: 'Updated description',
       };
 
       const mockHistory = {
@@ -160,7 +171,11 @@ describe('HistoryService', () => {
       };
 
       mockRepository.findOne.mockResolvedValue(mockHistory);
-      mockRepository.save.mockResolvedValue({ ...mockHistory, ...updateDto, event: updateDto.description });
+      mockRepository.save.mockResolvedValue({
+        ...mockHistory,
+        ...updateDto,
+        event: updateDto.description,
+      });
 
       const result = await service.update('1', updateDto);
 
@@ -170,7 +185,9 @@ describe('HistoryService', () => {
     it('should throw NotFoundException when updating non-existent history', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { title: 'Updated' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', { title: 'Updated' }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -187,7 +204,9 @@ describe('HistoryService', () => {
     it('should throw NotFoundException when deleting non-existent history', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.delete('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

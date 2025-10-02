@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeftIcon, InformationCircleIcon, DocumentArrowDownIcon } from '@heroicons/react/24/outline'
+import { ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
 import { coursesApi, CourseBulkInitRequest } from '@/lib/api/courses'
 import Title from '@/components/common/Title'
 import Button from '@/components/common/Button'

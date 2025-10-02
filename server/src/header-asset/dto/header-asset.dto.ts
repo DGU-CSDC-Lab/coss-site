@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, IsInt, IsDateString, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsEnum,
+  IsBoolean,
+  IsInt,
+  IsDateString,
+  Min,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { HeaderAssetType } from '../entities';
@@ -8,7 +16,7 @@ export class HeaderAssetQuery extends PaginationQuery {
   @ApiProperty({
     description: '헤더 요소 타입',
     enum: HeaderAssetType,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsEnum(HeaderAssetType)
@@ -17,7 +25,7 @@ export class HeaderAssetQuery extends PaginationQuery {
   @ApiProperty({
     description: '활성 상태 필터',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @Transform(({ value }) => value === 'true')
@@ -29,14 +37,14 @@ export class HeaderAssetCreate {
   @ApiProperty({
     description: '헤더 요소 타입',
     enum: HeaderAssetType,
-    example: HeaderAssetType.BANNER
+    example: HeaderAssetType.BANNER,
   })
   @IsEnum(HeaderAssetType)
   type: HeaderAssetType;
 
   @ApiProperty({
     description: '제목',
-    example: '메인 로고'
+    example: '메인 로고',
   })
   @IsString()
   title: string;
@@ -44,7 +52,7 @@ export class HeaderAssetCreate {
   @ApiProperty({
     description: '이미지 URL',
     example: '/uploads/logo.png',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -53,7 +61,7 @@ export class HeaderAssetCreate {
   @ApiProperty({
     description: '링크 URL',
     example: '/',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -62,7 +70,7 @@ export class HeaderAssetCreate {
   @ApiProperty({
     description: '텍스트 내용',
     example: '중요 공지사항입니다',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -72,7 +80,7 @@ export class HeaderAssetCreate {
     description: '활성 상태',
     example: true,
     default: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean()
@@ -82,7 +90,7 @@ export class HeaderAssetCreate {
     description: '표시 순서',
     example: 1,
     minimum: 0,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsInt()
@@ -92,7 +100,7 @@ export class HeaderAssetCreate {
   @ApiProperty({
     description: '시작일시',
     example: '2024-01-01T00:00:00.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -101,7 +109,7 @@ export class HeaderAssetCreate {
   @ApiProperty({
     description: '종료일시',
     example: '2024-12-31T23:59:59.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -112,7 +120,7 @@ export class HeaderAssetUpdate {
   @ApiProperty({
     description: '제목',
     example: '메인 로고',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -121,7 +129,7 @@ export class HeaderAssetUpdate {
   @ApiProperty({
     description: '이미지 URL',
     example: '/uploads/logo.png',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -130,7 +138,7 @@ export class HeaderAssetUpdate {
   @ApiProperty({
     description: '링크 URL',
     example: '/',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -139,7 +147,7 @@ export class HeaderAssetUpdate {
   @ApiProperty({
     description: '텍스트 내용',
     example: '중요 공지사항입니다',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -148,7 +156,7 @@ export class HeaderAssetUpdate {
   @ApiProperty({
     description: '활성 상태',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean()
@@ -158,7 +166,7 @@ export class HeaderAssetUpdate {
     description: '표시 순서',
     example: 1,
     minimum: 0,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsInt()
@@ -168,7 +176,7 @@ export class HeaderAssetUpdate {
   @ApiProperty({
     description: '시작일시',
     example: '2024-01-01T00:00:00.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -177,7 +185,7 @@ export class HeaderAssetUpdate {
   @ApiProperty({
     description: '종료일시',
     example: '2024-12-31T23:59:59.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -187,78 +195,78 @@ export class HeaderAssetUpdate {
 export class HeaderAssetResponse {
   @ApiProperty({
     description: '헤더 요소 ID',
-    example: 'uuid-1234-5678-9012'
+    example: 'uuid-1234-5678-9012',
   })
   id: string;
 
   @ApiProperty({
     description: '헤더 요소 타입',
-    enum: HeaderAssetType
+    enum: HeaderAssetType,
   })
   type: HeaderAssetType;
 
   @ApiProperty({
     description: '제목',
-    example: '메인 로고'
+    example: '메인 로고',
   })
   title: string;
 
   @ApiProperty({
     description: '이미지 URL',
     example: '/uploads/logo.png',
-    required: false
+    required: false,
   })
   imageUrl?: string;
 
   @ApiProperty({
     description: '링크 URL',
     example: '/',
-    required: false
+    required: false,
   })
   linkUrl?: string;
 
   @ApiProperty({
     description: '텍스트 내용',
     example: '중요 공지사항입니다',
-    required: false
+    required: false,
   })
   textContent?: string;
 
   @ApiProperty({
     description: '활성 상태',
-    example: true
+    example: true,
   })
   isActive: boolean;
 
   @ApiProperty({
     description: '표시 순서',
-    example: 1
+    example: 1,
   })
   displayOrder: number;
 
   @ApiProperty({
     description: '시작일시',
     example: '2024-01-01T00:00:00.000Z',
-    required: false
+    required: false,
   })
   startDate?: Date;
 
   @ApiProperty({
     description: '종료일시',
     example: '2024-12-31T23:59:59.000Z',
-    required: false
+    required: false,
   })
   endDate?: Date;
 
   @ApiProperty({
     description: '생성일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   createdAt: Date;
 
   @ApiProperty({
     description: '수정일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   updatedAt: Date;
 }

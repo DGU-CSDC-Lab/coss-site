@@ -6,10 +6,7 @@ import { FacultyController } from './controllers/faculty.controller';
 import { FacultyService } from './services/faculty.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([FacultyMember]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([FacultyMember]), AuthModule],
   controllers: [FacultyController],
   providers: [FacultyService],
 })

@@ -4,7 +4,14 @@ import { Repository } from 'typeorm';
 import { BoardPost, PostFile } from '../entities';
 import { User } from '../../auth/entities';
 import { Category } from '../../category/entities';
-import { PostCreateRequest, PostUpdateRequest, PostListQuery, PostResponse, PostDetailResponse, PostFileResponse } from '../dto/post.dto';
+import {
+  PostCreateRequest,
+  PostUpdateRequest,
+  PostListQuery,
+  PostResponse,
+  PostDetailResponse,
+  PostFileResponse,
+} from '../dto/post.dto';
 import { PagedResponse } from '../../common/dto/response.dto';
 
 @Injectable()
@@ -21,9 +28,16 @@ export class BoardService {
   ) {}
 
   async findAll(query: PostListQuery): Promise<PagedResponse<PostResponse>> {
-    const { categoryName, keyword, page = 1, size = 10, sort = 'latest' } = query;
-    
-    const queryBuilder = this.postRepository.createQueryBuilder('post')
+    const {
+      categoryName,
+      keyword,
+      page = 1,
+      size = 10,
+      sort = 'latest',
+    } = query;
+
+    const queryBuilder = this.postRepository
+      .createQueryBuilder('post')
       .leftJoinAndSelect('post.author', 'author')
       .leftJoinAndSelect('post.category', 'category')
       .leftJoin('post.files', 'files')
@@ -37,9 +51,12 @@ export class BoardService {
     }
 
     if (keyword) {
-      queryBuilder.andWhere('(post.title LIKE :keyword OR post.content LIKE :keyword)', {
-        keyword: `%${keyword}%`,
-      });
+      queryBuilder.andWhere(
+        '(post.title LIKE :keyword OR post.content LIKE :keyword)',
+        {
+          keyword: `%${keyword}%`,
+        },
+      );
     }
 
     if (sort === 'popular') {
@@ -55,22 +72,29 @@ export class BoardService {
 
     // Get file counts separately
     const postsWithFiles = await Promise.all(
-      posts.map(async (post) => {
-        const fileCount = await this.postFileRepository.count({ where: { postId: post.id } });
+      posts.map(async post => {
+        const fileCount = await this.postFileRepository.count({
+          where: { postId: post.id },
+        });
         return { post, fileCount };
-      })
+      }),
     );
 
-    const items = postsWithFiles.map(({ post, fileCount }) => 
-      this.toResponseWithFileCount(post, post.author?.username || 'Unknown', post.category?.name || 'Unknown', fileCount)
+    const items = postsWithFiles.map(({ post, fileCount }) =>
+      this.toResponseWithFileCount(
+        post,
+        post.author?.username || 'Unknown',
+        post.category?.name || 'Unknown',
+        fileCount,
+      ),
     );
     return new PagedResponse(items, page, size, totalElements);
   }
 
   async findOne(id: string): Promise<PostDetailResponse> {
-    const post = await this.postRepository.findOne({ 
+    const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['author', 'category', 'files']
+      relations: ['author', 'category', 'files'],
     });
     if (!post) {
       throw new NotFoundException('Post not found');
@@ -101,19 +125,28 @@ export class BoardService {
 
     return {
       ...this.toDetailResponse(post),
-      prevPost: prevPost ? { id: prevPost.id, title: prevPost.title } : undefined,
-      nextPost: nextPost ? { id: nextPost.id, title: nextPost.title } : undefined,
+      prevPost: prevPost
+        ? { id: prevPost.id, title: prevPost.title }
+        : undefined,
+      nextPost: nextPost
+        ? { id: nextPost.id, title: nextPost.title }
+        : undefined,
     };
   }
 
-  async create(createDto: PostCreateRequest, authorId: string): Promise<PostDetailResponse> {
+  async create(
+    createDto: PostCreateRequest,
+    authorId: string,
+  ): Promise<PostDetailResponse> {
     // categoryName으로 categoryId 찾기
     const category = await this.categoryRepository.findOne({
-      where: { name: createDto.categoryName }
+      where: { name: createDto.categoryName },
     });
-    
+
     if (!category) {
-      throw new NotFoundException(`Category with name '${createDto.categoryName}' not found`);
+      throw new NotFoundException(
+        `Category with name '${createDto.categoryName}' not found`,
+      );
     }
 
     const post = this.postRepository.create({
@@ -128,7 +161,7 @@ export class BoardService {
 
     // Handle file attachments
     if (createDto.files && createDto.files.length > 0) {
-      const files = createDto.files.slice(0, 10).map((fileDto, index) => 
+      const files = createDto.files.slice(0, 10).map((fileDto, index) =>
         this.postFileRepository.create({
           postId: saved.id,
           fileKey: fileDto.fileKey,
@@ -136,7 +169,7 @@ export class BoardService {
           fileSize: fileDto.fileSize,
           mimeType: fileDto.mimeType,
           displayOrder: index,
-        })
+        }),
       );
       await this.postFileRepository.save(files);
     }
@@ -144,27 +177,32 @@ export class BoardService {
     return this.findOne(saved.id);
   }
 
-  async update(id: string, updateDto: PostUpdateRequest): Promise<PostDetailResponse> {
-    const post = await this.postRepository.findOne({ 
+  async update(
+    id: string,
+    updateDto: PostUpdateRequest,
+  ): Promise<PostDetailResponse> {
+    const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['author']
+      relations: ['author'],
     });
     if (!post) {
       throw new NotFoundException('Post not found');
     }
 
     let categoryId = post.categoryId;
-    
+
     // categoryName이 제공된 경우 categoryId로 변환
     if (updateDto.categoryName) {
       const category = await this.categoryRepository.findOne({
-        where: { name: updateDto.categoryName }
+        where: { name: updateDto.categoryName },
       });
-      
+
       if (!category) {
-        throw new NotFoundException(`Category with name '${updateDto.categoryName}' not found`);
+        throw new NotFoundException(
+          `Category with name '${updateDto.categoryName}' not found`,
+        );
       }
-      
+
       categoryId = category.id;
     }
 
@@ -189,7 +227,11 @@ export class BoardService {
     await this.postRepository.softRemove(post);
   }
 
-  private toResponse(post: BoardPost, authorName: string, categoryName: string): PostResponse {
+  private toResponse(
+    post: BoardPost,
+    authorName: string,
+    categoryName: string,
+  ): PostResponse {
     return {
       id: post.id,
       title: post.title,
@@ -205,7 +247,12 @@ export class BoardService {
     };
   }
 
-  private toResponseWithFileCount(post: BoardPost, authorName: string, categoryName: string, fileCount: number): PostResponse {
+  private toResponseWithFileCount(
+    post: BoardPost,
+    authorName: string,
+    categoryName: string,
+    fileCount: number,
+  ): PostResponse {
     return {
       id: post.id,
       title: post.title,
@@ -222,15 +269,20 @@ export class BoardService {
   }
 
   private toDetailResponse(post: BoardPost): PostDetailResponse {
-    const files: PostFileResponse[] = post.files?.map(file => ({
-      id: file.id,
-      originalName: file.originalName,
-      fileSize: file.fileSize,
-      downloadUrl: this.generateDownloadUrl(file.fileKey),
-    })) || [];
+    const files: PostFileResponse[] =
+      post.files?.map(file => ({
+        id: file.id,
+        originalName: file.originalName,
+        fileSize: file.fileSize,
+        downloadUrl: this.generateDownloadUrl(file.fileKey),
+      })) || [];
 
     return {
-      ...this.toResponse(post, post.author?.username || 'Unknown', post.category?.name || 'Unknown'),
+      ...this.toResponse(
+        post,
+        post.author?.username || 'Unknown',
+        post.category?.name || 'Unknown',
+      ),
       contentHtml: post.content,
       files,
     };

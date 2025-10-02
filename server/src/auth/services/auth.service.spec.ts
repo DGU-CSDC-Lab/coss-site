@@ -3,7 +3,11 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User, Account } from '../entities';
-import { UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -67,16 +71,21 @@ describe('AuthService', () => {
       const mockAccount = {
         id: 'account-id',
         email: 'admin@iot.ac.kr',
-        passwordHash: '$2b$10$01rMdZzfzLsgr6ulhkl91ep8FA9PxIFb3WmaBD1k2GXxNaJAwEtle',
-        users: [{
-          id: 'user-id',
-          username: 'admin',
-          role: 'ADMIN',
-        }],
+        passwordHash:
+          '$2b$10$01rMdZzfzLsgr6ulhkl91ep8FA9PxIFb3WmaBD1k2GXxNaJAwEtle',
+        users: [
+          {
+            id: 'user-id',
+            username: 'admin',
+            role: 'ADMIN',
+          },
+        ],
       };
 
       mockAccountRepository.findOne.mockResolvedValue(mockAccount);
-      mockJwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      mockJwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
 
       const result = await service.login(loginDto);
 
@@ -101,7 +110,9 @@ describe('AuthService', () => {
 
       mockAccountRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should throw UnauthorizedException for invalid password', async () => {
@@ -119,7 +130,9 @@ describe('AuthService', () => {
 
       mockAccountRepository.findOne.mockResolvedValue(mockAccount);
 
-      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
+      await expect(service.login(loginDto)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -135,7 +148,9 @@ describe('AuthService', () => {
 
       mockJwtService.verify.mockReturnValue(mockPayload);
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      mockJwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      mockJwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
 
       const result = await service.refresh(refreshToken);
 
@@ -160,7 +175,9 @@ describe('AuthService', () => {
         throw new Error('Invalid token');
       });
 
-      await expect(service.refresh(refreshToken)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refresh(refreshToken)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -221,7 +238,9 @@ describe('AuthService', () => {
 
       mockAccountRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.forgotPassword(request)).rejects.toThrow(NotFoundException);
+      await expect(service.forgotPassword(request)).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -271,8 +290,9 @@ describe('AuthService', () => {
 
       mockUserRepository.findOne.mockResolvedValue(mockUser);
 
-      await expect(service.changePassword(userId, request))
-        .rejects.toThrow(BadRequestException);
+      await expect(service.changePassword(userId, request)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 });

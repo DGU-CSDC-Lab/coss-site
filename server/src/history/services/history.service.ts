@@ -1,19 +1,30 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { History } from '../entities';
-import { HistoryCreate, HistoryUpdate, HistoryResponse, HistoryQuery } from '../dto/history.dto';
+import {
+  HistoryCreate,
+  HistoryUpdate,
+  HistoryResponse,
+  HistoryQuery,
+} from '../dto/history.dto';
 import { PagedResponse } from '../../common/dto/pagination.dto';
 
 @Injectable()
 export class HistoryService {
-  constructor(@InjectRepository(History) private historyRepository: Repository<History>) {}
+  constructor(
+    @InjectRepository(History) private historyRepository: Repository<History>,
+  ) {}
 
   async findAll(query: HistoryQuery): Promise<PagedResponse<HistoryResponse>> {
     const { sort = 'desc', year, page = 1, size = 10 } = query;
-    
+
     const queryBuilder = this.historyRepository.createQueryBuilder('history');
-    
+
     if (year) {
       queryBuilder.where('history.year = :year', { year });
     }
@@ -51,7 +62,7 @@ export class HistoryService {
   async update(id: string, updateDto: HistoryUpdate): Promise<HistoryResponse> {
     const history = await this.historyRepository.findOne({ where: { id } });
     if (!history) throw new NotFoundException('History not found');
-    
+
     Object.assign(history, {
       year: updateDto.year ?? history.year,
       month: updateDto.month ?? history.month,

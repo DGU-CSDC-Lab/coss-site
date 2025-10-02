@@ -1,4 +1,9 @@
-import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from '@nestjs/common';
+import {
+  Injectable,
+  NestInterceptor,
+  ExecutionContext,
+  CallHandler,
+} from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -11,7 +16,7 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, any> {
         if (data && typeof data === 'object' && 'meta' in data) {
           return data;
         }
-        
+
         // For simple responses, return as is
         return data;
       }),

@@ -58,7 +58,7 @@ describe('CourseService', () => {
           name: 'Introduction to IoT',
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockCourses, 1]);
@@ -75,7 +75,10 @@ describe('CourseService', () => {
 
       await service.findAll({ year: 2024, page: 1, size: 20 });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('course.year = :year', { year: 2024 });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'course.year = :year',
+        { year: 2024 },
+      );
     });
 
     it('should filter by semester', async () => {
@@ -83,7 +86,10 @@ describe('CourseService', () => {
 
       await service.findAll({ semester: '1학기', page: 1, size: 20 });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('course.semester = :semester', { semester: '1학기' });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'course.semester = :semester',
+        { semester: '1학기' },
+      );
     });
   });
 
@@ -109,7 +115,9 @@ describe('CourseService', () => {
     it('should throw NotFoundException when course not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -122,7 +130,7 @@ describe('CourseService', () => {
         courseCode: 'IOT101',
         subjectName: 'Introduction to IoT',
         grade: '1학년',
-        credit: 3
+        credit: 3,
       };
 
       const mockCourse = {
@@ -151,7 +159,7 @@ describe('CourseService', () => {
     it('should update existing course', async () => {
       const updateDto = {
         subjectName: 'Advanced IoT',
-        credit: 4
+        credit: 4,
       };
 
       const mockCourse = {
@@ -166,7 +174,11 @@ describe('CourseService', () => {
       };
 
       mockRepository.findOne.mockResolvedValue(mockCourse);
-      mockRepository.save.mockResolvedValue({ ...mockCourse, name: updateDto.subjectName, credit: updateDto.credit });
+      mockRepository.save.mockResolvedValue({
+        ...mockCourse,
+        name: updateDto.subjectName,
+        credit: updateDto.credit,
+      });
 
       const result = await service.update('1', updateDto);
 
@@ -176,7 +188,9 @@ describe('CourseService', () => {
     it('should throw NotFoundException when updating non-existent course', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { subjectName: 'Updated' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', { subjectName: 'Updated' }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -193,13 +207,16 @@ describe('CourseService', () => {
     it('should throw NotFoundException when deleting non-existent course', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.delete('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
   describe('uploadFromFile', () => {
     it('should upload courses from CSV file', async () => {
-      const csvContent = 'year,semester,department,courseCode,subjectName\n2024,1학기,IoT Engineering,IOT101,Introduction to IoT';
+      const csvContent =
+        'year,semester,department,courseCode,subjectName\n2024,1학기,IoT Engineering,IOT101,Introduction to IoT';
       const fileBuffer = Buffer.from(csvContent, 'utf-8');
 
       const mockCourse = {
@@ -223,7 +240,9 @@ describe('CourseService', () => {
     it('should throw BadRequestException for unsupported file type', async () => {
       const fileBuffer = Buffer.from('test', 'utf-8');
 
-      await expect(service.uploadFromFile(fileBuffer, 'courses.txt')).rejects.toThrow(BadRequestException);
+      await expect(
+        service.uploadFromFile(fileBuffer, 'courses.txt'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should handle errors for invalid data', async () => {
@@ -231,7 +250,7 @@ describe('CourseService', () => {
       const fileBuffer = Buffer.from(csvContent, 'utf-8');
 
       const result = await service.uploadFromFile(fileBuffer, 'courses.csv');
-      
+
       expect(result.failureCount).toBeGreaterThan(0);
     });
   });

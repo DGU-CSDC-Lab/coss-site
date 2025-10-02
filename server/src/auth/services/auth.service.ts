@@ -1,10 +1,20 @@
-import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Account, User } from '../entities';
 import { LoginRequest, LoginResponse, UserMe } from '../dto/login.dto';
-import { ForgotPasswordRequest, VerifyCodeRequest, ResetPasswordRequest, ChangePasswordRequest } from '../dto/password-reset.dto';
+import {
+  ForgotPasswordRequest,
+  VerifyCodeRequest,
+  ResetPasswordRequest,
+  ChangePasswordRequest,
+} from '../dto/password-reset.dto';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -29,7 +39,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(loginRequest.password, account.passwordHash);
+    const isPasswordValid = await bcrypt.compare(
+      loginRequest.password,
+      account.passwordHash,
+    );
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -55,18 +68,24 @@ export class AuthService {
   async refresh(refreshToken: string): Promise<LoginResponse> {
     try {
       const payload = this.jwtService.verify(refreshToken);
-      const user = await this.userRepository.findOne({ 
+      const user = await this.userRepository.findOne({
         where: { id: payload.sub },
         relations: ['account'],
       });
-      
+
       if (!user) {
         throw new UnauthorizedException('Invalid refresh token');
       }
 
-      const newPayload = { sub: user.id, email: user.account.email, role: user.role };
+      const newPayload = {
+        sub: user.id,
+        email: user.account.email,
+        role: user.role,
+      };
       const accessToken = this.jwtService.sign(newPayload);
-      const newRefreshToken = this.jwtService.sign(newPayload, { expiresIn: '7d' });
+      const newRefreshToken = this.jwtService.sign(newPayload, {
+        expiresIn: '7d',
+      });
 
       return {
         accessToken,
@@ -81,7 +100,7 @@ export class AuthService {
   }
 
   async getMe(userId: string): Promise<UserMe> {
-    const user = await this.userRepository.findOne({ 
+    const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['account'],
     });
@@ -97,8 +116,12 @@ export class AuthService {
     };
   }
 
-  async forgotPassword(request: ForgotPasswordRequest): Promise<{ message: string }> {
-    const account = await this.accountRepository.findOne({ where: { email: request.email } });
+  async forgotPassword(
+    request: ForgotPasswordRequest,
+  ): Promise<{ message: string }> {
+    const account = await this.accountRepository.findOne({
+      where: { email: request.email },
+    });
     if (!account) {
       throw new NotFoundException('User not found');
     }
@@ -113,16 +136,24 @@ export class AuthService {
 
   async verifyCode(request: VerifyCodeRequest): Promise<{ message: string }> {
     const resetData = this.resetCodes.get(request.email);
-    if (!resetData || resetData.code !== request.code || resetData.expiresAt < new Date()) {
+    if (
+      !resetData ||
+      resetData.code !== request.code ||
+      resetData.expiresAt < new Date()
+    ) {
       throw new BadRequestException('Invalid or expired reset code');
     }
     return { message: 'Reset code verified' };
   }
 
-  async resetPassword(request: ResetPasswordRequest): Promise<{ message: string }> {
+  async resetPassword(
+    request: ResetPasswordRequest,
+  ): Promise<{ message: string }> {
     await this.verifyCode({ email: request.email, code: request.code });
-    
-    const account = await this.accountRepository.findOne({ where: { email: request.email } });
+
+    const account = await this.accountRepository.findOne({
+      where: { email: request.email },
+    });
     if (!account) {
       throw new NotFoundException('User not found');
     }
@@ -134,8 +165,11 @@ export class AuthService {
     return { message: 'Password reset successfully' };
   }
 
-  async changePassword(userId: string, request: ChangePasswordRequest): Promise<{ message: string }> {
-    const user = await this.userRepository.findOne({ 
+  async changePassword(
+    userId: string,
+    request: ChangePasswordRequest,
+  ): Promise<{ message: string }> {
+    const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['account'],
     });
@@ -154,7 +188,7 @@ export class AuthService {
   }
 
   async validateUserById(userId: string): Promise<User | null> {
-    return this.userRepository.findOne({ 
+    return this.userRepository.findOne({
       where: { id: userId },
       relations: ['account'],
     });

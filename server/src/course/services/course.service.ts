@@ -1,8 +1,18 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from '../entities';
-import { CourseCreate, CourseUpdate, CourseResponse, CourseQuery, CourseUploadResult } from '../dto/course.dto';
+import {
+  CourseCreate,
+  CourseUpdate,
+  CourseResponse,
+  CourseQuery,
+  CourseUploadResult,
+} from '../dto/course.dto';
 import { PagedResponse } from '../../common/dto/pagination.dto';
 
 @Injectable()
@@ -13,21 +23,37 @@ export class CourseService {
   ) {}
 
   async findAll(query: CourseQuery): Promise<PagedResponse<CourseResponse>> {
-    const { 
-      year, semester, department, name, code, grade, 
-      sortBy = 'createdAt', sortOrder = 'DESC',
-      page = 1, size = 20 
+    const {
+      year,
+      semester,
+      department,
+      name,
+      code,
+      grade,
+      sortBy = 'createdAt',
+      sortOrder = 'DESC',
+      page = 1,
+      size = 20,
     } = query;
-    
+
     const queryBuilder = this.courseRepository.createQueryBuilder('course');
 
     // 필터링
     if (year) queryBuilder.andWhere('course.year = :year', { year });
-    if (semester) queryBuilder.andWhere('course.semester = :semester', { semester });
-    if (department) queryBuilder.andWhere('course.department LIKE :department', { department: `%${department}%` });
-    if (name) queryBuilder.andWhere('course.name LIKE :name', { name: `%${name}%` });
-    if (code) queryBuilder.andWhere('course.code LIKE :code', { code: `%${code}%` });
-    if (grade) queryBuilder.andWhere('course.grade LIKE :grade', { grade: `%${grade}%` });
+    if (semester)
+      queryBuilder.andWhere('course.semester = :semester', { semester });
+    if (department)
+      queryBuilder.andWhere('course.department LIKE :department', {
+        department: `%${department}%`,
+      });
+    if (name)
+      queryBuilder.andWhere('course.name LIKE :name', { name: `%${name}%` });
+    if (code)
+      queryBuilder.andWhere('course.code LIKE :code', { code: `%${code}%` });
+    if (grade)
+      queryBuilder.andWhere('course.grade LIKE :grade', {
+        grade: `%${grade}%`,
+      });
 
     // 정렬
     const sortField = this.getSortField(sortBy);
@@ -45,11 +71,11 @@ export class CourseService {
   private getSortField(sortBy: string): string {
     const fieldMap: { [key: string]: string } = {
       name: 'course.name',
-      code: 'course.code', 
+      code: 'course.code',
       department: 'course.department',
       grade: 'course.grade',
       credit: 'course.credit',
-      createdAt: 'course.createdAt'
+      createdAt: 'course.createdAt',
     };
     return fieldMap[sortBy] || 'course.createdAt';
   }
@@ -109,7 +135,11 @@ export class CourseService {
     return this.toResponse(saved);
   }
 
-  async bulkInit(year: number, semester: string, courses: CourseCreate[]): Promise<CourseUploadResult> {
+  async bulkInit(
+    year: number,
+    semester: string,
+    courses: CourseCreate[],
+  ): Promise<CourseUploadResult> {
     // 기존 년도/학기 데이터 삭제
     await this.courseRepository.delete({ year, semester });
 
@@ -131,7 +161,7 @@ export class CourseService {
     return {
       successCount,
       failureCount: errors.length,
-      errors
+      errors,
     };
   }
 
@@ -143,16 +173,21 @@ export class CourseService {
     await this.courseRepository.remove(course);
   }
 
-  async uploadFromFile(buffer: Buffer, filename: string): Promise<CourseUploadResult> {
+  async uploadFromFile(
+    buffer: Buffer,
+    filename: string,
+  ): Promise<CourseUploadResult> {
     if (!filename.endsWith('.csv')) {
       throw new BadRequestException('Only CSV files are supported');
     }
 
     const csvData = buffer.toString('utf-8');
     const lines = csvData.split('\n').filter(line => line.trim());
-    
+
     if (lines.length < 2) {
-      throw new BadRequestException('CSV file must contain header and at least one data row');
+      throw new BadRequestException(
+        'CSV file must contain header and at least one data row',
+      );
     }
 
     const errors: string[] = [];
@@ -163,7 +198,7 @@ export class CourseService {
     for (let i = 1; i < lines.length; i++) {
       try {
         const columns = lines[i].split(',').map(col => col.trim());
-        
+
         if (columns.length < 4) {
           errors.push(`Row ${i + 1}: Insufficient columns`);
           failureCount++;

@@ -54,7 +54,7 @@ describe('ScheduleController', () => {
           category: ScheduleCategory.ACADEMIC,
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       ];
 
       mockScheduleService.findAll.mockResolvedValue(mockSchedules);
@@ -68,9 +68,15 @@ describe('ScheduleController', () => {
     it('should filter by month and category', async () => {
       mockScheduleService.findAll.mockResolvedValue([]);
 
-      await controller.getSchedules({ month: '2024-01', category: ScheduleCategory.ADMISSION });
+      await controller.getSchedules({
+        month: '2024-01',
+        category: ScheduleCategory.ADMISSION,
+      });
 
-      expect(mockScheduleService.findAll).toHaveBeenCalledWith({ month: '2024-01', category: ScheduleCategory.ADMISSION });
+      expect(mockScheduleService.findAll).toHaveBeenCalledWith({
+        month: '2024-01',
+        category: ScheduleCategory.ADMISSION,
+      });
     });
   });
 
@@ -98,7 +104,7 @@ describe('ScheduleController', () => {
       const createDto = {
         title: 'New Schedule',
         startDate: '2024-01-01',
-        category: ScheduleCategory.ACADEMIC
+        category: ScheduleCategory.ACADEMIC,
       };
 
       const mockSchedule = {
@@ -116,14 +122,17 @@ describe('ScheduleController', () => {
       const result = await controller.createSchedule(createDto, mockRequest);
 
       expect(result).toEqual(mockSchedule);
-      expect(mockScheduleService.create).toHaveBeenCalledWith(createDto, 'user1');
+      expect(mockScheduleService.create).toHaveBeenCalledWith(
+        createDto,
+        'user1',
+      );
     });
   });
 
   describe('updateSchedule', () => {
     it('should update existing schedule', async () => {
       const updateDto = {
-        title: 'Updated Schedule'
+        title: 'Updated Schedule',
       };
 
       const mockSchedule = {

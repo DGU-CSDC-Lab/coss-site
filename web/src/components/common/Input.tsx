@@ -5,6 +5,7 @@ interface InputProps {
   type?: 'text' | 'email' | 'password' | 'search'
   size?: 'sm' | 'md' | 'lg'
   disabled?: boolean
+  required?: boolean
   className?: string
   onKeyPress?: (e: React.KeyboardEvent) => void
   onFocus?: () => void
@@ -18,6 +19,7 @@ export default function Input({
   type = 'text',
   size = 'md',
   disabled = false,
+  required = false,
   className = '',
   onKeyPress,
   onFocus,
@@ -39,6 +41,7 @@ export default function Input({
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
       disabled={disabled}
+      required={required}
       onKeyPress={onKeyPress}
       onFocus={onFocus}
       onBlur={onBlur}

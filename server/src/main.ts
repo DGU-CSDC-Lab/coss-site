@@ -7,11 +7,13 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Global validation pipe
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   // CORS
   app.enableCors({
@@ -22,7 +24,9 @@ async function bootstrap() {
   // Swagger setup
   const config = new DocumentBuilder()
     .setTitle('COSS Backend API')
-    .setDescription('동국대학교 COSS 사이트 백엔드 API (계층형 카테고리, 관리자 /admin/**, S3 Presigned Upload, 디버깅 친화적 에러 응답)')
+    .setDescription(
+      '동국대학교 COSS 사이트 백엔드 API (계층형 카테고리, 관리자 /admin/**, S3 Presigned Upload, 디버깅 친화적 에러 응답)',
+    )
     .setVersion('4.0.0')
     .addServer('https://api.coss.dongguk.edu', 'Production')
     .addServer('https://staging.api.coss.dongguk.edu', 'Staging')

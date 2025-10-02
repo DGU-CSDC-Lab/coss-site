@@ -61,7 +61,7 @@ describe('PopupService', () => {
           endDate: new Date('2024-12-31'),
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockPopups, 1]);
@@ -77,7 +77,10 @@ describe('PopupService', () => {
 
       await service.findAll({ isActive: true });
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('popup.isActive = :isActive', { isActive: true });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'popup.isActive = :isActive',
+        { isActive: true },
+      );
     });
   });
 
@@ -93,7 +96,7 @@ describe('PopupService', () => {
           endDate: new Date('2024-12-31'),
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       ];
 
       mockQueryBuilder.getMany.mockResolvedValue(mockPopups);
@@ -102,7 +105,10 @@ describe('PopupService', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0].title).toBe('Active Popup');
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('popup.isActive = :active', { active: true });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'popup.isActive = :active',
+        { active: true },
+      );
     });
   });
 
@@ -129,7 +135,9 @@ describe('PopupService', () => {
     it('should throw NotFoundException when popup not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -140,7 +148,7 @@ describe('PopupService', () => {
         content: 'New content',
         startDate: '2024-01-01',
         endDate: '2024-12-31',
-        isActive: true
+        isActive: true,
       };
 
       const mockPopup = {
@@ -166,7 +174,7 @@ describe('PopupService', () => {
     it('should update existing popup', async () => {
       const updateDto = {
         title: 'Updated Popup',
-        content: 'Updated content'
+        content: 'Updated content',
       };
 
       const mockPopup = {
@@ -191,7 +199,9 @@ describe('PopupService', () => {
     it('should throw NotFoundException when updating non-existent popup', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { title: 'Updated' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', { title: 'Updated' }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -208,7 +218,9 @@ describe('PopupService', () => {
     it('should throw NotFoundException when deleting non-existent popup', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.delete('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

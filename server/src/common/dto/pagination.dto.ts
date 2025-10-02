@@ -8,7 +8,7 @@ export class PaginationQuery {
     example: 1,
     minimum: 1,
     default: 1,
-    required: false
+    required: false,
   })
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
@@ -22,7 +22,7 @@ export class PaginationQuery {
     minimum: 1,
     maximum: 100,
     default: 10,
-    required: false
+    required: false,
   })
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
@@ -35,25 +35,25 @@ export class PaginationQuery {
 export class PageMeta {
   @ApiProperty({
     description: '현재 페이지 번호',
-    example: 1
+    example: 1,
   })
   page: number;
 
   @ApiProperty({
     description: '페이지당 항목 수',
-    example: 10
+    example: 10,
   })
   size: number;
 
   @ApiProperty({
     description: '전체 항목 수',
-    example: 45
+    example: 45,
   })
   totalElements: number;
 
   @ApiProperty({
     description: '전체 페이지 수',
-    example: 5
+    example: 5,
   })
   totalPages: number;
 
@@ -67,13 +67,13 @@ export class PageMeta {
 
 export class PagedResponse<T> {
   @ApiProperty({
-    description: '페이지 메타데이터'
+    description: '페이지 메타데이터',
   })
   meta: PageMeta;
 
   @ApiProperty({
     description: '데이터 목록',
-    isArray: true
+    isArray: true,
   })
   items: T[];
 

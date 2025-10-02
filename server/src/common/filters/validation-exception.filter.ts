@@ -1,4 +1,9 @@
-import { ExceptionFilter, Catch, ArgumentsHost, BadRequestException } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  BadRequestException,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { ErrorResponse } from '../dto/response.dto';
 
@@ -9,7 +14,7 @@ export class ValidationExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     const exceptionResponse = exception.getResponse() as any;
-    
+
     let details: Record<string, any> | undefined;
     let message = 'Validation failed';
 
@@ -23,7 +28,11 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       message = exceptionResponse.message;
     }
 
-    const errorResponse = new ErrorResponse('VALIDATION_ERROR', message, details);
+    const errorResponse = new ErrorResponse(
+      'VALIDATION_ERROR',
+      message,
+      details,
+    );
 
     response.status(422).json(errorResponse);
   }

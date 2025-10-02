@@ -6,10 +6,7 @@ import { PopupController } from './controllers/popup.controller';
 import { PopupService } from './services/popup.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Popup]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Popup]), AuthModule],
   controllers: [PopupController],
   providers: [PopupService],
 })

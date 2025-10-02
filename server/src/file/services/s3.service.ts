@@ -1,5 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  DeleteObjectCommand,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 @Injectable()
@@ -30,7 +34,7 @@ export class S3Service {
   async generatePresignedUploadUrl(
     fileKey: string,
     contentType: string,
-    expiresIn: number = 3600
+    expiresIn: number = 3600,
   ): Promise<string> {
     // 개발 환경에서는 Mock URL 반환
     if (!this.isProduction || !this.bucketName) {

@@ -7,7 +7,7 @@ export class PopupQuery extends PaginationQuery {
   @ApiProperty({
     description: '활성 상태 필터',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @Transform(({ value }) => value === 'true')
@@ -17,14 +17,14 @@ export class PopupQuery extends PaginationQuery {
 export class PopupCreate {
   @ApiProperty({
     description: '팝업 제목',
-    example: '2024학년도 신입생 모집 안내'
+    example: '2024학년도 신입생 모집 안내',
   })
   @IsString()
   title: string;
 
   @ApiProperty({
     description: '팝업 내용',
-    example: '2024학년도 신입생 모집에 대한 상세 안내입니다.'
+    example: '2024학년도 신입생 모집에 대한 상세 안내입니다.',
   })
   @IsString()
   content: string;
@@ -32,7 +32,7 @@ export class PopupCreate {
   @ApiProperty({
     description: '팝업 이미지 URL',
     example: 'https://example.com/popup-image.jpg',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -41,7 +41,7 @@ export class PopupCreate {
   @ApiProperty({
     description: '링크 URL',
     example: 'https://example.com/admission',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -49,21 +49,21 @@ export class PopupCreate {
 
   @ApiProperty({
     description: '팝업 시작일',
-    example: '2024-03-01T00:00:00.000Z'
+    example: '2024-03-01T00:00:00.000Z',
   })
   @IsDateString()
   startDate: string;
 
   @ApiProperty({
     description: '팝업 종료일',
-    example: '2024-03-31T23:59:59.000Z'
+    example: '2024-03-31T23:59:59.000Z',
   })
   @IsDateString()
   endDate: string;
 
   @ApiProperty({
     description: '활성화 여부',
-    example: true
+    example: true,
   })
   @IsBoolean()
   isActive: boolean;
@@ -73,7 +73,7 @@ export class PopupUpdate {
   @ApiProperty({
     description: '팝업 제목',
     example: '2024학년도 신입생 모집 안내',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -82,7 +82,7 @@ export class PopupUpdate {
   @ApiProperty({
     description: '팝업 내용',
     example: '2024학년도 신입생 모집에 대한 상세 안내입니다.',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -91,7 +91,7 @@ export class PopupUpdate {
   @ApiProperty({
     description: '팝업 이미지 URL',
     example: 'https://example.com/popup-image.jpg',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -100,7 +100,7 @@ export class PopupUpdate {
   @ApiProperty({
     description: '링크 URL',
     example: 'https://example.com/admission',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -109,7 +109,7 @@ export class PopupUpdate {
   @ApiProperty({
     description: '팝업 시작일',
     example: '2024-03-01T00:00:00.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -118,7 +118,7 @@ export class PopupUpdate {
   @ApiProperty({
     description: '팝업 종료일',
     example: '2024-03-31T23:59:59.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -127,7 +127,7 @@ export class PopupUpdate {
   @ApiProperty({
     description: '활성화 여부',
     example: true,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsBoolean()
@@ -137,63 +137,63 @@ export class PopupUpdate {
 export class PopupResponse {
   @ApiProperty({
     description: '팝업 ID',
-    example: 'uuid-1234-5678-9012'
+    example: 'uuid-1234-5678-9012',
   })
   id: string;
 
   @ApiProperty({
     description: '팝업 제목',
-    example: '2024학년도 신입생 모집 안내'
+    example: '2024학년도 신입생 모집 안내',
   })
   title: string;
 
   @ApiProperty({
     description: '팝업 내용',
-    example: '2024학년도 신입생 모집에 대한 상세 안내입니다.'
+    example: '2024학년도 신입생 모집에 대한 상세 안내입니다.',
   })
   content: string;
 
   @ApiProperty({
     description: '팝업 이미지 URL',
     example: 'https://example.com/popup-image.jpg',
-    required: false
+    required: false,
   })
   imageUrl?: string;
 
   @ApiProperty({
     description: '링크 URL',
     example: 'https://example.com/admission',
-    required: false
+    required: false,
   })
   linkUrl?: string;
 
   @ApiProperty({
     description: '팝업 시작일',
-    example: '2024-03-01T00:00:00.000Z'
+    example: '2024-03-01T00:00:00.000Z',
   })
   startDate: Date;
 
   @ApiProperty({
     description: '팝업 종료일',
-    example: '2024-03-31T23:59:59.000Z'
+    example: '2024-03-31T23:59:59.000Z',
   })
   endDate: Date;
 
   @ApiProperty({
     description: '활성화 여부',
-    example: true
+    example: true,
   })
   isActive: boolean;
 
   @ApiProperty({
     description: '생성일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   createdAt: Date;
 
   @ApiProperty({
     description: '수정일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   updatedAt: Date;
 }

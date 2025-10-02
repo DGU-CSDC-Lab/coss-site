@@ -6,13 +6,13 @@ export enum OwnerType {
   CUSTOM_TABLE = 'custom_table',
   SCHEDULE = 'schedule',
   POPUP = 'popup',
-  FACULTY = 'faculty'
+  FACULTY = 'faculty',
 }
 
 export enum FileStatus {
   ACTIVE = 'active',
   DELETED = 'deleted',
-  PENDING = 'pending'
+  PENDING = 'pending',
 }
 
 @Entity('files')
@@ -26,7 +26,12 @@ export class File extends BaseEntity {
   @Column({ name: 'file_key', type: 'varchar', length: 512 })
   fileKey: string;
 
-  @Column({ name: 'original_name', type: 'varchar', length: 255, nullable: true })
+  @Column({
+    name: 'original_name',
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+  })
   originalName?: string;
 
   @Column({ name: 'mime_type', type: 'varchar', length: 255, nullable: true })

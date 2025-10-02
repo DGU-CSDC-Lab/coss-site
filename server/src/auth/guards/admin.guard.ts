@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -22,8 +28,10 @@ export class AdminGuard implements CanActivate {
 
     try {
       const payload = this.jwtService.verify(token);
-      const user = await this.userRepository.findOne({ where: { id: payload.sub } });
-      
+      const user = await this.userRepository.findOne({
+        where: { id: payload.sub },
+      });
+
       if (!user) {
         throw new UnauthorizedException('Invalid token');
       }

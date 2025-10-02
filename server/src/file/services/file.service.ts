@@ -1,8 +1,16 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { File, OwnerType, FileStatus } from '../entities';
-import { PresignRequest, PresignResponse, FileCompleteRequest } from '../dto/file.dto';
+import {
+  PresignRequest,
+  PresignResponse,
+  FileCompleteRequest,
+} from '../dto/file.dto';
 import { S3Service } from './s3.service';
 import { randomUUID } from 'crypto';
 
@@ -14,14 +22,21 @@ export class FileService {
     private s3Service: S3Service,
   ) {}
 
-  async generatePresignedUrl(request: PresignRequest, userId: string): Promise<PresignResponse> {
+  async generatePresignedUrl(
+    request: PresignRequest,
+    userId: string,
+  ): Promise<PresignResponse> {
     // Validate file type
     const allowedTypes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-      'application/pdf', 'application/msword', 
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'application/msword',
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     ];
 
     if (!allowedTypes.includes(request.contentType)) {
@@ -36,7 +51,7 @@ export class FileService {
     // Generate unique file key
     const fileExtension = this.getFileExtension(request.fileName);
     const fileKey = `uploads/${Date.now()}-${randomUUID()}${fileExtension}`;
-    
+
     // Create file record
     const file = this.fileRepository.create({
       ownerType: (request.ownerType as OwnerType) || OwnerType.POST,
@@ -55,9 +70,9 @@ export class FileService {
     // Generate real presigned URL
     const uploadUrl = await this.s3Service.generatePresignedUploadUrl(
       fileKey,
-      request.contentType
+      request.contentType,
     );
-    
+
     const fileUrl = this.s3Service.getFileUrl(fileKey);
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000);
 
@@ -70,9 +85,11 @@ export class FileService {
     };
   }
 
-  async completeUpload(request: FileCompleteRequest): Promise<{ fileKey: string; fileUrl: string }> {
-    const file = await this.fileRepository.findOne({ 
-      where: { fileKey: request.fileKey } 
+  async completeUpload(
+    request: FileCompleteRequest,
+  ): Promise<{ fileKey: string; fileUrl: string }> {
+    const file = await this.fileRepository.findOne({
+      where: { fileKey: request.fileKey },
     });
 
     if (!file) {
@@ -87,7 +104,7 @@ export class FileService {
     file.status = FileStatus.ACTIVE;
     file.ownerType = (request.ownerType as OwnerType) || file.ownerType;
     file.ownerId = request.ownerId || file.ownerId;
-    
+
     await this.fileRepository.save(file);
 
     return {
@@ -97,8 +114,8 @@ export class FileService {
   }
 
   async getFile(fileKey: string): Promise<File> {
-    const file = await this.fileRepository.findOne({ 
-      where: { fileKey, status: FileStatus.ACTIVE } 
+    const file = await this.fileRepository.findOne({
+      where: { fileKey, status: FileStatus.ACTIVE },
     });
 
     if (!file) {
@@ -110,7 +127,7 @@ export class FileService {
 
   async deleteFile(fileKey: string, userId: string): Promise<void> {
     const file = await this.fileRepository.findOne({ where: { fileKey } });
-    
+
     if (!file) {
       throw new NotFoundException('File not found');
     }

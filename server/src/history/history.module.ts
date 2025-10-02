@@ -6,10 +6,7 @@ import { HistoryController } from './controllers/history.controller';
 import { HistoryService } from './services/history.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([History]),
-    AuthModule,
-  ],
+  imports: [TypeOrmModule.forFeature([History]), AuthModule],
   controllers: [HistoryController],
   providers: [HistoryService],
 })

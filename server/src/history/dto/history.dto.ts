@@ -9,7 +9,7 @@ export class HistoryQuery extends PaginationQuery {
     example: 'desc',
     enum: ['asc', 'desc'],
     default: 'desc',
-    required: false
+    required: false,
   })
   @IsOptional()
   sort?: 'asc' | 'desc' = 'desc';
@@ -19,7 +19,7 @@ export class HistoryQuery extends PaginationQuery {
     example: 'DESC',
     enum: ['ASC', 'DESC'],
     default: 'DESC',
-    required: false
+    required: false,
   })
   @IsOptional()
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
@@ -27,7 +27,7 @@ export class HistoryQuery extends PaginationQuery {
   @ApiProperty({
     description: '연도 필터',
     example: 2024,
-    required: false
+    required: false,
   })
   @IsOptional()
   @Transform(({ value }) => parseInt(value))
@@ -40,7 +40,7 @@ export class HistoryCreate {
     description: '연도',
     example: 2024,
     minimum: 1900,
-    maximum: 2100
+    maximum: 2100,
   })
   @IsInt()
   @Min(1900)
@@ -51,7 +51,7 @@ export class HistoryCreate {
     description: '월',
     example: 3,
     minimum: 1,
-    maximum: 12
+    maximum: 12,
   })
   @IsInt()
   @Min(1)
@@ -60,14 +60,14 @@ export class HistoryCreate {
 
   @ApiProperty({
     description: '연혁 제목',
-    example: '지능IoT학과 신설'
+    example: '지능IoT학과 신설',
   })
   @IsString()
   title: string;
 
   @ApiProperty({
     description: '연혁 상세 내용',
-    example: '지능IoT학과가 새롭게 신설되어 첫 신입생을 모집하였습니다.'
+    example: '지능IoT학과가 새롭게 신설되어 첫 신입생을 모집하였습니다.',
   })
   @IsString()
   description: string;
@@ -79,7 +79,7 @@ export class HistoryUpdate {
     example: 2024,
     minimum: 1900,
     maximum: 2100,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsInt()
@@ -92,7 +92,7 @@ export class HistoryUpdate {
     example: 3,
     minimum: 1,
     maximum: 12,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsInt()
@@ -103,7 +103,7 @@ export class HistoryUpdate {
   @ApiProperty({
     description: '연혁 제목',
     example: '지능IoT학과 신설',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -112,7 +112,7 @@ export class HistoryUpdate {
   @ApiProperty({
     description: '연혁 상세 내용',
     example: '지능IoT학과가 새롭게 신설되어 첫 신입생을 모집하였습니다.',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -122,43 +122,43 @@ export class HistoryUpdate {
 export class HistoryResponse {
   @ApiProperty({
     description: '연혁 ID',
-    example: 'uuid-1234-5678-9012'
+    example: 'uuid-1234-5678-9012',
   })
   id: string;
 
   @ApiProperty({
     description: '연도',
-    example: 2024
+    example: 2024,
   })
   year: number;
 
   @ApiProperty({
     description: '월',
-    example: 3
+    example: 3,
   })
   month: number;
 
   @ApiProperty({
     description: '연혁 제목',
-    example: '지능IoT학과 신설'
+    example: '지능IoT학과 신설',
   })
   title: string;
 
   @ApiProperty({
     description: '연혁 상세 내용',
-    example: '지능IoT학과가 새롭게 신설되어 첫 신입생을 모집하였습니다.'
+    example: '지능IoT학과가 새롭게 신설되어 첫 신입생을 모집하였습니다.',
   })
   description: string;
 
   @ApiProperty({
     description: '생성일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   createdAt: Date;
 
   @ApiProperty({
     description: '수정일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   updatedAt: Date;
 }

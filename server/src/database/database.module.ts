@@ -6,7 +6,11 @@ import { DatabaseSeeder } from './database.seeder';
 import { Account, User } from '../auth/entities';
 import { BoardPost, PostFile } from '../board/entities';
 import { AcademicSchedule } from '../schedule/entities';
-import { CustomTable, CustomTableColumn, CustomTableRow } from '../custom-table/entities';
+import {
+  CustomTable,
+  CustomTableColumn,
+  CustomTableRow,
+} from '../custom-table/entities';
 import { File } from '../file/entities';
 import { Popup } from '../popup/entities';
 import { FacultyMember } from '../faculty/entities';
@@ -39,7 +43,7 @@ import { HeaderAsset } from '../header-asset/entities';
         History,
         Course,
         Category,
-        HeaderAsset
+        HeaderAsset,
       ],
       synchronize: true, // 개발환경에서만 사용
       logging: true,

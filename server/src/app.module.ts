@@ -15,11 +15,11 @@ import { HeaderAssetModule } from './header-asset/header-asset.module';
 @Module({
   imports: [
     CommonModule,
-    DatabaseModule, 
-    AuthModule, 
-    CategoryModule, 
-    BoardModule, 
-    ScheduleModule, 
+    DatabaseModule,
+    AuthModule,
+    CategoryModule,
+    BoardModule,
+    ScheduleModule,
     CourseModule,
     PopupModule,
     FacultyModule,

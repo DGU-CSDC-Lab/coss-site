@@ -7,7 +7,7 @@ export class ScheduleQuery extends PaginationQuery {
   @ApiProperty({
     description: '조회할 월 (YYYY-MM 형식). 생략 시 전체 기간 조회',
     example: '2024-03',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -16,7 +16,7 @@ export class ScheduleQuery extends PaginationQuery {
   @ApiProperty({
     description: '조회할 연도 (YYYY 형식). month가 있으면 무시됨',
     example: '2024',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -25,7 +25,7 @@ export class ScheduleQuery extends PaginationQuery {
   @ApiProperty({
     description: '조회할 특정 날짜 (YYYY-MM-DD 형식)',
     example: '2024-03-15',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -34,7 +34,7 @@ export class ScheduleQuery extends PaginationQuery {
   @ApiProperty({
     description: '일정 카테고리. 생략 시 전체 카테고리 조회',
     enum: ScheduleCategory,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsEnum(ScheduleCategory)
@@ -44,7 +44,7 @@ export class ScheduleQuery extends PaginationQuery {
 export class ScheduleCreate {
   @ApiProperty({
     description: '일정 제목',
-    example: '2024학년도 1학기 개강'
+    example: '2024학년도 1학기 개강',
   })
   @IsString()
   title: string;
@@ -52,7 +52,7 @@ export class ScheduleCreate {
   @ApiProperty({
     description: '일정 상세 내용',
     example: '2024학년도 1학기가 시작됩니다.',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -60,7 +60,7 @@ export class ScheduleCreate {
 
   @ApiProperty({
     description: '일정 시작일',
-    example: '2024-03-04T00:00:00.000Z'
+    example: '2024-03-04T00:00:00.000Z',
   })
   @IsDateString()
   startDate: string;
@@ -68,7 +68,7 @@ export class ScheduleCreate {
   @ApiProperty({
     description: '일정 종료일',
     example: '2024-03-04T23:59:59.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -77,7 +77,7 @@ export class ScheduleCreate {
   @ApiProperty({
     description: '일정 카테고리',
     enum: ScheduleCategory,
-    example: ScheduleCategory.ACADEMIC
+    example: ScheduleCategory.ACADEMIC,
   })
   @IsEnum(ScheduleCategory)
   category: ScheduleCategory;
@@ -85,7 +85,7 @@ export class ScheduleCreate {
   @ApiProperty({
     description: '장소',
     example: '본관 강당',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -96,7 +96,7 @@ export class ScheduleUpdate {
   @ApiProperty({
     description: '일정 제목',
     example: '2024학년도 1학기 개강',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -105,7 +105,7 @@ export class ScheduleUpdate {
   @ApiProperty({
     description: '일정 상세 내용',
     example: '2024학년도 1학기가 시작됩니다.',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -114,7 +114,7 @@ export class ScheduleUpdate {
   @ApiProperty({
     description: '일정 시작일',
     example: '2024-03-04T00:00:00.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -123,7 +123,7 @@ export class ScheduleUpdate {
   @ApiProperty({
     description: '일정 종료일',
     example: '2024-03-04T23:59:59.000Z',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsDateString()
@@ -133,7 +133,7 @@ export class ScheduleUpdate {
     description: '일정 카테고리',
     enum: ScheduleCategory,
     example: ScheduleCategory.ACADEMIC,
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsEnum(ScheduleCategory)
@@ -142,7 +142,7 @@ export class ScheduleUpdate {
   @ApiProperty({
     description: '장소',
     example: '본관 강당',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -152,56 +152,56 @@ export class ScheduleUpdate {
 export class ScheduleResponse {
   @ApiProperty({
     description: '일정 ID',
-    example: 'uuid-1234-5678-9012'
+    example: 'uuid-1234-5678-9012',
   })
   id: string;
 
   @ApiProperty({
     description: '일정 제목',
-    example: '2024학년도 1학기 개강'
+    example: '2024학년도 1학기 개강',
   })
   title: string;
 
   @ApiProperty({
     description: '일정 상세 내용',
-    example: '2024학년도 1학기가 시작됩니다.'
+    example: '2024학년도 1학기가 시작됩니다.',
   })
   description?: string;
 
   @ApiProperty({
     description: '일정 시작일',
-    example: '2024-03-04T00:00:00.000Z'
+    example: '2024-03-04T00:00:00.000Z',
   })
   startDate: Date;
 
   @ApiProperty({
     description: '일정 종료일',
-    example: '2024-03-04T23:59:59.000Z'
+    example: '2024-03-04T23:59:59.000Z',
   })
   endDate?: Date;
 
   @ApiProperty({
     description: '일정 카테고리',
     enum: ScheduleCategory,
-    example: ScheduleCategory.ACADEMIC
+    example: ScheduleCategory.ACADEMIC,
   })
   category: ScheduleCategory;
 
   @ApiProperty({
     description: '장소',
-    example: '본관 강당'
+    example: '본관 강당',
   })
   location?: string;
 
   @ApiProperty({
     description: '생성일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   createdAt: Date;
 
   @ApiProperty({
     description: '수정일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   updatedAt: Date;
 }

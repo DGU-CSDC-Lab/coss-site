@@ -40,7 +40,9 @@ describe('ScheduleService', () => {
     }).compile();
 
     service = module.get<ScheduleService>(ScheduleService);
-    repository = module.get<Repository<AcademicSchedule>>(getRepositoryToken(AcademicSchedule));
+    repository = module.get<Repository<AcademicSchedule>>(
+      getRepositoryToken(AcademicSchedule),
+    );
 
     jest.clearAllMocks();
   });
@@ -60,7 +62,7 @@ describe('ScheduleService', () => {
           category: ScheduleCategory.ACADEMIC,
           createdAt: new Date(),
           updatedAt: new Date(),
-        }
+        },
       ];
 
       mockQueryBuilder.getManyAndCount.mockResolvedValue([mockSchedules, 1]);
@@ -78,7 +80,7 @@ describe('ScheduleService', () => {
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'YEAR(schedule.startDate) = :year AND MONTH(schedule.startDate) = :month',
-        { year: 2024, month: 1 }
+        { year: 2024, month: 1 },
       );
     });
 
@@ -89,7 +91,7 @@ describe('ScheduleService', () => {
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'schedule.category = :category',
-        { category: ScheduleCategory.ADMISSION }
+        { category: ScheduleCategory.ADMISSION },
       );
     });
   });
@@ -115,7 +117,9 @@ describe('ScheduleService', () => {
     it('should throw NotFoundException when schedule not found', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 
@@ -126,7 +130,7 @@ describe('ScheduleService', () => {
         startDate: '2024-01-01',
         endDate: '2024-01-02',
         description: 'Test description',
-        category: ScheduleCategory.ACADEMIC
+        category: ScheduleCategory.ACADEMIC,
       };
 
       const mockSchedule = {
@@ -152,7 +156,7 @@ describe('ScheduleService', () => {
     it('should update existing schedule', async () => {
       const updateDto = {
         title: 'Updated Schedule',
-        description: 'Updated description'
+        description: 'Updated description',
       };
 
       const mockSchedule = {
@@ -175,7 +179,9 @@ describe('ScheduleService', () => {
     it('should throw NotFoundException when updating non-existent schedule', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { title: 'Updated' })).rejects.toThrow(NotFoundException);
+      await expect(
+        service.update('nonexistent', { title: 'Updated' }),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -192,7 +198,9 @@ describe('ScheduleService', () => {
     it('should throw NotFoundException when deleting non-existent schedule', async () => {
       mockRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow(NotFoundException);
+      await expect(service.delete('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 });

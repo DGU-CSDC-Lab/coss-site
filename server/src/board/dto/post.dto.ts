@@ -1,18 +1,24 @@
-import { IsString, IsOptional, IsArray, ValidateNested, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  ValidateNested,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
 export class PostFileDto {
   @ApiProperty({
     description: '파일 키 (S3 업로드 후 받은 fileKey)',
-    example: 'uploads/2024/03/15/uuid-1234-5678-9012.pdf'
+    example: 'uploads/2024/03/15/uuid-1234-5678-9012.pdf',
   })
   @IsString()
   fileKey: string;
 
   @ApiProperty({
     description: '원본 파일명',
-    example: 'document.pdf'
+    example: 'document.pdf',
   })
   @IsString()
   originalName: string;
@@ -20,7 +26,7 @@ export class PostFileDto {
   @ApiProperty({
     description: '파일 크기 (bytes)',
     example: 1024000,
-    required: false
+    required: false,
   })
   @IsOptional()
   fileSize?: number;
@@ -28,7 +34,7 @@ export class PostFileDto {
   @ApiProperty({
     description: 'MIME 타입',
     example: 'application/pdf',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -38,25 +44,25 @@ export class PostFileDto {
 export class PostFileResponse {
   @ApiProperty({
     description: '파일 ID',
-    example: 'file-uuid-1234'
+    example: 'file-uuid-1234',
   })
   id: string;
 
   @ApiProperty({
     description: '원본 파일명',
-    example: 'document.pdf'
+    example: 'document.pdf',
   })
   originalName: string;
 
   @ApiProperty({
     description: '파일 크기 (bytes)',
-    example: 1024000
+    example: 1024000,
   })
   fileSize?: number;
 
   @ApiProperty({
     description: '파일 다운로드 URL',
-    example: 'https://s3.amazonaws.com/bucket/uploads/file.pdf?signature=...'
+    example: 'https://s3.amazonaws.com/bucket/uploads/file.pdf?signature=...',
   })
   downloadUrl: string;
 }
@@ -64,7 +70,7 @@ export class PostFileResponse {
 export class PostCreateRequest {
   @ApiProperty({
     description: '게시글 제목',
-    example: '2024학년도 신입생 모집 안내'
+    example: '2024학년도 신입생 모집 안내',
   })
   @IsString()
   @MaxLength(255)
@@ -72,14 +78,15 @@ export class PostCreateRequest {
 
   @ApiProperty({
     description: '게시글 내용 (HTML)',
-    example: '<p>2024학년도 신입생 모집에 대한 상세 안내입니다.</p><p>지원 기간: 2024년 3월 1일 ~ 3월 31일</p>'
+    example:
+      '<p>2024학년도 신입생 모집에 대한 상세 안내입니다.</p><p>지원 기간: 2024년 3월 1일 ~ 3월 31일</p>',
   })
   @IsString()
   contentHtml: string;
 
   @ApiProperty({
     description: '카테고리명',
-    example: '공지사항'
+    example: '공지사항',
   })
   @IsString()
   categoryName: string;
@@ -87,7 +94,7 @@ export class PostCreateRequest {
   @ApiProperty({
     description: '썸네일 이미지 URL',
     example: 'https://example.com/images/thumbnail.jpg',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -97,7 +104,7 @@ export class PostCreateRequest {
     description: '첨부파일 목록 (최대 10개)',
     type: [PostFileDto],
     required: false,
-    maxItems: 10
+    maxItems: 10,
   })
   @IsOptional()
   @IsArray()
@@ -110,7 +117,7 @@ export class PostUpdateRequest {
   @ApiProperty({
     description: '게시글 제목',
     example: '2024학년도 신입생 모집 안내 (수정)',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -119,7 +126,7 @@ export class PostUpdateRequest {
   @ApiProperty({
     description: '게시글 내용 (HTML)',
     example: '<p>수정된 2024학년도 신입생 모집 안내입니다.</p>',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -128,7 +135,7 @@ export class PostUpdateRequest {
   @ApiProperty({
     description: '카테고리명',
     example: '공지사항',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -137,7 +144,7 @@ export class PostUpdateRequest {
   @ApiProperty({
     description: '썸네일 이미지 URL',
     example: 'https://example.com/images/new-thumbnail.jpg',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -147,7 +154,7 @@ export class PostUpdateRequest {
     description: '첨부파일 목록 (최대 10개)',
     type: [PostFileDto],
     required: false,
-    maxItems: 10
+    maxItems: 10,
   })
   @IsOptional()
   @IsArray()
@@ -160,7 +167,7 @@ export class PostListQuery {
   @ApiProperty({
     description: '카테고리명으로 필터링',
     example: '공지사항',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -169,7 +176,7 @@ export class PostListQuery {
   @ApiProperty({
     description: '제목 또는 내용 검색 키워드',
     example: '신입생',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -180,7 +187,7 @@ export class PostListQuery {
     example: 1,
     minimum: 1,
     default: 1,
-    required: false
+    required: false,
   })
   @IsOptional()
   page?: number = 1;
@@ -191,7 +198,7 @@ export class PostListQuery {
     minimum: 1,
     maximum: 100,
     default: 10,
-    required: false
+    required: false,
   })
   @IsOptional()
   size?: number = 10;
@@ -201,7 +208,7 @@ export class PostListQuery {
     example: 'latest',
     enum: ['latest', 'popular'],
     default: 'latest',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsString()
@@ -211,68 +218,68 @@ export class PostListQuery {
 export class PostResponse {
   @ApiProperty({
     description: '게시글 ID',
-    example: 'post-uuid-1234-5678-9012'
+    example: 'post-uuid-1234-5678-9012',
   })
   id: string;
 
   @ApiProperty({
     description: '게시글 제목',
-    example: '2024학년도 신입생 모집 안내'
+    example: '2024학년도 신입생 모집 안내',
   })
   title: string;
 
   @ApiProperty({
     description: '카테고리 ID',
-    example: 'cat-notice-001'
+    example: 'cat-notice-001',
   })
   categoryId: string;
 
   @ApiProperty({
     description: '카테고리명',
-    example: '공지사항'
+    example: '공지사항',
   })
   categoryName: string;
 
   @ApiProperty({
     description: '작성자명',
-    example: 'Administrator'
+    example: 'Administrator',
   })
   author: string;
 
   @ApiProperty({
     description: '조회수',
-    example: 125
+    example: 125,
   })
   viewCount: number;
 
   @ApiProperty({
     description: '썸네일 이미지 URL',
     example: 'https://example.com/images/thumbnail.jpg',
-    required: false
+    required: false,
   })
   thumbnailUrl?: string;
 
   @ApiProperty({
     description: '첨부파일 존재 여부',
-    example: true
+    example: true,
   })
   hasFiles: boolean;
 
   @ApiProperty({
     description: '첨부파일 개수',
-    example: 3
+    example: 3,
   })
   fileCount: number;
 
   @ApiProperty({
     description: '생성일시',
-    example: '2024-03-15T09:00:00.000Z'
+    example: '2024-03-15T09:00:00.000Z',
   })
   createdAt: Date;
 
   @ApiProperty({
     description: '수정일시',
-    example: '2024-03-15T09:30:00.000Z'
+    example: '2024-03-15T09:30:00.000Z',
   })
   updatedAt: Date;
 }
@@ -280,27 +287,28 @@ export class PostResponse {
 export class PostDetailResponse extends PostResponse {
   @ApiProperty({
     description: '게시글 내용 (HTML)',
-    example: '<p>2024학년도 신입생 모집에 대한 상세 안내입니다.</p><p>지원 기간: 2024년 3월 1일 ~ 3월 31일</p>'
+    example:
+      '<p>2024학년도 신입생 모집에 대한 상세 안내입니다.</p><p>지원 기간: 2024년 3월 1일 ~ 3월 31일</p>',
   })
   contentHtml: string;
 
   @ApiProperty({
     description: '첨부파일 목록',
-    type: [PostFileResponse]
+    type: [PostFileResponse],
   })
   files: PostFileResponse[];
 
   @ApiProperty({
     description: '이전 게시글 정보',
     example: { id: 'post-uuid-prev', title: '2023학년도 졸업식 안내' },
-    required: false
+    required: false,
   })
   prevPost?: { id: string; title: string };
 
   @ApiProperty({
     description: '다음 게시글 정보',
     example: { id: 'post-uuid-next', title: '2024학년도 입학식 안내' },
-    required: false
+    required: false,
   })
   nextPost?: { id: string; title: string };
 }
@@ -308,25 +316,25 @@ export class PostDetailResponse extends PostResponse {
 export class PageMeta {
   @ApiProperty({
     description: '현재 페이지 번호',
-    example: 1
+    example: 1,
   })
   page: number;
 
   @ApiProperty({
     description: '페이지당 항목 수',
-    example: 10
+    example: 10,
   })
   size: number;
 
   @ApiProperty({
     description: '전체 항목 수',
-    example: 45
+    example: 45,
   })
   totalElements: number;
 
   @ApiProperty({
     description: '전체 페이지 수',
-    example: 5
+    example: 5,
   })
   totalPages: number;
 }

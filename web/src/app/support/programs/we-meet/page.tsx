@@ -8,7 +8,7 @@ export default function WeMeetPage() {
       <Tabs />
       <Title className="mb-4">We-Meet</Title>
       <SubTitle className="mb-4">
-        산학 프로젝트 기반 진로, 교육, 취업 연계 '원스톱' 모델
+        산학 프로젝트 기반 진로, 교육, 취업 연계 &apos;원스톱&apos; 모델
       </SubTitle>
       <ul className="list-disc pl-6 space-y-2 text-gray-700 font-body-14-regular leading-relaxed mb-4">
         <li>

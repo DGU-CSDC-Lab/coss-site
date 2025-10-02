@@ -4,7 +4,7 @@ import { SoftDeleteEntity } from '../../common/entities';
 export enum ScheduleCategory {
   ACADEMIC = 'academic',
   ADMISSION = 'admission',
-  EVENT = 'event'
+  EVENT = 'event',
 }
 
 @Entity('academic_schedules')
@@ -21,7 +21,11 @@ export class AcademicSchedule extends SoftDeleteEntity {
   @Column({ type: 'text', nullable: true })
   description?: string;
 
-  @Column({ type: 'enum', enum: ScheduleCategory, default: ScheduleCategory.ACADEMIC })
+  @Column({
+    type: 'enum',
+    enum: ScheduleCategory,
+    default: ScheduleCategory.ACADEMIC,
+  })
   category: ScheduleCategory;
 
   @Column({ name: 'created_by' })

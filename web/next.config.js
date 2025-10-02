@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  eslint: {
+    // 빌드 시 prettier 에러를 무시하고 진행
+    ignoreDuringBuilds: false,
+  },
   images: {
     domains: ['localhost', 'picsum.photos'], // 이미지 도메인 추가
   },

@@ -67,14 +67,16 @@ describe('CategoryService', () => {
           createdAt: 'ASC',
         },
       });
-      expect(result).toEqual(mockCategories.map(cat => ({
-        id: cat.id,
-        name: cat.name,
-        parentId: cat.parentId,
-        order: cat.displayOrder,
-        createdAt: cat.createdAt,
-        updatedAt: cat.updatedAt,
-      })));
+      expect(result).toEqual(
+        mockCategories.map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          parentId: cat.parentId,
+          order: cat.displayOrder,
+          createdAt: cat.createdAt,
+          updatedAt: cat.updatedAt,
+        })),
+      );
     });
 
     it('should return subcategories when parentId is provided', async () => {
@@ -185,7 +187,9 @@ describe('CategoryService', () => {
 
       mockCategoryRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.create(createDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(createDto)).rejects.toThrow(
+        NotFoundException,
+      );
       expect(categoryRepository.findOne).toHaveBeenCalledWith({
         where: { id: createDto.parentId },
       });
@@ -246,7 +250,9 @@ describe('CategoryService', () => {
 
       mockCategoryRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update(categoryId, updateDto)).rejects.toThrow(NotFoundException);
+      await expect(service.update(categoryId, updateDto)).rejects.toThrow(
+        NotFoundException,
+      );
       expect(categoryRepository.findOne).toHaveBeenCalledWith({
         where: { id: categoryId },
       });
@@ -279,7 +285,9 @@ describe('CategoryService', () => {
 
       mockCategoryRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete(categoryId)).rejects.toThrow(NotFoundException);
+      await expect(service.delete(categoryId)).rejects.toThrow(
+        NotFoundException,
+      );
       expect(categoryRepository.findOne).toHaveBeenCalledWith({
         where: { id: categoryId },
         relations: ['children'],
@@ -291,14 +299,14 @@ describe('CategoryService', () => {
       const existingCategory = {
         id: categoryId,
         name: '부모 카테고리',
-        children: [
-          { id: 'child-1', name: '자식 카테고리' }
-        ],
+        children: [{ id: 'child-1', name: '자식 카테고리' }],
       };
 
       mockCategoryRepository.findOne.mockResolvedValue(existingCategory);
 
-      await expect(service.delete(categoryId)).rejects.toThrow(ConflictException);
+      await expect(service.delete(categoryId)).rejects.toThrow(
+        ConflictException,
+      );
       expect(categoryRepository.remove).not.toHaveBeenCalled();
     });
   });
