@@ -1,7 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { ChevronLeftIcon, ChevronRightIcon, PlayIcon } from '@heroicons/react/24/solid'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PlayIcon,
+} from '@heroicons/react/24/solid'
 import { schedulesApi, Schedule } from '@/lib/api/schedules'
 
 export default function Calendar() {

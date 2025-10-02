@@ -48,13 +48,12 @@ export const popupsApi = {
         searchParams.append(key, String(value))
       }
     })
-    
+
     return api.get(`/api/popups?${searchParams.toString()}`)
   },
 
   // 팝업 상세 조회
-  getPopup: (id: string): Promise<Popup> =>
-    api.get(`/api/popups/${id}`),
+  getPopup: (id: string): Promise<Popup> => api.get(`/api/popups/${id}`),
 
   // 팝업 생성 (관리자)
   createPopup: (data: CreatePopupRequest): Promise<Popup> =>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { postsApi, CreatePostRequest } from '@/lib/api/posts'
 import { UploadResult, uploadImage } from '@/utils/fileUpload'
 import FileUpload from '@/components/admin/FileUpload'
@@ -31,7 +32,6 @@ export default function CreatePostPage() {
     contentHtml: '',
   })
   const [files, setFiles] = useState<UploadResult[]>([])
-  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
   const [thumbnailUrl, setThumbnailUrl] = useState<string>('')
   const [thumbnailUploading, setThumbnailUploading] = useState(false)
 
@@ -41,7 +41,7 @@ export default function CreatePostPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setThumbnailFile(file)
+    setThumbnailUrl(URL.createObjectURL(file))
     setThumbnailUploading(true)
 
     try {
@@ -141,9 +141,11 @@ export default function CreatePostPage() {
                 )}
                 {thumbnailUrl && (
                   <div className="space-y-2">
-                    <img
+                    <Image
                       src={thumbnailUrl}
                       alt="썸네일 미리보기"
+                      width={128}
+                      height={128}
                       className="w-32 h-32 object-cover rounded-md border border-gray-50"
                     />
                     <div className="text-sm text-green-600">업로드 완료</div>

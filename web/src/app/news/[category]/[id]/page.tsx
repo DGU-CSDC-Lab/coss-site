@@ -8,11 +8,11 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 // 카테고리명을 영어 키로 매핑
 const categoryNameToKey: Record<string, string> = {
-  '뉴스': 'news',
-  '소식': 'updates', 
-  '장학정보': 'scholarship-info',
-  '자료실': 'resources',
-  '공지사항': 'notices'
+  뉴스: 'news',
+  소식: 'updates',
+  장학정보: 'scholarship-info',
+  자료실: 'resources',
+  공지사항: 'notices',
 }
 
 export default function NewsDetailPage() {
@@ -39,7 +39,8 @@ export default function NewsDetailPage() {
 
   // 카테고리명을 영어 키로 변환하여 쿼리 파라미터로 처리
   const getBackPath = () => {
-    const categoryKey = categoryNameToKey[decodeURIComponent(category as string)]
+    const categoryKey =
+      categoryNameToKey[decodeURIComponent(category as string)]
     if (categoryKey) {
       return `/news?category=${categoryKey}`
     }
@@ -51,7 +52,5 @@ export default function NewsDetailPage() {
     return <LoadingSpinner size="lg" />
   }
 
-  return (
-    <NewsDetail post={post} loading={loading} backPath={getBackPath()} />
-  )
+  return <NewsDetail post={post} loading={loading} backPath={getBackPath()} />
 }

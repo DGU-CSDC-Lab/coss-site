@@ -7,7 +7,7 @@ import menuConfig from '@/config/menuConfig'
 const PageHeader = () => {
   const pathname = usePathname()
   const segments = pathname.split('/').filter(Boolean) // 예: ["about", "greeting"]
-  
+
   // 1. main 메뉴 찾기
   const main = menuConfig.find(m => m.path === `/${segments[0]}`)
   // 2. sub 메뉴 찾기 (절대 경로로 비교)

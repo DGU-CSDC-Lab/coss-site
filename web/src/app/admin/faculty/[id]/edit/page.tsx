@@ -21,6 +21,7 @@ export default function EditFacultyPage() {
   const [formData, setFormData] = useState({
     name: '',
     position: '',
+    department: '',
     email: '',
     phone: '',
     office: '',
@@ -50,18 +51,25 @@ export default function EditFacultyPage() {
   const fetchFaculty = async (id: string) => {
     try {
       setInitialLoading(true)
-      const facultyData = await facultyApi.getFacultyMember(id)
+      const facultyData = await facultyApi.getFacultyById(id)
       setFaculty(facultyData)
       setFormData({
         name: facultyData.name,
-        position: facultyData.position,
-        email: facultyData.email,
-        phone: facultyData.phone || '',
+        position: facultyData.jobTitle,
+        department: facultyData.department || '',
+        email: facultyData.email || '',
+        phone: facultyData.phoneNumber || '',
         office: facultyData.office || '',
         profileImage: facultyData.profileImage || '',
-        bio: facultyData.bio || '',
-        research: facultyData.research || '',
-        education: facultyData.education || '',
+        bio: Array.isArray(facultyData.biography)
+          ? facultyData.biography.join(', ')
+          : facultyData.biography || '',
+        research: Array.isArray(facultyData.researchAreas)
+          ? facultyData.researchAreas.join(', ')
+          : facultyData.researchAreas || '',
+        education: Array.isArray(facultyData.biography)
+          ? facultyData.biography.join(', ')
+          : facultyData.biography || '',
       })
       setProfileImageUrl(facultyData.profileImage || '')
     } catch (error) {
@@ -77,7 +85,6 @@ export default function EditFacultyPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setProfileImageFile(file)
     setImageUploading(true)
 
     try {
@@ -93,12 +100,12 @@ export default function EditFacultyPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.name.trim()) {
       alert('이름을 입력해주세요.')
       return
     }
-    
+
     if (!formData.position.trim()) {
       alert('직책을 입력해주세요.')
       return
@@ -115,16 +122,17 @@ export default function EditFacultyPage() {
       const facultyData: UpdateFacultyRequest = {
         name: formData.name,
         position: formData.position,
+        department: formData.department,
         email: formData.email,
         phone: formData.phone || undefined,
         office: formData.office || undefined,
         profileImage: profileImageUrl || undefined,
         bio: formData.bio || undefined,
-        research: formData.research || undefined,
-        education: formData.education || undefined,
+        researchAreas: formData.research ? [formData.research] : undefined,
+        education: formData.education ? [formData.education] : undefined,
       }
 
-      await facultyApi.updateFacultyMember(params.id as string, facultyData)
+      await facultyApi.updateFaculty(params.id as string, facultyData)
       alert('교원 정보가 수정되었습니다.')
       router.push('/admin/faculty')
     } catch (error) {
@@ -170,7 +178,7 @@ export default function EditFacultyPage() {
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-6">
           <h2 className="font-body-18-medium text-gray-900">기본 정보</h2>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <label className="block font-body-18-medium text-gray-900 mb-3">
@@ -179,12 +187,14 @@ export default function EditFacultyPage() {
               <Input
                 type="text"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, name: value })
+                }
                 placeholder="교원 이름을 입력하세요"
                 required
               />
             </div>
-            
+
             <div>
               <label className="block font-body-18-medium text-gray-900 mb-3">
                 직책 *
@@ -192,7 +202,9 @@ export default function EditFacultyPage() {
               <Dropdown
                 options={positionOptions}
                 value={formData.position}
-                onChange={(value) => setFormData({ ...formData, position: value })}
+                onChange={value =>
+                  setFormData({ ...formData, position: value })
+                }
                 placeholder="직책 선택"
               />
             </div>
@@ -206,12 +218,14 @@ export default function EditFacultyPage() {
               <Input
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, email: value })
+                }
                 placeholder="이메일을 입력하세요"
                 required
               />
             </div>
-            
+
             <div>
               <label className="block font-body-18-medium text-gray-900 mb-3">
                 전화번호
@@ -219,7 +233,9 @@ export default function EditFacultyPage() {
               <Input
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, phone: value })
+                }
                 placeholder="전화번호를 입력하세요"
               />
             </div>
@@ -233,11 +249,13 @@ export default function EditFacultyPage() {
               <Input
                 type="text"
                 value={formData.office}
-                onChange={(e) => setFormData({ ...formData, office: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, office: value })
+                }
                 placeholder="연구실을 입력하세요"
               />
             </div>
-            
+
             <div>
               <label className="block font-body-18-medium text-gray-900 mb-3">
                 프로필 이미지
@@ -249,10 +267,14 @@ export default function EditFacultyPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
               />
               {imageUploading && (
-                <p className="mt-2 font-caption-14 text-gray-600">업로드 중...</p>
+                <p className="mt-2 font-caption-14 text-gray-600">
+                  업로드 중...
+                </p>
               )}
               {profileImageUrl && (
-                <p className="mt-2 font-caption-14 text-gray-600">업로드 완료</p>
+                <p className="mt-2 font-caption-14 text-gray-600">
+                  업로드 완료
+                </p>
               )}
             </div>
           </div>
@@ -260,14 +282,14 @@ export default function EditFacultyPage() {
 
         <div className="space-y-6">
           <h2 className="font-body-18-medium text-gray-900">상세 정보</h2>
-          
+
           <div>
             <label className="block font-body-18-medium text-gray-900 mb-3">
               소개
             </label>
             <textarea
               value={formData.bio}
-              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              onChange={e => setFormData({ ...formData, bio: e.target.value })}
               placeholder="교원 소개를 입력하세요"
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
@@ -280,7 +302,9 @@ export default function EditFacultyPage() {
             </label>
             <textarea
               value={formData.research}
-              onChange={(e) => setFormData({ ...formData, research: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, research: e.target.value })
+              }
               placeholder="연구 분야를 입력하세요"
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
@@ -293,7 +317,9 @@ export default function EditFacultyPage() {
             </label>
             <textarea
               value={formData.education}
-              onChange={(e) => setFormData({ ...formData, education: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, education: e.target.value })
+              }
               placeholder="학력을 입력하세요"
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
@@ -305,11 +331,7 @@ export default function EditFacultyPage() {
           <Link href="/admin/faculty">
             <Button variant="secondary">취소</Button>
           </Link>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={loading}
-          >
+          <Button type="submit" variant="primary" disabled={loading}>
             {loading ? '수정 중...' : '교원 수정'}
           </Button>
         </div>

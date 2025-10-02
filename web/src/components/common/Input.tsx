@@ -2,10 +2,13 @@ interface InputProps {
   value: string
   onChange: (value: string) => void
   placeholder?: string
-  type?: 'text' | 'email' | 'password' | 'search'
+  type?: 'text' | 'email' | 'password' | 'search' | 'number' | 'tel' | 'url'
   size?: 'sm' | 'md' | 'lg'
   disabled?: boolean
   required?: boolean
+  min?: string
+  max?: string
+  step?: string
   className?: string
   onKeyPress?: (e: React.KeyboardEvent) => void
   onFocus?: () => void
@@ -20,6 +23,9 @@ export default function Input({
   size = 'md',
   disabled = false,
   required = false,
+  min,
+  max,
+  step,
   className = '',
   onKeyPress,
   onFocus,
@@ -42,6 +48,9 @@ export default function Input({
       placeholder={placeholder}
       disabled={disabled}
       required={required}
+      min={min}
+      max={max}
+      step={step}
       onKeyPress={onKeyPress}
       onFocus={onFocus}
       onBlur={onBlur}

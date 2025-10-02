@@ -49,7 +49,7 @@ export default function EditPostPage() {
         thumbnailUrl: postData.thumbnailUrl || '',
         contentHtml: postData.contentHtml,
       })
-      
+
       // 기존 파일들을 UploadResult 형태로 변환
       const existingFiles: UploadResult[] = postData.files.map(file => ({
         fileKey: file.id, // 임시로 id를 fileKey로 사용
@@ -70,12 +70,12 @@ export default function EditPostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!formData.title.trim()) {
       alert('제목을 입력해주세요.')
       return
     }
-    
+
     if (!formData.contentHtml.trim()) {
       alert('내용을 입력해주세요.')
       return
@@ -132,7 +132,7 @@ export default function EditPostPage() {
         {/* 기본 정보 */}
         <div className="bg-white border border-surface rounded-lg p-8 space-y-6">
           <h2 className="font-heading-24 text-text">기본 정보</h2>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div>
               <label className="block font-body-16-medium text-text mb-3">
@@ -140,7 +140,9 @@ export default function EditPostPage() {
               </label>
               <select
                 value={formData.categoryId}
-                onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, categoryId: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-surface rounded-md font-body-16-regular"
               >
                 {CATEGORIES.map(category => (
@@ -150,7 +152,7 @@ export default function EditPostPage() {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block font-body-16-medium text-text mb-3">
                 썸네일 URL
@@ -158,7 +160,9 @@ export default function EditPostPage() {
               <input
                 type="url"
                 value={formData.thumbnailUrl}
-                onChange={(e) => setFormData({ ...formData, thumbnailUrl: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, thumbnailUrl: e.target.value })
+                }
                 placeholder="https://example.com/image.jpg"
                 className="w-full px-4 py-3 border border-surface rounded-md font-body-16-regular"
               />
@@ -175,7 +179,9 @@ export default function EditPostPage() {
             <input
               type="text"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               placeholder="게시글 제목을 입력하세요"
               className="w-full px-4 py-3 border border-surface rounded-md font-body-18-regular"
               required
@@ -191,11 +197,13 @@ export default function EditPostPage() {
               에디터를 사용하여 내용을 작성하세요
             </div>
           </div>
-          
+
           <div>
             <HtmlEditor
               value={formData.contentHtml}
-              onChange={(value) => setFormData({ ...formData, contentHtml: value })}
+              onChange={value =>
+                setFormData({ ...formData, contentHtml: value })
+              }
               placeholder="게시글 내용을 입력하세요"
               height={500}
             />

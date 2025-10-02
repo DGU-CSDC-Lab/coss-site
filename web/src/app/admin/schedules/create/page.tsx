@@ -92,7 +92,9 @@ export default function CreateSchedulePage() {
             <Input
               type="text"
               value={formData.title}
-              onChange={e => setFormData({ ...formData, title: e.target.value })}
+              onChange={value =>
+                setFormData({ ...formData, title: value })
+              }
               placeholder="일정 제목을 입력하세요"
               required
             />
@@ -104,7 +106,9 @@ export default function CreateSchedulePage() {
             </label>
             <textarea
               value={formData.description}
-              onChange={e => setFormData({ ...formData, description: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               placeholder="일정에 대한 상세 설명을 입력하세요"
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
@@ -119,7 +123,9 @@ export default function CreateSchedulePage() {
               <Dropdown
                 options={categoryOptions}
                 value={formData.category}
-                onChange={value => setFormData({ ...formData, category: value })}
+                onChange={value =>
+                  setFormData({ ...formData, category: value })
+                }
                 placeholder="카테고리 선택"
               />
             </div>
@@ -131,7 +137,9 @@ export default function CreateSchedulePage() {
               <Input
                 type="text"
                 value={formData.location}
-                onChange={e => setFormData({ ...formData, location: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, location: value })
+                }
                 placeholder="장소를 입력하세요"
               />
             </div>
@@ -146,10 +154,15 @@ export default function CreateSchedulePage() {
               type="checkbox"
               id="isAllDay"
               checked={formData.isAllDay}
-              onChange={e => setFormData({ ...formData, isAllDay: e.target.checked })}
+              onChange={e =>
+                setFormData({ ...formData, isAllDay: e.target.checked })
+              }
               className="w-4 h-4"
             />
-            <label htmlFor="isAllDay" className="font-body-18-medium text-gray-900">
+            <label
+              htmlFor="isAllDay"
+              className="font-body-18-medium text-gray-900"
+            >
               종일 일정
             </label>
           </div>
@@ -162,7 +175,9 @@ export default function CreateSchedulePage() {
               <input
                 type={formData.isAllDay ? 'date' : 'datetime-local'}
                 value={formData.startDate}
-                onChange={e => setFormData({ ...formData, startDate: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, startDate: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900"
                 required
               />
@@ -175,7 +190,9 @@ export default function CreateSchedulePage() {
               <input
                 type={formData.isAllDay ? 'date' : 'datetime-local'}
                 value={formData.endDate}
-                onChange={e => setFormData({ ...formData, endDate: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, endDate: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900"
               />
             </div>
@@ -186,11 +203,7 @@ export default function CreateSchedulePage() {
           <Link href="/admin/schedules">
             <Button variant="secondary">취소</Button>
           </Link>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={loading}
-          >
+          <Button type="submit" variant="primary" disabled={loading}>
             {loading ? '생성 중...' : '일정 생성'}
           </Button>
         </div>

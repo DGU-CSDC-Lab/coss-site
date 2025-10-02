@@ -75,14 +75,14 @@ export const uploadFile = async (
     if (error instanceof FileUploadError) {
       throw error
     }
-    
+
     // 서버 오류 메시지 파싱
-    const errorMessage = error instanceof Error ? error.message : '파일 업로드 중 오류가 발생했습니다.'
-    
-    throw new FileUploadError(
-      errorMessage,
-      'UPLOAD_FAILED'
-    )
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : '파일 업로드 중 오류가 발생했습니다.'
+
+    throw new FileUploadError(errorMessage, 'UPLOAD_FAILED')
   }
 }
 

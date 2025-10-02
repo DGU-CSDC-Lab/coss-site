@@ -127,7 +127,7 @@ export default function AdminCoursesPage() {
             type="text"
             placeholder="과목명, 학수번호 검색"
             value={keyword}
-            onChange={e => setKeyword(e.target.value)}
+            onChange={setKeyword}
             onKeyPress={e => e.key === 'Enter' && handleSearch()}
           />
         </div>

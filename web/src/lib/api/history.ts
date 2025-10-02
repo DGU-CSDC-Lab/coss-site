@@ -35,7 +35,7 @@ export const historyApi = {
         searchParams.append(key, String(value))
       }
     })
-    
+
     return apiRequest(`/api/history?${searchParams.toString()}`)
   },
 
@@ -44,14 +44,21 @@ export const historyApi = {
     apiRequest(`/api/history/${id}`),
 
   // 연혁 등록 (관리자)
-  createHistory: (data: CreateHistoryRequest, token: string): Promise<History> =>
+  createHistory: (
+    data: CreateHistoryRequest,
+    token: string
+  ): Promise<History> =>
     authenticatedRequest('/admin/history', token, {
       method: 'POST',
       body: JSON.stringify(data),
     }),
 
   // 연혁 수정 (관리자)
-  updateHistory: (id: string, data: UpdateHistoryRequest, token: string): Promise<History> =>
+  updateHistory: (
+    id: string,
+    data: UpdateHistoryRequest,
+    token: string
+  ): Promise<History> =>
     authenticatedRequest(`/admin/history/${id}`, token, {
       method: 'PUT',
       body: JSON.stringify(data),

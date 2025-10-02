@@ -37,14 +37,16 @@ export interface UpdateScheduleRequest extends CreateScheduleRequest {}
 // 학사일정 API 함수들
 export const schedulesApi = {
   // 학사일정 목록 조회 (페이지네이션)
-  getSchedules: (params: SchedulesQuery = {}): Promise<PagedResponse<Schedule>> => {
+  getSchedules: (
+    params: SchedulesQuery = {}
+  ): Promise<PagedResponse<Schedule>> => {
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
         searchParams.append(key, String(value))
       }
     })
-    
+
     return api.get(`/api/schedules?${searchParams.toString()}`)
   },
 
@@ -57,8 +59,10 @@ export const schedulesApi = {
     api.auth.post('/admin/schedules', data),
 
   // 학사일정 수정 (관리자)
-  updateSchedule: (id: string, data: UpdateScheduleRequest): Promise<Schedule> =>
-    api.auth.put(`/admin/schedules/${id}`, data),
+  updateSchedule: (
+    id: string,
+    data: UpdateScheduleRequest
+  ): Promise<Schedule> => api.auth.put(`/admin/schedules/${id}`, data),
 
   // 학사일정 삭제 (관리자)
   deleteSchedule: (id: string): Promise<void> =>

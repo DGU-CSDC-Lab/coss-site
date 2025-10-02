@@ -45,7 +45,7 @@ export default function LoginForm() {
           id: response.userId,
           email: formData.email,
         },
-        response.role
+        response.role as 'ADMIN' | 'USER' | null
       )
 
       router.push('/')

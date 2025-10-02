@@ -3,8 +3,12 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
-import { headerAssetsApi, CreateHeaderAssetRequest } from '@/lib/api/headerAssets'
+import {
+  headerAssetsApi,
+  CreateHeaderAssetRequest,
+} from '@/lib/api/headerAssets'
 import { uploadImage } from '@/utils/fileUpload'
 import Title from '@/components/common/Title'
 import Button from '@/components/common/Button'
@@ -68,7 +72,11 @@ export default function CreateHeaderAssetPage() {
 
     try {
       const assetData: CreateHeaderAssetRequest = {
-        type: formData.type as 'logo' | 'banner' | 'background' | 'announcement',
+        type: formData.type as
+          | 'logo'
+          | 'banner'
+          | 'background'
+          | 'announcement',
         title: formData.title,
         imageUrl: formData.imageUrl || undefined,
         linkUrl: formData.linkUrl || undefined,
@@ -114,7 +122,9 @@ export default function CreateHeaderAssetPage() {
               <Dropdown
                 options={typeOptions}
                 value={formData.type}
-                onChange={value => setFormData({ ...formData, type: value as any })}
+                onChange={value =>
+                  setFormData({ ...formData, type: value as any })
+                }
                 placeholder="타입 선택"
               />
             </div>
@@ -126,7 +136,9 @@ export default function CreateHeaderAssetPage() {
               <Input
                 type="text"
                 value={formData.title}
-                onChange={e => setFormData({ ...formData, title: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, title: value })
+                }
                 placeholder="제목을 입력하세요"
                 required
               />
@@ -145,14 +157,20 @@ export default function CreateHeaderAssetPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
               />
               {imageUploading && (
-                <p className="mt-2 font-caption-14 text-gray-600">업로드 중...</p>
+                <p className="mt-2 font-caption-14 text-gray-600">
+                  업로드 중...
+                </p>
               )}
               {formData.imageUrl && (
                 <div className="mt-3">
-                  <p className="font-caption-14 text-gray-600 mb-2">미리보기:</p>
-                  <img
+                  <p className="font-caption-14 text-gray-600 mb-2">
+                    미리보기:
+                  </p>
+                  <Image
                     src={formData.imageUrl}
                     alt="미리보기"
+                    width={320}
+                    height={128}
                     className="w-full max-w-xs h-32 object-cover rounded-md border"
                   />
                 </div>
@@ -166,7 +184,9 @@ export default function CreateHeaderAssetPage() {
               <Input
                 type="url"
                 value={formData.linkUrl}
-                onChange={e => setFormData({ ...formData, linkUrl: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, linkUrl: value })
+                }
                 placeholder="https://example.com"
               />
             </div>
@@ -179,8 +199,13 @@ export default function CreateHeaderAssetPage() {
               </label>
               <Input
                 type="number"
-                value={formData.displayOrder}
-                onChange={e => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 1 })}
+                value={formData.displayOrder.toString()}
+                onChange={value =>
+                  setFormData({
+                    ...formData,
+                    displayOrder: parseInt(value) || 1,
+                  })
+                }
                 min="1"
               />
             </div>
@@ -190,10 +215,15 @@ export default function CreateHeaderAssetPage() {
                 type="checkbox"
                 id="isActive"
                 checked={formData.isActive}
-                onChange={e => setFormData({ ...formData, isActive: e.target.checked })}
+                onChange={e =>
+                  setFormData({ ...formData, isActive: e.target.checked })
+                }
                 className="w-4 h-4"
               />
-              <label htmlFor="isActive" className="font-body-18-medium text-gray-900">
+              <label
+                htmlFor="isActive"
+                className="font-body-18-medium text-gray-900"
+              >
                 활성화
               </label>
             </div>
@@ -205,7 +235,9 @@ export default function CreateHeaderAssetPage() {
             </label>
             <textarea
               value={formData.textContent}
-              onChange={e => setFormData({ ...formData, textContent: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, textContent: e.target.value })
+              }
               placeholder="텍스트 내용을 입력하세요"
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
@@ -220,7 +252,9 @@ export default function CreateHeaderAssetPage() {
               <input
                 type="datetime-local"
                 value={formData.startDate}
-                onChange={e => setFormData({ ...formData, startDate: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, startDate: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900"
               />
             </div>
@@ -232,7 +266,9 @@ export default function CreateHeaderAssetPage() {
               <input
                 type="datetime-local"
                 value={formData.endDate}
-                onChange={e => setFormData({ ...formData, endDate: e.target.value })}
+                onChange={e =>
+                  setFormData({ ...formData, endDate: e.target.value })
+                }
                 className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900"
               />
             </div>
@@ -243,11 +279,7 @@ export default function CreateHeaderAssetPage() {
           <Link href="/admin/header-assets">
             <Button variant="secondary">취소</Button>
           </Link>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={loading}
-          >
+          <Button type="submit" variant="primary" disabled={loading}>
             {loading ? '생성 중...' : '에셋 생성'}
           </Button>
         </div>

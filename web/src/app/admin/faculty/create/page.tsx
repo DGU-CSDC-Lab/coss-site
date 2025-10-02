@@ -16,6 +16,7 @@ export default function CreateFacultyPage() {
   const [formData, setFormData] = useState({
     name: '',
     position: '',
+    department: 'IoT학과',
     email: '',
     phone: '',
     office: '',
@@ -39,7 +40,7 @@ export default function CreateFacultyPage() {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setProfileImageFile(file)
+    setProfileImageUrl(URL.createObjectURL(file))
     setImageUploading(true)
 
     try {
@@ -77,16 +78,17 @@ export default function CreateFacultyPage() {
       const facultyData: CreateFacultyRequest = {
         name: formData.name,
         position: formData.position,
+        department: formData.department,
         email: formData.email,
         phone: formData.phone || undefined,
         office: formData.office || undefined,
         profileImage: profileImageUrl || undefined,
         bio: formData.bio || undefined,
-        research: formData.research || undefined,
-        education: formData.education || undefined,
+        researchAreas: formData.research ? [formData.research] : undefined,
+        education: formData.education ? [formData.education] : undefined,
       }
 
-      await facultyApi.createFacultyMember(facultyData)
+      await facultyApi.createFaculty(facultyData)
       alert('교원이 생성되었습니다.')
       router.push('/admin/faculty')
     } catch (error) {
@@ -118,7 +120,9 @@ export default function CreateFacultyPage() {
               <Input
                 type="text"
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, name: value })
+                }
                 placeholder="교원 이름을 입력하세요"
                 required
               />
@@ -131,7 +135,9 @@ export default function CreateFacultyPage() {
               <Dropdown
                 options={positionOptions}
                 value={formData.position}
-                onChange={value => setFormData({ ...formData, position: value })}
+                onChange={value =>
+                  setFormData({ ...formData, position: value })
+                }
                 placeholder="직책 선택"
               />
             </div>
@@ -145,7 +151,9 @@ export default function CreateFacultyPage() {
               <Input
                 type="email"
                 value={formData.email}
-                onChange={e => setFormData({ ...formData, email: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, email: value })
+                }
                 placeholder="이메일을 입력하세요"
                 required
               />
@@ -158,7 +166,9 @@ export default function CreateFacultyPage() {
               <Input
                 type="tel"
                 value={formData.phone}
-                onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, phone: value })
+                }
                 placeholder="전화번호를 입력하세요"
               />
             </div>
@@ -172,7 +182,9 @@ export default function CreateFacultyPage() {
               <Input
                 type="text"
                 value={formData.office}
-                onChange={e => setFormData({ ...formData, office: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, office: value })
+                }
                 placeholder="연구실을 입력하세요"
               />
             </div>
@@ -188,10 +200,14 @@ export default function CreateFacultyPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
               />
               {imageUploading && (
-                <p className="mt-2 font-caption-14 text-gray-600">업로드 중...</p>
+                <p className="mt-2 font-caption-14 text-gray-600">
+                  업로드 중...
+                </p>
               )}
               {profileImageUrl && (
-                <p className="mt-2 font-caption-14 text-gray-600">업로드 완료</p>
+                <p className="mt-2 font-caption-14 text-gray-600">
+                  업로드 완료
+                </p>
               )}
             </div>
           </div>
@@ -219,7 +235,9 @@ export default function CreateFacultyPage() {
             </label>
             <textarea
               value={formData.research}
-              onChange={e => setFormData({ ...formData, research: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, research: e.target.value })
+              }
               placeholder="연구 분야를 입력하세요"
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
@@ -232,7 +250,9 @@ export default function CreateFacultyPage() {
             </label>
             <textarea
               value={formData.education}
-              onChange={e => setFormData({ ...formData, education: e.target.value })}
+              onChange={e =>
+                setFormData({ ...formData, education: e.target.value })
+              }
               placeholder="학력을 입력하세요"
               rows={4}
               className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
@@ -244,11 +264,7 @@ export default function CreateFacultyPage() {
           <Link href="/admin/faculty">
             <Button variant="secondary">취소</Button>
           </Link>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={loading}
-          >
+          <Button type="submit" variant="primary" disabled={loading}>
             {loading ? '생성 중...' : '교원 생성'}
           </Button>
         </div>

@@ -8,13 +8,27 @@ import menuConfig from '@/config/menuConfig'
 
 // 아이콘 컴포넌트
 const ChevronDownIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <polyline points="6,9 12,15 18,9"></polyline>
   </svg>
 )
 
 const ChevronRightIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
     <polyline points="9,18 15,12 9,6"></polyline>
   </svg>
 )
@@ -95,7 +109,11 @@ export default function SideNav() {
               >
                 {menu.name}
                 <span className="pr-4">
-                  {openMenu === menu.path ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                  {openMenu === menu.path ? (
+                    <ChevronDownIcon />
+                  ) : (
+                    <ChevronRightIcon />
+                  )}
                 </span>
               </button>
 
@@ -125,7 +143,11 @@ export default function SideNav() {
                           >
                             {sub.name}
                             <span className="pr-4">
-                              {openSubMenu === sub.path ? <ChevronDownIcon /> : <ChevronRightIcon />}
+                              {openSubMenu === sub.path ? (
+                                <ChevronDownIcon />
+                              ) : (
+                                <ChevronRightIcon />
+                              )}
                             </span>
                           </button>
                           <ul

@@ -17,7 +17,7 @@ interface AuthState {
   // Getters
   isAuthenticated: () => boolean
   // Actions
-  llogin: (
+  login: (
     tokens: { accessToken: string; refreshToken: string },
     user: UserInfo,
     role: 'ADMIN' | 'USER' | null

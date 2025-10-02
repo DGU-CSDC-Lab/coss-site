@@ -31,7 +31,8 @@
 @tailwind utilities;
 
 /* 수평 스크롤 방지 */
-html, body {
+html,
+body {
   overflow-x: hidden;
   max-width: 100vw;
 }
@@ -65,7 +66,8 @@ table {
 }
 
 /* 컨테이너 최대 너비 제한 */
-.container, .max-w-full {
+.container,
+.max-w-full {
   max-width: 100vw;
   overflow-x: hidden;
 }
@@ -83,38 +85,94 @@ table {
 
 @layer components {
   /* Typography */
-  .font-heading-48 { @apply text-heading-48; }
-  .font-heading-32 { @apply text-heading-32; }
-  .font-heading-28 { @apply text-heading-28; }
-  .font-heading-24 { @apply text-heading-24; }
-  .font-subheading-32 { @apply text-subheading-32; }
-  .font-subheading-24 { @apply text-subheading-24; }
-  .font-subheading-18 { @apply text-subheading-18; }
-  .font-body-24-medium { @apply text-body-24-medium; }
-  .font-body-20-medium { @apply text-body-20-medium; }
-  .font-body-18-medium { @apply text-body-18-medium; }
-  .font-body-24-regular { @apply text-body-24-regular; }
-  .font-body-18-regular { @apply text-body-18-regular; }
-  .font-caption-14 { @apply text-caption-14; }
-  .font-caption-12 { @apply text-caption-12; }
-  .font-caption-10 { @apply text-caption-10; }
+  .font-heading-48 {
+    @apply text-heading-48;
+  }
+  .font-heading-32 {
+    @apply text-heading-32;
+  }
+  .font-heading-28 {
+    @apply text-heading-28;
+  }
+  .font-heading-24 {
+    @apply text-heading-24;
+  }
+  .font-subheading-32 {
+    @apply text-subheading-32;
+  }
+  .font-subheading-24 {
+    @apply text-subheading-24;
+  }
+  .font-subheading-18 {
+    @apply text-subheading-18;
+  }
+  .font-body-24-medium {
+    @apply text-body-24-medium;
+  }
+  .font-body-20-medium {
+    @apply text-body-20-medium;
+  }
+  .font-body-18-medium {
+    @apply text-body-18-medium;
+  }
+  .font-body-24-regular {
+    @apply text-body-24-regular;
+  }
+  .font-body-18-regular {
+    @apply text-body-18-regular;
+  }
+  .font-caption-14 {
+    @apply text-caption-14;
+  }
+  .font-caption-12 {
+    @apply text-caption-12;
+  }
+  .font-caption-10 {
+    @apply text-caption-10;
+  }
 
   /* Colors */
-  .text-primary { @apply text-pri-700; }
-  .text-primary-light { @apply text-pri-500; }
-  .text-text { @apply text-gray-700; }
-  .text-text-light { @apply text-gray-500; }
-  .text-text-lighter { @apply text-gray-400; }
-  
-  .bg-primary { @apply bg-pri-500; }
-  .bg-primary-light { @apply bg-pri-100; }
-  .bg-surface { @apply bg-gray-50; }
-  .bg-surface-hover { @apply bg-gray-100; }
-  
-  .border-primary { @apply border-pri-700; }
-  .border-surface { @apply border-gray-200; }
+  .text-primary {
+    @apply text-pri-700;
+  }
+  .text-primary-light {
+    @apply text-pri-500;
+  }
+  .text-text {
+    @apply text-gray-700;
+  }
+  .text-text-light {
+    @apply text-gray-500;
+  }
+  .text-text-lighter {
+    @apply text-gray-400;
+  }
+
+  .bg-primary {
+    @apply bg-pri-500;
+  }
+  .bg-primary-light {
+    @apply bg-pri-100;
+  }
+  .bg-surface {
+    @apply bg-gray-50;
+  }
+  .bg-surface-hover {
+    @apply bg-gray-100;
+  }
+
+  .border-primary {
+    @apply border-pri-700;
+  }
+  .border-surface {
+    @apply border-gray-200;
+  }
 
   /* Interactive States */
-  .hover-primary { @apply hover:text-pri-700; }
-  .hover-surface { @apply hover:bg-gray-50; }
+  .hover-primary {
+    @apply hover:text-pri-700;
+  }
+  .hover-surface {
+    @apply hover:bg-gray-50;
+  }
 }

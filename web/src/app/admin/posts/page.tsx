@@ -75,22 +75,21 @@ export default function AdminPostsPage() {
 
       <div className="flex justify-between items-center mb-6">
         <div className="font-body-18-medium text-gray-900">
-          전체 <span className="text-pri-500">{posts?.meta.totalElements || 0}</span> 건
+          전체{' '}
+          <span className="text-pri-500">{posts?.meta.totalElements || 0}</span>{' '}
+          건
         </div>
-        
+
         <div className="flex gap-2">
           <Input
             type="text"
             placeholder="제목을 입력해주세요."
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onChange={setKeyword}
+            onKeyPress={e => e.key === 'Enter' && handleSearch()}
             className="w-80"
           />
-          <Button
-            variant="secondary"
-            onClick={handleSearch}
-          >
+          <Button variant="secondary" onClick={handleSearch}>
             <MagnifyingGlassIcon className="w-4 h-4 mr-2" />
             검색
           </Button>
@@ -101,22 +100,35 @@ export default function AdminPostsPage() {
         <table className="w-full min-w-[800px]">
           <thead>
             <tr>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">제목</th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">카테고리</th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-24">조회수</th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">작성일</th>
-              <th className="px-4 py-3 text-center font-body-18-medium text-gray-900 w-32">관리</th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                제목
+              </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
+                카테고리
+              </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-24">
+                조회수
+              </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
+                작성일
+              </th>
+              <th className="px-4 py-3 text-center font-body-18-medium text-gray-900 w-32">
+                관리
+              </th>
             </tr>
           </thead>
           <tbody>
             {posts?.items.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center font-caption-14 text-gray-600">
+                <td
+                  colSpan={5}
+                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                >
                   게시글이 없습니다.
                 </td>
               </tr>
             ) : (
-              posts?.items.map((post) => (
+              posts?.items.map(post => (
                 <tr key={post.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
@@ -145,7 +157,9 @@ export default function AdminPostsPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
                       <Link href={`/admin/posts/${post.id}/edit`}>
-                        <Button variant="secondary" size="sm">수정</Button>
+                        <Button variant="secondary" size="sm">
+                          수정
+                        </Button>
                       </Link>
                       <Button
                         variant="danger"
@@ -172,25 +186,33 @@ export default function AdminPostsPage() {
         >
           이전
         </Button>
-        
-        {posts && Array.from({ length: Math.min(5, posts.meta.totalPages || 1) }, (_, i) => {
-          const pageNum = i + 1
-          return (
-            <Button
-              key={pageNum}
-              variant={currentPage === pageNum ? "primary" : "secondary"}
-              size="sm"
-              onClick={() => setCurrentPage(pageNum)}
-            >
-              {pageNum}
-            </Button>
-          )
-        })}
-        
+
+        {posts &&
+          Array.from(
+            { length: Math.min(5, posts.meta.totalPages || 1) },
+            (_, i) => {
+              const pageNum = i + 1
+              return (
+                <Button
+                  key={pageNum}
+                  variant={currentPage === pageNum ? 'primary' : 'secondary'}
+                  size="sm"
+                  onClick={() => setCurrentPage(pageNum)}
+                >
+                  {pageNum}
+                </Button>
+              )
+            }
+          )}
+
         <Button
           variant="secondary"
           size="sm"
-          onClick={() => setCurrentPage(Math.min(posts?.meta.totalPages || 1, currentPage + 1))}
+          onClick={() =>
+            setCurrentPage(
+              Math.min(posts?.meta.totalPages || 1, currentPage + 1)
+            )
+          }
           disabled={currentPage === (posts?.meta.totalPages || 1)}
         >
           다음

@@ -120,7 +120,7 @@ export default function CreateCoursePage() {
               <Input
                 type="text"
                 value={formData.name}
-                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                onChange={value => setFormData({ ...formData, name: value })}
                 placeholder="과목명을 입력하세요"
                 required
               />
@@ -133,7 +133,9 @@ export default function CreateCoursePage() {
               <Input
                 type="text"
                 value={formData.englishName}
-                onChange={e => setFormData({ ...formData, englishName: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, englishName: value })
+                }
                 placeholder="영문 과목명을 입력하세요"
               />
             </div>
@@ -147,7 +149,7 @@ export default function CreateCoursePage() {
               <Input
                 type="text"
                 value={formData.code}
-                onChange={e => setFormData({ ...formData, code: e.target.value })}
+                onChange={value => setFormData({ ...formData, code: value })}
                 placeholder="예: IOT101-01"
                 required
               />
@@ -160,7 +162,9 @@ export default function CreateCoursePage() {
               <Input
                 type="text"
                 value={formData.department}
-                onChange={e => setFormData({ ...formData, department: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, department: value })
+                }
                 placeholder="학과명을 입력하세요"
               />
             </div>
@@ -173,8 +177,13 @@ export default function CreateCoursePage() {
               </label>
               <Input
                 type="number"
-                value={formData.year}
-                onChange={e => setFormData({ ...formData, year: parseInt(e.target.value) || new Date().getFullYear() })}
+                value={formData.year.toString()}
+                onChange={value =>
+                  setFormData({
+                    ...formData,
+                    year: parseInt(value) || new Date().getFullYear(),
+                  })
+                }
                 min="2000"
                 max="2100"
               />
@@ -187,7 +196,9 @@ export default function CreateCoursePage() {
               <Dropdown
                 options={semesterOptions}
                 value={formData.semester}
-                onChange={value => setFormData({ ...formData, semester: value })}
+                onChange={value =>
+                  setFormData({ ...formData, semester: value })
+                }
               />
             </div>
 
@@ -197,8 +208,10 @@ export default function CreateCoursePage() {
               </label>
               <Input
                 type="number"
-                value={formData.credit}
-                onChange={e => setFormData({ ...formData, credit: parseFloat(e.target.value) || 0 })}
+                value={formData.credit.toString()}
+                onChange={value =>
+                  setFormData({ ...formData, credit: parseFloat(value) || 0 })
+                }
                 min="0"
                 max="10"
                 step="0.5"
@@ -226,7 +239,9 @@ export default function CreateCoursePage() {
               <Dropdown
                 options={courseTypeOptions}
                 value={formData.courseType}
-                onChange={value => setFormData({ ...formData, courseType: value })}
+                onChange={value =>
+                  setFormData({ ...formData, courseType: value })
+                }
                 placeholder="과목유형 선택"
               />
             </div>
@@ -240,7 +255,9 @@ export default function CreateCoursePage() {
               <Input
                 type="text"
                 value={formData.instructor}
-                onChange={e => setFormData({ ...formData, instructor: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, instructor: value })
+                }
                 placeholder="담당교수명을 입력하세요"
               />
             </div>
@@ -252,7 +269,9 @@ export default function CreateCoursePage() {
               <Input
                 type="text"
                 value={formData.classroom}
-                onChange={e => setFormData({ ...formData, classroom: e.target.value })}
+                onChange={value =>
+                  setFormData({ ...formData, classroom: value })
+                }
                 placeholder="강의실을 입력하세요"
               />
             </div>
@@ -263,11 +282,7 @@ export default function CreateCoursePage() {
           <Link href="/admin/courses">
             <Button variant="secondary">취소</Button>
           </Link>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={loading}
-          >
+          <Button type="submit" variant="primary" disabled={loading}>
             {loading ? '생성 중...' : '과목 생성'}
           </Button>
         </div>

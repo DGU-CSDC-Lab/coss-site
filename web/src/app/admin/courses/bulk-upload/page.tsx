@@ -3,7 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeftIcon, InformationCircleIcon } from '@heroicons/react/24/outline'
+import {
+  ArrowLeftIcon,
+  InformationCircleIcon,
+} from '@heroicons/react/24/outline'
 import { coursesApi, CourseBulkInitRequest } from '@/lib/api/courses'
 import Title from '@/components/common/Title'
 import Button from '@/components/common/Button'
@@ -48,17 +51,21 @@ export default function CourseBulkUploadPage() {
     if (!selectedFile) return
 
     setFile(selectedFile)
-    
+
     try {
       const data = await selectedFile.arrayBuffer()
       const workbook = XLSX.read(data, { type: 'array' })
       const sheetName = workbook.SheetNames[0]
       const worksheet = workbook.Sheets[sheetName]
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][]
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+        header: 1,
+      }) as any[][]
 
       // 첫 번째 행은 헤더로 가정하고 제외
-      const rows = jsonData.slice(1).filter(row => row.some(cell => cell !== undefined && cell !== ''))
-      
+      const rows = jsonData
+        .slice(1)
+        .filter(row => row.some(cell => cell !== undefined && cell !== ''))
+
       // 정확한 Excel 컬럼 매핑:
       const courses: CourseData[] = rows.map(row => ({
         year: year,
@@ -73,7 +80,7 @@ export default function CourseBulkUploadPage() {
         instructor: row[6] || undefined, // 담당교원
         classroom: row[8] || undefined, // 강의실
         courseType: String(row[1]) || undefined, // 교과과정
-        syllabusUrl: null,
+        syllabusUrl: undefined,
       }))
 
       setPreviewData(courses)
@@ -90,26 +97,32 @@ export default function CourseBulkUploadPage() {
       return
     }
 
-    console.log('API 요청 시작:', { year, semester, coursesCount: previewData.length })
+    console.log('API 요청 시작:', {
+      year,
+      semester,
+      coursesCount: previewData.length,
+    })
     setLoading(true)
 
     try {
       const requestData: CourseBulkInitRequest = {
         year,
         semester,
-        courses: previewData
+        courses: previewData,
       }
 
       console.log('API 요청 데이터:', requestData)
       const result = await coursesApi.bulkInit(requestData)
       console.log('API 응답:', result)
-      
+
       if (result.failureCount > 0) {
-        alert(`등록 완료!\n성공: ${result.successCount}건\n실패: ${result.failureCount}건\n\n오류:\n${result.errors.join('\n')}`)
+        alert(
+          `등록 완료!\n성공: ${result.successCount}건\n실패: ${result.failureCount}건\n\n오류:\n${result.errors.join('\n')}`
+        )
       } else {
         alert(`${result.successCount}건의 과목이 성공적으로 등록되었습니다.`)
       }
-      
+
       router.push('/admin/courses')
     } catch (error) {
       console.error('과목 등록 실패:', error)
@@ -136,11 +149,22 @@ export default function CourseBulkUploadPage() {
         <div className="flex items-start gap-3">
           <InformationCircleIcon className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="font-body-18-medium text-blue-900 mb-2">개설과목 등록 안내</h3>
+            <h3 className="font-body-18-medium text-blue-900 mb-2">
+              개설과목 등록 안내
+            </h3>
             <div className="font-caption-14 text-blue-800 space-y-1">
-              <p>• <strong>일괄 등록</strong>: 선택한 년도/학기의 모든 기존 과목을 삭제하고 새로운 과목으로 초기화합니다.</p>
-              <p>• <strong>개별 관리</strong>: 개설과목 관리 페이지에서 년도/학기를 선택하여 개별 과목의 생성/수정/삭제가 가능합니다.</p>
-              <p>• <strong>Excel 형식</strong>: 과목유형, 학점, 과목명, 학년, 학수번호, 강의시간, 교수명, 강의실 순서</p>
+              <p>
+                • <strong>일괄 등록</strong>: 선택한 년도/학기의 모든 기존
+                과목을 삭제하고 새로운 과목으로 초기화합니다.
+              </p>
+              <p>
+                • <strong>개별 관리</strong>: 개설과목 관리 페이지에서
+                년도/학기를 선택하여 개별 과목의 생성/수정/삭제가 가능합니다.
+              </p>
+              <p>
+                • <strong>Excel 형식</strong>: 과목유형, 학점, 과목명, 학년,
+                학수번호, 강의시간, 교수명, 강의실 순서
+              </p>
             </div>
           </div>
         </div>
@@ -185,7 +209,8 @@ export default function CourseBulkUploadPage() {
             className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
           />
           <p className="mt-2 font-caption-14 text-gray-600">
-            Excel 파일(.xlsx, .xls)을 업로드하세요. 첫 번째 행은 헤더로 처리됩니다.
+            Excel 파일(.xlsx, .xls)을 업로드하세요. 첫 번째 행은 헤더로
+            처리됩니다.
           </p>
         </div>
 
@@ -198,31 +223,71 @@ export default function CourseBulkUploadPage() {
               <table className="w-full min-w-[1200px]">
                 <thead className="bg-gray-50 sticky top-0">
                   <tr>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">개설학과</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">학수강좌번호</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">교과목명</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">교과목영문명</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">대상학년</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">학점</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">요일/교시</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">담당교원</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">강의실</th>
-                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">교과과정</th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      개설학과
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      학수강좌번호
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      교과목명
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      교과목영문명
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      대상학년
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      학점
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      요일/교시
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      담당교원
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      강의실
+                    </th>
+                    <th className="px-3 py-2 text-left font-body-18-medium text-gray-900 border-b">
+                      교과과정
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {previewData.map((course, index) => (
                     <tr key={index} className="hover:bg-gray-50">
-                      <td className="px-3 py-2 font-caption-14 text-gray-900 border-b">{course.department}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-900 border-b">{course.courseCode}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-900 border-b">{course.subjectName}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">{course.englishName || '-'}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">{course.grade || '-'}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">{course.credit || '-'}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">{course.classTime || '-'}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">{course.instructor || '-'}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">{course.classroom || '-'}</td>
-                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">{course.courseType || '-'}</td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-900 border-b">
+                        {course.department}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-900 border-b">
+                        {course.courseCode}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-900 border-b">
+                        {course.subjectName}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">
+                        {course.englishName || '-'}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">
+                        {course.grade || '-'}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">
+                        {course.credit || '-'}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">
+                        {course.classTime || '-'}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">
+                        {course.instructor || '-'}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">
+                        {course.classroom || '-'}
+                      </td>
+                      <td className="px-3 py-2 font-caption-14 text-gray-600 border-b">
+                        {course.courseType || '-'}
+                      </td>
                     </tr>
                   ))}
                 </tbody>

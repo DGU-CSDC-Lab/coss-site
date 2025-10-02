@@ -23,7 +23,7 @@ export default function AdminSchedulesPage() {
     try {
       setLoading(true)
       const response = await schedulesApi.getSchedules({ month: selectedMonth })
-      setSchedules(response)
+      setSchedules(response.items)
     } catch (error) {
       console.error('Failed to fetch schedules:', error)
     } finally {
@@ -105,7 +105,10 @@ export default function AdminSchedulesPage() {
           <tbody>
             {schedules.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center font-caption-14 text-gray-600">
+                <td
+                  colSpan={6}
+                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                >
                   해당 월에 일정이 없습니다.
                 </td>
               </tr>
@@ -141,12 +144,16 @@ export default function AdminSchedulesPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
                       <Link href={`/admin/schedules/${schedule.id}/edit`}>
-                        <Button variant="secondary" size="sm">수정</Button>
+                        <Button variant="secondary" size="sm">
+                          수정
+                        </Button>
                       </Link>
                       <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleDelete(schedule.id, schedule.title)}
+                        onClick={() =>
+                          handleDelete(schedule.id, schedule.title)
+                        }
                       >
                         삭제
                       </Button>

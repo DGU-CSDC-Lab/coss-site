@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { facultyApi, Faculty } from '@/lib/api/faculty'
 import { PagedResponse } from '@/lib/api'
 import Title from '@/components/common/Title'
@@ -99,7 +100,10 @@ export default function AdminFacultyPage() {
           <tbody>
             {faculty?.items?.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center font-caption-14 text-gray-600">
+                <td
+                  colSpan={6}
+                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                >
                   등록된 교원이 없습니다.
                 </td>
               </tr>
@@ -110,14 +114,18 @@ export default function AdminFacultyPage() {
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
                         {member.profileImage ? (
-                          <img
+                          <Image
                             src={member.profileImage}
                             alt={member.name}
+                            width={48}
+                            height={48}
                             className="w-full h-full object-cover"
                           />
                         ) : (
                           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                            <span className="font-caption-14 text-gray-600">사진</span>
+                            <span className="font-caption-14 text-gray-600">
+                              사진
+                            </span>
                           </div>
                         )}
                       </div>
@@ -141,7 +149,9 @@ export default function AdminFacultyPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
                       <Link href={`/admin/faculty/${member.id}/edit`}>
-                        <Button variant="secondary" size="sm">수정</Button>
+                        <Button variant="secondary" size="sm">
+                          수정
+                        </Button>
                       </Link>
                       <Button
                         variant="danger"
@@ -172,7 +182,7 @@ export default function AdminFacultyPage() {
         {Array.from({ length: totalPages }, (_, idx) => (
           <Button
             key={idx}
-            variant={idx === currentPage ? "primary" : "secondary"}
+            variant={idx === currentPage ? 'primary' : 'secondary'}
             size="sm"
             onClick={() => setPage(idx)}
           >

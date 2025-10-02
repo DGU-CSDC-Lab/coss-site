@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import Tabs from '@/components/tabs/Tabs'
 
 export default function MajorPage() {
   const router = useRouter()

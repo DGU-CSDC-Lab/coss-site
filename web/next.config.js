@@ -6,7 +6,27 @@ const nextConfig = {
     ignoreDuringBuilds: false,
   },
   images: {
-    domains: ['localhost', 'picsum.photos'], // 이미지 도메인 추가
+    domains: [
+      'localhost', 
+      'picsum.photos',
+      '127.0.0.1',
+      'server',
+      // 추가 가능한 도메인들
+    ],
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+        pathname: '/uploads/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'server',
+        port: '3001',
+        pathname: '/uploads/**',
+      },
+    ],
   },
   async rewrites() {
     return [

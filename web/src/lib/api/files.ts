@@ -30,7 +30,9 @@ export const filesApi = {
     api.auth.post('/files/presign', data),
 
   // 파일 업로드 완료 처리
-  completeUpload: (data: FileCompleteRequest): Promise<{ fileKey: string; fileUrl: string }> =>
+  completeUpload: (
+    data: FileCompleteRequest
+  ): Promise<{ fileKey: string; fileUrl: string }> =>
     api.auth.post('/files/complete', data),
 
   // 파일 업로드 (Presigned URL 사용)
@@ -49,7 +51,11 @@ export const filesApi = {
   },
 
   // 파일 업로드 전체 플로우 (Presigned URL 생성 + 업로드 + 완료 처리)
-  uploadFileComplete: async (file: File, ownerType?: string, ownerId?: string): Promise<{
+  uploadFileComplete: async (
+    file: File,
+    ownerType?: string,
+    ownerId?: string
+  ): Promise<{
     fileKey: string
     fileUrl: string
     originalName: string
@@ -87,12 +93,10 @@ export const filesApi = {
   },
 
   // 파일 정보 조회
-  getFile: (fileKey: string) =>
-    api.get(`/files/${fileKey}`),
+  getFile: (fileKey: string) => api.get(`/files/${fileKey}`),
 
   // 파일 삭제 (관리자)
-  deleteFile: (fileKey: string) =>
-    api.auth.delete(`/files/${fileKey}`),
+  deleteFile: (fileKey: string) => api.auth.delete(`/files/${fileKey}`),
 
   // 소유자별 파일 목록
   getFilesByOwner: (ownerType: string, ownerId: string) =>

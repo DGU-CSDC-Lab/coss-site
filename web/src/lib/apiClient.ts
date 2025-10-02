@@ -32,7 +32,10 @@ class ApiClient {
     }
 
     // 204 No Content 또는 빈 응답 처리
-    if (response.status === 204 || response.headers.get('content-length') === '0') {
+    if (
+      response.status === 204 ||
+      response.headers.get('content-length') === '0'
+    ) {
       return undefined as T
     }
 

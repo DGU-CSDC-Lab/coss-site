@@ -32,6 +32,7 @@ export interface CreateFacultyRequest {
   phone?: string
   office?: string
   profileImage?: string
+  bio?: string
   researchAreas?: string[]
   education?: string[]
   career?: string[]
