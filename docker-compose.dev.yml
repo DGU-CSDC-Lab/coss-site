@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    depends_on:
+      - server
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=mariadb
+      - DB_PORT=3308
+      - DB_USERNAME=iot_user
+      - DB_PASSWORD=iot_password
+      - DB_DATABASE=iot_site
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: mariadb:10.11
+    ports:
+      - "3308:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=iot_site
+      - MYSQL_USER=iot_user
+      - MYSQL_PASSWORD=iot_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+volumes:
+  mariadb_data:

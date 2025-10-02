@@ -1,0 +1,87 @@
+import { api } from '../apiClient'
+import { PagedResponse } from '../api'
+
+export interface HeaderAsset {
+  id: string
+  type: 'logo' | 'banner' | 'background' | 'announcement'
+  title: string
+  imageUrl?: string
+  linkUrl?: string
+  textContent?: string
+  isActive: boolean
+  displayOrder: number
+  startDate?: string
+  endDate?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface HeaderAssetsQuery {
+  type?: 'logo' | 'banner' | 'background' | 'announcement'
+  isActive?: boolean
+  page?: number
+  size?: number
+}
+
+export interface CreateHeaderAssetRequest {
+  type: 'logo' | 'banner' | 'background' | 'announcement'
+  title: string
+  imageUrl?: string
+  linkUrl?: string
+  textContent?: string
+  isActive?: boolean
+  displayOrder?: number
+  startDate?: string
+  endDate?: string
+}
+
+export interface UpdateHeaderAssetRequest {
+  title?: string
+  imageUrl?: string
+  linkUrl?: string
+  textContent?: string
+  isActive?: boolean
+  displayOrder?: number
+  startDate?: string
+  endDate?: string
+}
+
+// Header Assets API 함수들
+export const headerAssetsApi = {
+  // 헤더 요소 목록 조회 (페이지네이션)
+  getHeaderAssets: (
+    params: HeaderAssetsQuery = {}
+  ): Promise<PagedResponse<HeaderAsset>> => {
+    const searchParams = new URLSearchParams()
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        searchParams.append(key, String(value))
+      }
+    })
+
+    return api.get(`/api/header-assets?${searchParams.toString()}`)
+  },
+
+  // 특정 타입의 활성화된 헤더 요소들 조회
+  getHeaderAssetsByType: (
+    type: 'logo' | 'banner' | 'background' | 'announcement'
+  ): Promise<HeaderAsset[]> => api.get(`/api/header-assets/type/${type}`),
+
+  // 헤더 요소 상세 조회
+  getHeaderAsset: (id: string): Promise<HeaderAsset> =>
+    api.get(`/api/header-assets/${id}`),
+
+  // 헤더 요소 생성 (관리자)
+  createHeaderAsset: (data: CreateHeaderAssetRequest): Promise<HeaderAsset> =>
+    api.auth.post('/admin/header-assets', data),
+
+  // 헤더 요소 수정 (관리자)
+  updateHeaderAsset: (
+    id: string,
+    data: UpdateHeaderAssetRequest
+  ): Promise<HeaderAsset> => api.auth.put(`/admin/header-assets/${id}`, data),
+
+  // 헤더 요소 삭제 (관리자)
+  deleteHeaderAsset: (id: string): Promise<void> =>
+    api.auth.delete(`/admin/header-assets/${id}`),
+}

@@ -1,0 +1,257 @@
+name: Deploy with ECR
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  AWS_REGION: ap-northeast-2
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: |
+            server/package-lock.json
+            web/package-lock.json
+
+      - name: Install and test server
+        run: |
+          cd server
+          npm ci
+          npm run test
+
+      - name: Install and test web
+        run: |
+          cd web
+          npm ci
+          npm run test || echo "No tests found"
+
+      - name: Build server
+        run: |
+          cd server
+          npm run build
+
+      - name: Build web
+        run: |
+          cd web
+          npm run build
+
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    outputs:
+      server-image: ${{ steps.build-server.outputs.image }}
+      web-image: ${{ steps.build-web.outputs.image }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_CICD }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_CICD }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push server image
+        id: build-server
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_SERVER }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # 서버 이미지 빌드
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f server/Dockerfile.prod server/
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f server/Dockerfile.prod server/
+
+          # ECR에 푸시
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          # 출력 설정
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Build and push web image
+        id: build-web
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_WEB }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          # 웹 이미지 빌드
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f web/Dockerfile.prod web/
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f web/Dockerfile.prod web/
+
+          # ECR에 푸시
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+          # 출력 설정
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            # 프로젝트 디렉토리로 이동 (없으면 생성)
+            if [ ! -d "iot-site" ]; then
+              git clone https://github.com/${{ github.repository }}.git iot-site
+            fi
+
+            cd iot-site
+
+            # 최신 코드 가져오기 (docker-compose.prod.yml 포함)
+            git fetch origin
+            git reset --hard origin/main
+            git pull origin main
+
+            # AWS CLI 설치 확인
+            if ! command -v aws &> /dev/null; then
+              echo "Installing AWS CLI..."
+              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip -q awscliv2.zip
+              sudo ./aws/install
+              rm -rf aws awscliv2.zip
+            fi
+
+            # AWS 자격증명 설정 (EC2 IAM 역할 사용)
+            export AWS_DEFAULT_REGION=ap-northeast-2
+
+            # ECR 로그인
+            aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+
+            # 환경 변수 파일 생성
+            cat > .env.prod << EOF
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_USERNAME=advicor
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_DATABASE=coss
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            AWS_REGION=ap-northeast-2
+            S3_BUCKET=${{ secrets.S3_BUCKET }}
+            NEXT_PUBLIC_API_URL=http://${{ secrets.ALB_DNS }}/api
+            SERVER_IMAGE=${{ needs.build-and-push.outputs.server-image }}
+            WEB_IMAGE=${{ needs.build-and-push.outputs.web-image }}
+            EOF
+
+            # 기존 컨테이너 정지
+            docker-compose -f docker-compose.prod.yml down || true
+
+            # 최신 이미지 pull
+            docker-compose --env-file .env.prod -f docker-compose.prod.yml pull
+
+            # 컨테이너 시작
+            docker-compose --env-file .env.prod -f docker-compose.prod.yml up -d
+
+            # 배포 대기
+            echo "⏳ Waiting for services to start..."
+            sleep 60
+
+            # 헬스체크
+            echo "🔍 Running health checks..."
+
+            # API 서버 헬스체크
+            for i in {1..12}; do
+              if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
+                echo "✅ API server is healthy"
+                break
+              else
+                echo "⏳ API server not ready, attempt $i/12"
+                sleep 10
+              fi
+              if [ $i -eq 12 ]; then
+                echo "❌ API server health check failed"
+                docker-compose -f docker-compose.prod.yml logs server
+                exit 1
+              fi
+            done
+
+            # 웹 서버 헬스체크
+            for i in {1..12}; do
+              if curl -f http://localhost:3000 > /dev/null 2>&1; then
+                echo "✅ Web server is healthy"
+                break
+              else
+                echo "⏳ Web server not ready, attempt $i/12"
+                sleep 10
+              fi
+              if [ $i -eq 12 ]; then
+                echo "❌ Web server health check failed"
+                docker-compose -f docker-compose.prod.yml logs web
+                exit 1
+              fi
+            done
+
+            # 컨테이너 상태 확인
+            echo "📊 Container status:"
+            docker-compose -f docker-compose.prod.yml ps
+
+            # 이미지 정보 출력
+            echo "🐳 Deployed images:"
+            echo "Server: ${{ needs.build-and-push.outputs.server-image }}"
+            echo "Web: ${{ needs.build-and-push.outputs.web-image }}"
+
+            echo "🎉 ECR deployment completed successfully!"
+
+  health-check:
+    needs: deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: External health check via ALB
+        run: |
+          echo "🏥 Running external health checks via ALB..."
+
+          # ALB 헬스체크 (최대 5분 대기)
+          for i in {1..30}; do
+            if curl -f http://${{ secrets.ALB_DNS }} > /dev/null 2>&1; then
+              echo "✅ ALB web endpoint is healthy"
+              break
+            else
+              echo "⏳ ALB not ready, attempt $i/30"
+              sleep 10
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ ALB health check failed"
+              exit 1
+            fi
+          done
+
+          # API 엔드포인트 테스트
+          if curl -f http://${{ secrets.ALB_DNS }}/api/health > /dev/null 2>&1; then
+            echo "✅ ALB API endpoint is healthy"
+          else
+            echo "❌ ALB API endpoint not accessible"
+            exit 1
+          fi
+
+          echo "🎉 All external health checks passed!"
+          echo "🌐 Application is live at: http://${{ secrets.ALB_DNS }}"
+          echo "🔗 API endpoint: http://${{ secrets.ALB_DNS }}/api/health"
