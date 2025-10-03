@@ -108,11 +108,25 @@ jobs:
           # 출력 설정
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+  # SSH 포트 열기 Job  
+  open-ssh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open SSH port
+        run: |
+          echo "🔓 Opening SSH port..."
+          aws ec2 authorize-security-group-ingress \
+            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr 0.0.0.0/0
+
   deploy:
-    needs: build-and-push
+    needs: [build-and-push, open-ssh]
     runs-on: ubuntu-latest
 
     steps:
+      # 열린 22 포트로 ec2 접근
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
@@ -219,6 +233,21 @@ jobs:
             echo "Web: ${{ needs.build-and-push.outputs.web-image }}"
 
             echo "🎉 ECR deployment completed successfully!"
+
+  # needs와 관계없이 무조건 실행되는 SSH 닫기 Job
+  close-ssh:
+    needs: [open-ssh, deploy]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Close SSH port
+        run: |
+          echo "🔒 Closing SSH port..."
+          aws ec2 revoke-security-group-ingress \
+            --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
+            --protocol tcp \
+            --port 22 \
+            --cidr 0.0.0.0/0
 
   health-check:
     needs: deploy
