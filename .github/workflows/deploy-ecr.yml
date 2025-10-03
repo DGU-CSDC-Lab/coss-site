@@ -142,27 +142,6 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # 프로젝트 디렉토리로 이동 (없으면 생성)
-            if [ ! -d "iot-site" ]; then
-              git clone https://github.com/${{ github.repository }}.git iot-site
-            fi
-
-            cd iot-site
-
-            # 최신 코드 가져오기 (docker-compose.prod.yml 포함)
-            git fetch origin
-            git reset --hard origin/main
-            git pull origin main
-
-            # AWS CLI 설치 확인
-            if ! command -v aws &> /dev/null; then
-              echo "Installing AWS CLI..."
-              curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-              unzip -q awscliv2.zip
-              sudo ./aws/install
-              rm -rf aws awscliv2.zip
-            fi
-
             # AWS 자격증명 설정 (EC2 IAM 역할 사용)
             export AWS_DEFAULT_REGION=ap-northeast-2
 
