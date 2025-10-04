@@ -153,7 +153,7 @@ jobs:
 
             cat > .env.prod << EOF
             DB_HOST=${{ secrets.DB_HOST }}
-            DB_USERNAME=advicor
+            DB_USERNAME=advisor
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_DATABASE=coss
             JWT_SECRET=${{ secrets.JWT_SECRET }}
