@@ -148,10 +148,14 @@ jobs:
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          SERVER_IMAGE: ${{ needs.build-and-push.outputs.server-image }}
+          WEB_IMAGE: ${{ needs.build-and-push.outputs.web-image }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
+          envs: SERVER_IMAGE,WEB_IMAGE
           script: |
             # AWS 자격증명 설정 (EC2 IAM 역할 사용)
             export AWS_DEFAULT_REGION=ap-northeast-2
@@ -169,9 +173,13 @@ jobs:
             AWS_REGION=ap-northeast-2
             S3_BUCKET=${{ secrets.S3_BUCKET }}
             NEXT_PUBLIC_API_URL=http://${{ secrets.ALB_DNS }}/api
-            SERVER_IMAGE=${{ needs.build-and-push.outputs.server-image }}
-            WEB_IMAGE=${{ needs.build-and-push.outputs.web-image }}
+            SERVER_IMAGE=$SERVER_IMAGE
+            WEB_IMAGE=$WEB_IMAGE
             EOF
+            
+            echo "🐳 Using images:"
+            echo "Server: $SERVER_IMAGE"
+            echo "Web: $WEB_IMAGE"
 
             # 기존 컨테이너 정지
             docker-compose -f docker-compose.prod.yml down || true
@@ -227,8 +235,8 @@ jobs:
 
             # 이미지 정보 출력
             echo "🐳 Deployed images:"
-            echo "Server: ${{ needs.build-and-push.outputs.server-image }}"
-            echo "Web: ${{ needs.build-and-push.outputs.web-image }}"
+            echo "Server: $SERVER_IMAGE"
+            echo "Web: $WEB_IMAGE"
 
             echo "🎉 ECR deployment completed successfully!"
 
