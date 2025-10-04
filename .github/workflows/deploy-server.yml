@@ -1,26 +1,23 @@
-name: Deploy with ECR
+name: Deploy Server
 
-# main branch에 push 또는 pull request 이벤트 발생 시 워크플로우 실행
-# (필요에 따라 브랜치 이름 변경 가능)
 on:
   push:
     branches: [main]
+    paths:
+      - 'server/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'server/**'
 
-# AWS_REGION은 ap-northeast-2로 설정
 env:
   AWS_REGION: ap-northeast-2
-  WEB_VERSION: v1.0.0
 
-# git actions OIDC 설정용 permissions
 permissions:
-  id-token: write   # OIDC 토큰 요청 권한
-  contents: read    # 코드 체크아웃 권한
+  id-token: write
+  contents: read
 
-# 워크플로우 시작
 jobs:
-  # api server에 대한 test and build 실행
   server-test:
     runs-on: ubuntu-latest
     steps:
@@ -30,7 +27,7 @@ jobs:
           node-version: "24"
           cache: "npm"
           cache-dependency-path: server/package-lock.json
-      # npm ci 시간 단축을 위해 node_modules 캐시 설정
+      
       - name: Cache node_modules
         uses: actions/cache@v3
         id: cache-server-deps
@@ -40,7 +37,7 @@ jobs:
           restore-keys: |
             server-deps-
       
-      - name: Install dependencies and test
+      - name: Install dependencies
         if: steps.cache-server-deps.outputs.cache-hit != 'true'
         run: cd server && npm ci
       
@@ -65,101 +62,11 @@ jobs:
       
       - run: cd server && npm run build
 
-  # web server에 대한 test and build 실행
-  web-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-          cache: "npm"
-          cache-dependency-path: web/package-lock.json
-      
-      - name: Cache node_modules
-        uses: actions/cache@v3
-        id: cache-web-deps
-        with:
-          path: web/node_modules
-          key: web-deps-${{ hashFiles('web/package-lock.json') }}
-          restore-keys: |
-            web-deps-
-      
-      - name: Install dependencies and build
-        if: steps.cache-web-deps.outputs.cache-hit != 'true'
-        run: cd web && npm ci
-      
-      - run: cd web && npm run test || echo "No tests found"
-
-  web-build:
-    runs-on: ubuntu-latest
-    needs: web-test
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-      
-      - name: Restore node_modules
-        uses: actions/cache@v3
-        with:
-          path: web/node_modules
-          key: web-deps-${{ hashFiles('web/package-lock.json') }}
-          restore-keys: |
-            web-deps-
-      
-      - name: Build static site
-        run: cd web && npm run build
-      
-      # 빌드 결과물을 artifact로 업로드
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build
-          path: web/out/
-
-  # web build 결과물을 S3에 배포하는 Job
-  deploy-web-to-s3:
-    runs-on: ubuntu-latest
-    needs: [web-build]
-    steps:
-      # build 결과물 다운로드
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: web-build
-          path: web/out/
-      
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN }}
-          role-session-name: github-actions-s3
-          aws-region: ${{ env.AWS_REGION }}
-      
-      # s3 root directory에 빌드 결과물 업로드
-      - name: Deploy to S3
-        run: |
-          VERSION=${{ github.sha }}
-          # 버전별 백업
-          aws s3 sync web/out/ s3://${{ secrets.WEB_S3_BUCKET_NAME }}/versions/$VERSION/ --delete
-          # 루트에 현재 버전 배포
-          aws s3 sync web/out/ s3://${{ secrets.WEB_S3_BUCKET_NAME }}/ --delete
-      
-      # --paths "/*" 옵션을 사용하여 모든 캐시 파일 무효화
-      # Todo: directory별 무효화
-      - name: Invalidate CloudFront
-        run: |
-          aws cloudfront create-invalidation \
-            --distribution-id ${{ secrets.WEB_CLOUDFRONT_DISTRIBUTION_ID }} \
-            --paths "/*"
-
-  # server ec2에 대한 SSH 포트 열기 Job
   open-ssh:
     runs-on: ubuntu-latest
     needs: server-build
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
-      # OIDC를 사용하여 AWS 자격증명 구성
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -167,25 +74,18 @@ jobs:
           role-session-name: github-actions-ssh
           aws-region: ${{ env.AWS_REGION }}
 
-      # 기존 SSH 규칙 정리 후 새 IP로 SSH 포트 열기
-      - name: Clean up old SSH rules and open new
+      - name: Open SSH port
         run: |
-          # 현재 IP 확인
-          RUNNER_IP=$(curl -s https://checkip.amazonaws.com)
-          echo "🔍 Current runner IP: $RUNNER_IP"
-
-          # 새 IP로 규칙 추가
           aws ec2 authorize-security-group-ingress \
             --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
             --protocol tcp \
             --port 22 \
-            --cidr ${RUNNER_IP}/32
+            --cidr 0.0.0.0/0
 
-  # docker file build 및 ECR push
   build-and-push-to-ecr:
     needs: server-build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
 
     outputs:
       server-image: ${{ steps.build-server.outputs.image }}
@@ -212,15 +112,12 @@ jobs:
           ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY_SERVER }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          # 서버 이미지 빌드
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG -f server/Dockerfile.prod server/
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest -f server/Dockerfile.prod server/
 
-          # ECR에 푸시
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-          # 출력 설정
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deploy:
@@ -231,30 +128,29 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # local의 docker-compose.server.prod.yml을 EC2 root로 복사
       - name: Copy docker-compose.prod.yml to EC2
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
-          source: "deploy/docker-compose.server.prod.yml"
+          source: "docker-compose.prod.yml"
           target: "/home/${{ secrets.EC2_USERNAME }}/"
 
       - name: Deploy docker-compose to EC2
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          SERVER_IMAGE: ${{ needs.build-and-push-to-ecr.outputs.server-image }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
+          envs: SERVER_IMAGE
           script: |
-            # AWS 자격증명 설정 (EC2 IAM 역할 사용)
             export AWS_DEFAULT_REGION=ap-northeast-2
 
-            # ECR 로그인
             aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
 
-            # 환경 변수 파일 생성
             cat > .env.prod << EOF
             DB_HOST=${{ secrets.DB_HOST }}
             DB_USERNAME=advicor
@@ -263,30 +159,40 @@ jobs:
             JWT_SECRET=${{ secrets.JWT_SECRET }}
             AWS_REGION=${{ env.AWS_REGION }}
             S3_BUCKET=${{ secrets.S3_BUCKET }}
-            REGISTRY_URL=${{ secrets.ECR_REGISTRY }}
-            GITHUB_SHA=${{ github.sha }}
+            SERVER_IMAGE=$SERVER_IMAGE
             EOF
 
-            # 기존 컨테이너 정지
-            docker-compose -f docker-compose.server.prod.yml down || true
+            docker-compose -f docker-compose.prod.yml down || true
+            docker-compose --env-file .env.prod -f docker-compose.prod.yml pull
+            docker-compose --env-file .env.prod -f docker-compose.prod.yml up -d
 
-            # 최신 이미지 pull
-            docker-compose --env-file .env.prod -f docker-compose.server.prod.yml pull
-
-            # 컨테이너 시작
-            docker-compose --env-file .env.prod -f docker-compose.server.prod.yml up -d
-
-            # 배포 대기
             echo "⏳ Waiting for services to start..."
             sleep 60
 
-            # 컨테이너 상태 확인
+            echo "🔍 Running health checks..."
+            for i in {1..12}; do
+              if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
+                echo "✅ API server is healthy"
+                break
+              else
+                echo "⏳ API server not ready, attempt $i/12"
+                sleep 10
+              fi
+              if [ $i -eq 12 ]; then
+                echo "❌ API server health check failed"
+                docker-compose -f docker-compose.prod.yml logs server
+                exit 1
+              fi
+            done
+
             echo "📊 Container status:"
             docker-compose -f docker-compose.prod.yml ps
 
+            echo "🐳 Deployed images:"
+            echo "Server: $SERVER_IMAGE"
+
             echo "🎉 ECR deployment completed successfully!"
 
-  # needs와 관계없이 무조건 실행되는 SSH 닫기 Job
   close-ssh:
     needs: [open-ssh, deploy]
     runs-on: ubuntu-latest
@@ -299,29 +205,16 @@ jobs:
           role-session-name: github-actions-cleanup
           aws-region: ${{ env.AWS_REGION }}
           
-      - name: Get Runner IP and Close SSH port
+      - name: Close SSH port
         run: |
-          RUNNER_IP=$(curl -s https://checkip.amazonaws.com)
-          echo "Runner IP: $RUNNER_IP"
           aws ec2 revoke-security-group-ingress \
             --group-id ${{ secrets.EC2_SECURITY_GROUP_ID }} \
             --protocol tcp \
             --port 22 \
-            --cidr ${RUNNER_IP}/32
-
-  sleep-30:
-    needs: deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Wait for 30 seconds
-        run: |
-          echo "⏳ Waiting for 30 seconds to allow services to stabilize..."
-          sleep 30
-          echo "✅ Wait completed."
+            --cidr 0.0.0.0/0
 
   server-ec2-health-check:
-    needs: sleep-30
+    needs: deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -332,11 +225,11 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            # 컨테이너 상태 확인
-            echo "Container status:"
+            echo "🏥 Running EC2 internal health checks..."
+
+            echo "📊 Container status:"
             docker-compose -f docker-compose.prod.yml ps
 
-            # 내부 API 서버 헬스체크
             if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
               echo "✅ Internal API server is healthy"
             else
@@ -345,7 +238,6 @@ jobs:
               exit 1
             fi
 
-            # 시스템 리소스 확인
             echo "💾 System resources:"
             echo "Memory usage:"
             free -h
@@ -357,7 +249,7 @@ jobs:
             echo "🎉 EC2 internal health check passed!"
 
   alb-health-check:
-    needs: sleep-30
+    needs: deploy
     runs-on: ubuntu-latest
 
     steps:
@@ -365,7 +257,6 @@ jobs:
         run: |
           echo "🏥 Running ALB health checks..."
 
-          # ALB 전체 헬스체크 (최대 5분 대기)
           for i in {1..30}; do
             if curl -f http://${{ secrets.ALB_DNS }} > /dev/null 2>&1; then
               echo "✅ ALB root endpoint is healthy"
@@ -380,7 +271,6 @@ jobs:
             fi
           done
 
-          # API 엔드포인트 테스트
           if curl -f http://${{ secrets.ALB_DNS }}/api/health > /dev/null 2>&1; then
             echo "✅ ALB API endpoint is healthy"
           else
@@ -389,4 +279,5 @@ jobs:
           fi
 
           echo "🎉 All ALB health checks passed!"
-
+          echo "🌐 Application is live at: http://${{ secrets.ALB_DNS }}"
+          echo "🔗 API endpoint: http://${{ secrets.ALB_DNS }}/api/health"
