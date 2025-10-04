@@ -40,4 +40,4 @@ Thumbs.db
 .dockerignore
 
 # sample courses data
-server/src/sample_courses.xlsx
+server/src/sample_course.xlsx
