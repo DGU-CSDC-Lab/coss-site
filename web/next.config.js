@@ -30,7 +30,6 @@ const nextConfig = {
       },
     ],
   },
-  // CDN 배포에서는 rewrites 사용 불가 (제거)
 }
 
 module.exports = nextConfig
