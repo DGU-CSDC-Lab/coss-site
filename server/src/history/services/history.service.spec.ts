@@ -7,7 +7,6 @@ import { History } from '../entities';
 
 describe('HistoryService', () => {
   let service: HistoryService;
-  let repository: Repository<History>;
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),

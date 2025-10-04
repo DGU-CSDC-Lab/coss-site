@@ -94,7 +94,7 @@ export class AuthService {
         userId: user.id,
         role: user.role,
       };
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Invalid refresh token');
     }
   }

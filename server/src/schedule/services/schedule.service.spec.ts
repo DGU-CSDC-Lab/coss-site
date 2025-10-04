@@ -7,7 +7,6 @@ import { AcademicSchedule, ScheduleCategory } from '../entities';
 
 describe('ScheduleService', () => {
   let service: ScheduleService;
-  let repository: Repository<AcademicSchedule>;
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),

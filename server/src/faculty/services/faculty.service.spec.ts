@@ -7,7 +7,6 @@ import { FacultyMember } from '../entities';
 
 describe('FacultyService', () => {
   let service: FacultyService;
-  let repository: Repository<FacultyMember>;
 
   const mockQueryBuilder = {
     andWhere: jest.fn().mockReturnThis(),

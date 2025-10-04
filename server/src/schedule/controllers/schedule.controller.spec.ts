@@ -6,7 +6,6 @@ import { ScheduleCategory } from '../entities';
 
 describe('ScheduleController', () => {
   let controller: ScheduleController;
-  let service: ScheduleService;
 
   const mockScheduleService = {
     findAll: jest.fn(),

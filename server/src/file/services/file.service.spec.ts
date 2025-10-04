@@ -8,8 +8,6 @@ import { File, OwnerType, FileStatus } from '../entities';
 
 describe('FileService', () => {
   let service: FileService;
-  let fileRepository: Repository<File>;
-  let s3Service: S3Service;
 
   const mockFileRepository = {
     create: jest.fn(),

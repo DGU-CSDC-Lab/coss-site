@@ -17,7 +17,6 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { PopupService } from '../services/popup.service';
 import { AdminGuard } from '../../auth/guards/admin.guard';

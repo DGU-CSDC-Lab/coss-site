@@ -142,7 +142,7 @@ export class CourseUploadService {
 
   private parseClassroom(value: any): string | undefined {
     if (!value) return undefined;
-    let classroom = String(value).trim();
+    const classroom = String(value).trim();
 
     // 강의실 정보에서 핵심 정보만 추출
     const match = classroom.match(/^([A-Z]?\d+)/);

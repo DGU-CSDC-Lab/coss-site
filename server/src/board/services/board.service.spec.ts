@@ -9,8 +9,6 @@ import { Category } from '../../category/entities';
 
 describe('BoardService', () => {
   let service: BoardService;
-  let postRepository: Repository<BoardPost>;
-  let userRepository: Repository<User>;
   let categoryRepository: Repository<Category>;
 
   const mockQueryBuilder = {

@@ -7,7 +7,6 @@ import { Course } from '../entities';
 
 describe('CourseService', () => {
   let service: CourseService;
-  let repository: Repository<Course>;
 
   const mockQueryBuilder = {
     andWhere: jest.fn().mockReturnThis(),

@@ -7,7 +7,6 @@ import { Popup } from '../entities';
 
 describe('PopupService', () => {
   let service: PopupService;
-  let repository: Repository<Popup>;
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),
