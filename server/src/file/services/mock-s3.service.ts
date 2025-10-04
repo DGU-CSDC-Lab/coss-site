@@ -18,7 +18,7 @@ export class MockS3Service {
     _contentType: string,
   ): Promise<string> {
     // Mock presigned URL - 실제로는 로컬 업로드 엔드포인트
-    return `http://localhost:3001/api/files/mock-upload/${encodeURIComponent(fileKey)}`;
+    return `http://localhost:3001/api/v1/files/mock-upload/${encodeURIComponent(fileKey)}`;
   }
 
   async deleteObject(fileKey: string): Promise<void> {
@@ -29,7 +29,7 @@ export class MockS3Service {
   }
 
   getFileUrl(fileKey: string): string {
-    return `http://localhost:3001/api/files/mock-download/${encodeURIComponent(fileKey)}`;
+    return `http://localhost:3001/api/v1/files/mock-download/${encodeURIComponent(fileKey)}`;
   }
 
   // Mock 파일 업로드 처리
