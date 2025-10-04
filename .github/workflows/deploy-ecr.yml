@@ -134,7 +134,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 열린 22 포트로 ec2 접근
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.prod.yml to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          source: "docker-compose.prod.yml"
+          target: "/home/${{ secrets.EC2_USERNAME }}/"
+
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.0
         with:
