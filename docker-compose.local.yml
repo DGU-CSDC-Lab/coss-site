@@ -1,0 +1,34 @@
+services:
+  # rds 대용 maria db container
+  mariadb:
+    image: mariadb:10.11
+    container_name: coss-mariadb
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: coss
+      MYSQL_USER: local
+      MYSQL_PASSWORD: user_password
+    ports:
+      - "3308:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    restart: unless-stopped
+
+  # aws s3 대용 minio container (presigned url 테스트용)
+  minio:
+    image: minio/minio:latest
+    container_name: coss-minio
+    environment:
+      MINIO_ROOT_USER: minio_admin
+      MINIO_ROOT_PASSWORD: admin_password
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+volumes:
+  mariadb_data:
+  minio_data:

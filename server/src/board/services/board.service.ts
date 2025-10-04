@@ -290,8 +290,8 @@ export class BoardService {
 
   private generateDownloadUrl(fileKey: string): string {
     // Generate presigned download URL - mock implementation
-    const bucket = process.env.S3_BUCKET || 'iot-site-files';
-    const region = process.env.AWS_REGION || 'ap-northeast-2';
+    const bucket = process.env.S3_BUCKET;
+    const region = process.env.AWS_REGION;
     return `https://${bucket}.s3.${region}.amazonaws.com/${fileKey}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600`;
   }
 }

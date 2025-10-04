@@ -14,13 +14,23 @@ export class S3Service {
 
   constructor() {
     this.isProduction = process.env.NODE_ENV === 'production';
-    this.bucketName = process.env.S3_BUCKET;
+    this.bucketName = process.env.BUCKET_NAME;
 
-    // 프로덕션 환경에서만 실제 S3 클라이언트 초기화
-    if (this.isProduction && this.bucketName) {
+    // 로컬 환경에서는 MinIO 사용
+    if (!this.isProduction) {
       this.s3Client = new S3Client({
-        region: process.env.AWS_REGION || 'ap-southeast-2',
-        // IAM 역할 사용 시 credentials 생략 (EC2에서 자동 인식)
+        endpoint: process.env.MINIO_ENDPOINT,
+        region: process.env.MINIO_REGION,
+        credentials: {
+          accessKeyId: process.env.MINIO_ACCESS_KEY,
+          secretAccessKey: process.env.MINIO_SECRET_KEY,
+        },
+        forcePathStyle: true, // MinIO 필수 설정
+      });
+    } else if (this.bucketName) {
+      // 프로덕션 환경에서는 실제 S3 사용
+      this.s3Client = new S3Client({
+        region: process.env.AWS_REGION,
         ...(process.env.AWS_ACCESS_KEY_ID && {
           credentials: {
             accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -36,12 +46,10 @@ export class S3Service {
     contentType: string,
     expiresIn: number = 3600,
   ): Promise<string> {
-    // 개발 환경에서는 Mock URL 반환
-    if (!this.isProduction || !this.bucketName) {
-      return `http://localhost:3001/api/files/mock-upload/${encodeURIComponent(fileKey)}?contentType=${encodeURIComponent(contentType)}`;
+    if (!this.s3Client) {
+      throw new Error('S3 client not initialized');
     }
 
-    // 프로덕션에서는 실제 S3 Presigned URL
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: fileKey,
@@ -52,8 +60,7 @@ export class S3Service {
   }
 
   async deleteObject(fileKey: string): Promise<void> {
-    if (!this.isProduction || !this.bucketName) {
-      // 개발 환경에서는 로컬 파일 삭제 (MockS3Service에서 처리)
+    if (!this.s3Client) {
       return;
     }
 
@@ -66,10 +73,12 @@ export class S3Service {
   }
 
   getFileUrl(fileKey: string): string {
-    if (!this.isProduction || !this.bucketName) {
-      return `http://localhost:3001/api/files/mock-download/${encodeURIComponent(fileKey)}`;
+    if (!this.isProduction) {
+      // 로컬 MinIO URL
+      return `${process.env.MINIO_ENDPOINT}/${this.bucketName}/${fileKey}`;
     }
 
+    // 프로덕션 S3 URL
     return `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
   }
 }

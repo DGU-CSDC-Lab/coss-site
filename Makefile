@@ -10,14 +10,19 @@ help: ## Show this help message
 install: ## Install dependencies
 	cd web && npm install
 	cd server && npm install
+	cp server/.env.example server/.env.local
+	cp web/.env.example web/.env.local
 
 # Build and Runs
-start: ## Start development environment
-	scripts/check-mariadb.sh
-	cd web && npm run dev
-	cd server && npm run start
+start: ## Start local environment
+	@echo "Starting local environment..."
+	@scripts/check-compose.sh || (echo "❌ Service check failed" && exit 1)
+	@scripts/create-minio-bucket.sh || (echo "❌ MinIO setup failed" && exit 1)
+	@echo "✅ All services ready, starting development servers..."
+	cd server && npm run start:dev &
+	cd web && npm run dev &
 
-dev: ## Start development environment
+dev: ## Start local environment
 	docker-compose up --build
 	docker-compose up
 
