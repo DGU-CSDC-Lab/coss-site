@@ -17,7 +17,11 @@ async function bootstrap() {
 
   // CORS
   app.enableCors({
-    origin: ['http://localhost:3000', 'http://localhost:3001'],
+    origin: [
+      'http://localhost:3000', 
+      'http://localhost:3001',
+      /^https:\/\/.*\.cloudfront\.net$/  // CloudFront 도메인 허용
+    ],
     credentials: true,
   });
 
