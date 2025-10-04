@@ -7,6 +7,7 @@ import { Popup } from '../entities';
 
 describe('PopupService', () => {
   let service: PopupService;
+  let _repository: Repository<Popup>;
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),
@@ -39,7 +40,7 @@ describe('PopupService', () => {
     }).compile();
 
     service = module.get<PopupService>(PopupService);
-    repository = module.get<Repository<Popup>>(getRepositoryToken(Popup));
+    _repository = module.get<Repository<Popup>>(getRepositoryToken(Popup));
 
     jest.clearAllMocks();
   });

@@ -7,6 +7,7 @@ import { History } from '../entities';
 
 describe('HistoryService', () => {
   let service: HistoryService;
+  let _repository: Repository<History>;
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),
@@ -39,7 +40,7 @@ describe('HistoryService', () => {
     }).compile();
 
     service = module.get<HistoryService>(HistoryService);
-    repository = module.get<Repository<History>>(getRepositoryToken(History));
+    _repository = module.get<Repository<History>>(getRepositoryToken(History));
 
     jest.clearAllMocks();
   });

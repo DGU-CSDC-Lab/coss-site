@@ -8,6 +8,8 @@ import { File, OwnerType, FileStatus } from '../entities';
 
 describe('FileService', () => {
   let service: FileService;
+  let _fileRepository: Repository<File>;
+  let _s3Service: S3Service;
 
   const mockFileRepository = {
     create: jest.fn(),
@@ -38,8 +40,8 @@ describe('FileService', () => {
     }).compile();
 
     service = module.get<FileService>(FileService);
-    fileRepository = module.get<Repository<File>>(getRepositoryToken(File));
-    s3Service = module.get<S3Service>(S3Service);
+    _fileRepository = module.get<Repository<File>>(getRepositoryToken(File));
+    _s3Service = module.get<S3Service>(S3Service);
   });
 
   afterEach(() => {

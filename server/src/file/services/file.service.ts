@@ -125,7 +125,7 @@ export class FileService {
     return file;
   }
 
-  async deleteFile(fileKey: string): Promise<void> {
+  async deleteFile(fileKey: string, _userId: string): Promise<void> {
     const file = await this.fileRepository.findOne({ where: { fileKey } });
 
     if (!file) {

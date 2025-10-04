@@ -15,6 +15,7 @@ export class MockS3Service {
 
   async generatePresignedUploadUrl(
     fileKey: string,
+    _contentType: string,
   ): Promise<string> {
     // Mock presigned URL - 실제로는 로컬 업로드 엔드포인트
     return `http://localhost:3001/api/files/mock-upload/${encodeURIComponent(fileKey)}`;

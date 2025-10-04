@@ -7,6 +7,7 @@ import { AcademicSchedule, ScheduleCategory } from '../entities';
 
 describe('ScheduleService', () => {
   let service: ScheduleService;
+  let _repository: Repository<AcademicSchedule>;
 
   const mockQueryBuilder = {
     where: jest.fn().mockReturnThis(),
@@ -39,7 +40,7 @@ describe('ScheduleService', () => {
     }).compile();
 
     service = module.get<ScheduleService>(ScheduleService);
-    repository = module.get<Repository<AcademicSchedule>>(
+    _repository = module.get<Repository<AcademicSchedule>>(
       getRepositoryToken(AcademicSchedule),
     );
 

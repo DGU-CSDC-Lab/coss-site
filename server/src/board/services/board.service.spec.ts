@@ -9,6 +9,8 @@ import { Category } from '../../category/entities';
 
 describe('BoardService', () => {
   let service: BoardService;
+  let _postRepository: Repository<BoardPost>;
+  let _userRepository: Repository<User>;
   let categoryRepository: Repository<Category>;
 
   const mockQueryBuilder = {
@@ -66,10 +68,10 @@ describe('BoardService', () => {
     }).compile();
 
     service = module.get<BoardService>(BoardService);
-    postRepository = module.get<Repository<BoardPost>>(
+    _postRepository = module.get<Repository<BoardPost>>(
       getRepositoryToken(BoardPost),
     );
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    _userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     categoryRepository = module.get<Repository<Category>>(
       getRepositoryToken(Category),
     );

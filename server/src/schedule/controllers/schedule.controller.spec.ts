@@ -6,6 +6,7 @@ import { ScheduleCategory } from '../entities';
 
 describe('ScheduleController', () => {
   let controller: ScheduleController;
+  let _service: ScheduleService;
 
   const mockScheduleService = {
     findAll: jest.fn(),
@@ -34,7 +35,7 @@ describe('ScheduleController', () => {
       .compile();
 
     controller = module.get<ScheduleController>(ScheduleController);
-    service = module.get<ScheduleService>(ScheduleService);
+    _service = module.get<ScheduleService>(ScheduleService);
 
     jest.clearAllMocks();
   });

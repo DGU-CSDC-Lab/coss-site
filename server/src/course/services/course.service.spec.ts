@@ -7,6 +7,7 @@ import { Course } from '../entities';
 
 describe('CourseService', () => {
   let service: CourseService;
+  let _repository: Repository<Course>;
 
   const mockQueryBuilder = {
     andWhere: jest.fn().mockReturnThis(),
@@ -36,7 +37,7 @@ describe('CourseService', () => {
     }).compile();
 
     service = module.get<CourseService>(CourseService);
-    repository = module.get<Repository<Course>>(getRepositoryToken(Course));
+    _repository = module.get<Repository<Course>>(getRepositoryToken(Course));
 
     jest.clearAllMocks();
   });
