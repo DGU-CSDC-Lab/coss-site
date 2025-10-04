@@ -17,7 +17,8 @@ export class HealthController {
     };
   }
 
-  @Get('api/v1/health')
+  // 전체 api 서버에 대한 health check로, v1 태그 없음
+  @Get('api/health')
   getApiHealth() {
     return this.getHealth();
   }
