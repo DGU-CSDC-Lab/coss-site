@@ -18,8 +18,11 @@ export default function Tabs() {
   // 3depth 페이지인 경우 첫 번째 3depth로 리다이렉트
   const getTabHref = (tab: any) => {
     if (tab.children && tab.children.length > 0) {
+      console.log('tab.children[0].path:', tab.children[0].path)
       return tab.children[0].path
     }
+
+    console.log('tab.path:', tab.path)
     return tab.path
   }
 
