@@ -19,8 +19,27 @@ start: ## Start local environment
 	@scripts/check-compose.sh || (echo "❌ Service check failed" && exit 1)
 	@scripts/create-minio-bucket.sh || (echo "❌ MinIO setup failed" && exit 1)
 	@echo "✅ All services ready, starting development servers..."
-	cd server && npm run start:dev &
-	cd web && npm run dev &
+	@echo "🚀 Starting API server in background..."
+	@(cd server && nohup npm run start:dev > server.log 2>&1 &)
+	@sleep 6
+	@echo ""
+	@echo "🌐 Development servers are running:"
+	@echo "   📱 Web:    http://localhost:3000"
+	@echo "   🔧 API:    http://localhost:3001"
+	@echo "   📚 Docs:   http://localhost:3001/api-docs"
+	@echo "   📄 Server logs: tail -f server/server.log"
+	@echo ""
+	@echo "🚀 Starting web server (foreground)..."
+	@echo "📝 Press Ctrl+C to stop web server, use 'make stop' to stop all"
+	@cd web && npm run dev
+
+stop: ## Stop all running development servers
+	@echo "Stopping development servers..."
+	@pkill -f "npm run start:dev" || echo "No server process found"
+	@pkill -f "npm run dev" || echo "No web process found"
+	@pkill -f "node.*nest start" || echo "No nest process found"
+	@rm -f server/server.log || echo "No log file to remove"
+	@echo "✅ All processes stopped"
 
 dev: ## Start local environment
 	docker-compose up --build
