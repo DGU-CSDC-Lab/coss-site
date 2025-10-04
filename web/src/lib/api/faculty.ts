@@ -1,5 +1,5 @@
 import { api } from '../apiClient'
-import { PagedResponse } from '../api'
+import { PagedResponse } from '../apiClient'
 
 export interface Faculty {
   id: string
@@ -52,12 +52,11 @@ export const facultyApi = {
       }
     })
 
-    return api.get(`/api/faculty?${searchParams.toString()}`)
+    return api.get(`/faculty?${searchParams.toString()}`)
   },
 
   // 교수진 상세 조회
-  getFacultyById: (id: string): Promise<Faculty> =>
-    api.get(`/api/faculty/${id}`),
+  getFacultyById: (id: string): Promise<Faculty> => api.get(`/faculty/${id}`),
 
   // 교수진 등록 (관리자)
   createFaculty: (data: CreateFacultyRequest): Promise<Faculty> =>

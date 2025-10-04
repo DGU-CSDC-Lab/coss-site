@@ -10,14 +10,14 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
   return (
     <div className="transition-all flex gap-6 items-start">
       {/* 프로필 이미지 */}
-      <div className="flex-shrink-0 aspect-[3/4] w-32 bg-gray-100 relative overflow-hidden self-start">
+      <div className="flex-shrink-0 aspect-[3/4] w-48 bg-gray-100 relative overflow-hidden self-start">
         {faculty.profileImage ? (
           <Image
             src={faculty.profileImage}
             alt={faculty.name}
             fill
             className="object-cover"
-            sizes="(max-width: 768px) 100vw, 128px"
+            sizes="(max-width: 768px) 100vw, 192px"
           />
         ) : (
           <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
@@ -31,10 +31,14 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
         <h3 className="font-body-20-medium text-gray-900">{faculty.name}</h3>
         <div className="h-4" />
         <div className="space-y-1 text-gray-600">
-          <p className="font-caption-14 text-gray-500">{faculty.jobTitle}</p>
-          <p className="font-caption-14">{faculty.email}</p>
-          <p className="font-caption-14">{faculty.phoneNumber}</p>
-          <p className="font-caption-14">{faculty.office}</p>
+          <p className="font-body-18-regular text-gray-500">
+            {faculty.jobTitle}
+          </p>
+          <p className="font-body-18-regular text-gray-500">{faculty.email}</p>
+          <p className="font-body-18-regular text-gray-500">
+            {faculty.phoneNumber}
+          </p>
+          <p className="font-body-18-regular text-gray-500">{faculty.office}</p>
         </div>
         {/** 
         <div className="h-4" />

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { PaginatedResponse } from '@/lib/api'
+import { PaginatedResponse } from '@/lib/apiClient'
 import { postsApi, Post } from '@/lib/api/posts'
 import NewsList from '@/components/news/NewsList'
 import Tabs from '@/components/tabs/Tabs'

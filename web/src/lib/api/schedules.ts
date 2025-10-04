@@ -1,5 +1,5 @@
 import { api } from '../apiClient'
-import { PagedResponse } from '../api'
+import { PagedResponse } from '../apiClient'
 
 export interface Schedule {
   id: string
@@ -47,12 +47,11 @@ export const schedulesApi = {
       }
     })
 
-    return api.get(`/api/schedules?${searchParams.toString()}`)
+    return api.get(`/schedules?${searchParams.toString()}`)
   },
 
   // 학사일정 상세 조회
-  getSchedule: (id: string): Promise<Schedule> =>
-    api.get(`/api/schedules/${id}`),
+  getSchedule: (id: string): Promise<Schedule> => api.get(`/schedules/${id}`),
 
   // 학사일정 생성 (관리자)
   createSchedule: (data: CreateScheduleRequest): Promise<Schedule> =>

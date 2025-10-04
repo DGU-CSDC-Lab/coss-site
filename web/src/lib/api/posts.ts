@@ -1,5 +1,5 @@
 import { api } from '../apiClient'
-import { PaginatedResponse } from '../api'
+import { PaginatedResponse } from '../apiClient'
 
 export interface PostFile {
   id: string
@@ -73,11 +73,11 @@ export const postsApi = {
       }
     })
 
-    return api.get(`/api/posts?${searchParams.toString()}`)
+    return api.get(`/posts?${searchParams.toString()}`)
   },
 
   // 게시글 상세 조회
-  getPost: (id: string): Promise<PostDetail> => api.get(`/api/posts/${id}`),
+  getPost: (id: string): Promise<PostDetail> => api.get(`/posts/${id}`),
 
   // 게시글 생성 (관리자)
   createPost: (data: CreatePostRequest): Promise<Post> =>

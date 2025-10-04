@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
-import { PaginatedResponse } from '@/lib/api'
+import { PaginatedResponse } from '@/lib/apiClient'
 import { postsApi, Post } from '@/lib/api/posts'
 import Title from '@/components/common/Title'
 import Button from '@/components/common/Button'

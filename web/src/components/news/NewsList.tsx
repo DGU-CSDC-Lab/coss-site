@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { CalendarIcon, UserIcon, EyeIcon } from '@heroicons/react/24/outline'
-import { PaginatedResponse } from '@/lib/api'
+import { PaginatedResponse } from '@/lib/apiClient'
 import { Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'

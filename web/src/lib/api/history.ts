@@ -1,5 +1,4 @@
-import { apiRequest, authenticatedRequest } from '../api'
-import { PagedResponse } from '../api'
+import { api, PagedResponse } from '../apiClient'
 
 export interface History {
   id: string
@@ -36,37 +35,22 @@ export const historyApi = {
       }
     })
 
-    return apiRequest(`/api/history?${searchParams.toString()}`)
+    return api.get(`/history?${searchParams.toString()}`)
   },
 
   // 연혁 상세 조회
   getHistoryById: (id: string): Promise<History> =>
-    apiRequest(`/api/history/${id}`),
+    api.get(`/history/${id}`),
 
   // 연혁 등록 (관리자)
-  createHistory: (
-    data: CreateHistoryRequest,
-    token: string
-  ): Promise<History> =>
-    authenticatedRequest('/admin/history', token, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
+  createHistory: (data: CreateHistoryRequest): Promise<History> =>
+    api.auth.post('/admin/history', data),
 
   // 연혁 수정 (관리자)
-  updateHistory: (
-    id: string,
-    data: UpdateHistoryRequest,
-    token: string
-  ): Promise<History> =>
-    authenticatedRequest(`/admin/history/${id}`, token, {
-      method: 'PUT',
-      body: JSON.stringify(data),
-    }),
+  updateHistory: (id: string, data: UpdateHistoryRequest): Promise<History> =>
+    api.auth.put(`/admin/history/${id}`, data),
 
   // 연혁 삭제 (관리자)
-  deleteHistory: (id: string, token: string): Promise<void> =>
-    authenticatedRequest(`/admin/history/${id}`, token, {
-      method: 'DELETE',
-    }),
+  deleteHistory: (id: string): Promise<void> =>
+    api.auth.delete(`/admin/history/${id}`),
 }

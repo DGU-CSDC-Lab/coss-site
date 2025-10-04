@@ -1,5 +1,4 @@
-import { api } from '../apiClient'
-import { PagedResponse } from '../api'
+import { api, PagedResponse } from '../apiClient'
 
 export interface Course {
   id: string
@@ -93,11 +92,11 @@ export const coursesApi = {
       }
     })
 
-    return api.get(`/api/courses?${searchParams.toString()}`)
+    return api.get(`/courses?${searchParams.toString()}`)
   },
 
   // 교과목 상세 조회
-  getCourse: (id: string): Promise<Course> => api.get(`/api/courses/${id}`),
+  getCourse: (id: string): Promise<Course> => api.get(`/courses/${id}`),
 
   // 교과목 생성 (관리자)
   createCourse: (data: CreateCourseRequest): Promise<Course> =>

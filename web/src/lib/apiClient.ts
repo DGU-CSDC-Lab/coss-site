@@ -1,7 +1,21 @@
 import { useAuthStore } from '@/store/auth.store'
 import { authApi } from './api/auth'
 
-const API_BASE_URL = 'http://localhost:3001'
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/${process.env.NEXT_PUBLIC_API_VERSION}`
+
+// 공통 타입 정의
+export interface PagedResponse<T> {
+  items: T[]
+  meta: {
+    page: number
+    size: number
+    totalElements: number
+    totalPages: number
+  }
+}
+
+// 호환성을 위한 별칭
+export interface PaginatedResponse<T> extends PagedResponse<T> {}
 
 class ApiClient {
   private baseURL: string

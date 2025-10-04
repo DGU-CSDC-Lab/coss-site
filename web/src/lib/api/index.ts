@@ -11,4 +11,4 @@ export * from './files'
 export * from './headerAssets'
 
 // 기본 API 유틸리티
-export * from '../api'
+export * from '../apiClient'

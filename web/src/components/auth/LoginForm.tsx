@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { authApi } from '@/lib/api/auth'
 import { useAuthStore } from '@/store/auth.store'
 import { getErrorMessage } from '@/lib/utils/errorHandler'
@@ -13,6 +14,7 @@ export default function LoginForm() {
   const router = useRouter()
   const { login } = useAuthStore()
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -82,15 +84,26 @@ export default function LoginForm() {
           />
         </div>
 
-        <div>
+        <div className="relative">
           <Input
-            type="password"
+            type={showPassword ? 'text' : 'password'}
             value={formData.password}
             onChange={value => setFormData({ ...formData, password: value })}
             placeholder="비밀번호"
             size="lg"
-            className="w-full"
+            className="w-full pr-12"
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+          >
+            {showPassword ? (
+              <EyeIcon className="h-5 w-5" />
+            ) : (
+              <EyeSlashIcon className="h-5 w-5" />
+            )}
+          </button>
         </div>
 
         {error && <p className="font-caption-14 text-error-500">{error}</p>}

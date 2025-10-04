@@ -1,5 +1,5 @@
 import { api } from '../apiClient'
-import { PagedResponse } from '../api'
+import { PagedResponse } from '../apiClient'
 
 export interface HeaderAsset {
   id: string
@@ -59,17 +59,17 @@ export const headerAssetsApi = {
       }
     })
 
-    return api.get(`/api/header-assets?${searchParams.toString()}`)
+    return api.get(`/header-assets?${searchParams.toString()}`)
   },
 
   // 특정 타입의 활성화된 헤더 요소들 조회
   getHeaderAssetsByType: (
     type: 'logo' | 'banner' | 'background' | 'announcement'
-  ): Promise<HeaderAsset[]> => api.get(`/api/header-assets/type/${type}`),
+  ): Promise<HeaderAsset[]> => api.get(`/header-assets/type/${type}`),
 
   // 헤더 요소 상세 조회
   getHeaderAsset: (id: string): Promise<HeaderAsset> =>
-    api.get(`/api/header-assets/${id}`),
+    api.get(`/header-assets/${id}`),
 
   // 헤더 요소 생성 (관리자)
   createHeaderAsset: (data: CreateHeaderAssetRequest): Promise<HeaderAsset> =>

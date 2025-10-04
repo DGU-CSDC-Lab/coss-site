@@ -5,7 +5,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { headerAssetsApi, HeaderAsset } from '@/lib/api/headerAssets'
 import Image from 'next/image'
 import Link from 'next/link'
-import { PagedResponse } from '@/lib/api'
+import { PagedResponse } from '@/lib/apiClient'
 
 export default function HeaderSlider() {
   const [currentIndex, setCurrentIndex] = useState(0)

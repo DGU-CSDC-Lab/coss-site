@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { PagedResponse } from '@/lib/api'
+import { PagedResponse } from '@/lib/apiClient'
 import { coursesApi, Course } from '@/lib/api/courses'
 import Tabs from '@/components/tabs/Tabs'
 import Button from '@/components/common/Button'

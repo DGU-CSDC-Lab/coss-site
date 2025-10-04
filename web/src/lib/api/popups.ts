@@ -1,5 +1,5 @@
 import { api } from '../apiClient'
-import { PagedResponse } from '../api'
+import { PagedResponse } from '../apiClient'
 
 export interface Popup {
   id: string
@@ -49,11 +49,11 @@ export const popupsApi = {
       }
     })
 
-    return api.get(`/api/popups?${searchParams.toString()}`)
+    return api.get(`/popups?${searchParams.toString()}`)
   },
 
   // 팝업 상세 조회
-  getPopup: (id: string): Promise<Popup> => api.get(`/api/popups/${id}`),
+  getPopup: (id: string): Promise<Popup> => api.get(`/popups/${id}`),
 
   // 팝업 생성 (관리자)
   createPopup: (data: CreatePopupRequest): Promise<Popup> =>
