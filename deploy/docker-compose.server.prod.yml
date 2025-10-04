@@ -1,6 +1,6 @@
 services:
   server:
-    image: ${REGISTRY_URL}/server:${GITHUB_SHA}
+    image: ${REGISTRY_URL}/${REPOSITORY_NAME}/server:${GITHUB_SHA}
     container_name: server-prod
     restart: unless-stopped
     env_file:
