@@ -1,13 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone',
+  output: 'export',
+  trailingSlash: true,
   eslint: {
     // 빌드 시 prettier 에러를 무시하고 진행
     ignoreDuringBuilds: false,
   },
   images: {
+    unoptimized: true,
     domains: [
-      'localhost', 
+      'localhost',
       'picsum.photos',
       '127.0.0.1',
       'server',
@@ -28,23 +30,7 @@ const nextConfig = {
       },
     ],
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/v1/:path*',
-        destination: process.env.NODE_ENV === 'production' 
-          ? 'http://server:3001/api/v1/:path*'
-          : 'http://localhost:3001/api/v1/:path*',
-      },
-      // 기존 api 경로도 v1으로 리다이렉트
-      {
-        source: '/api/:path*',
-        destination: process.env.NODE_ENV === 'production' 
-          ? 'http://server:3001/api/v1/:path*'
-          : 'http://localhost:3001/api/v1/:path*',
-      },
-    ]
-  },
+  // CDN 배포에서는 rewrites 사용 불가 (제거)
 }
 
 module.exports = nextConfig
