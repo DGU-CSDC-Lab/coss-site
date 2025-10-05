@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  trailingSlash: false, // 빌드 및 라우팅 전반에서 /가 자동으로 붙는 것 맞기
+  output: 'export',
+  trailingSlash: false,
   eslint: {
-    // 빌드 시 prettier 에러를 무시하고 진행
     ignoreDuringBuilds: false,
   },
   images: {
@@ -12,7 +12,6 @@ const nextConfig = {
       'picsum.photos',
       '127.0.0.1',
       'server',
-      // 추가 가능한 도메인들
     ],
     remotePatterns: [
       {
