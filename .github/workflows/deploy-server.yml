@@ -153,6 +153,8 @@ jobs:
 
             aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
 
+            cd deploy
+            
             cat > .env.prod << EOF
             DB_HOST=${{ secrets.DB_HOST }}
             DB_USERNAME=advisor
