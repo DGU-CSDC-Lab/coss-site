@@ -14,7 +14,7 @@ install: ## Install dependencies
 	cp web/.env.example web/.env.local
 
 # Build and Runs
-start: ## Start local environment
+start:
 	@echo "Starting local environment..."
 	@scripts/check-compose.sh || (echo "❌ Service check failed" && exit 1)
 	@scripts/create-minio-bucket.sh || (echo "❌ MinIO setup failed" && exit 1)
@@ -22,16 +22,13 @@ start: ## Start local environment
 	@echo "🚀 Starting API server in background..."
 	@(cd server && nohup npm run start:dev > server.log 2>&1 &)
 	@sleep 6
-	@echo ""
-	@echo "🌐 Development servers are running:"
-	@echo "   📱 Web:    http://localhost:3000"
-	@echo "   🔧 API:    http://localhost:3001"
-	@echo "   📚 Docs:   http://localhost:3001/api-docs"
-	@echo "   📄 Server logs: tail -f server/server.log"
+	@echo "📄 Run 'make logs' in a separate terminal to follow server logs."
 	@echo ""
 	@echo "🚀 Starting web server (foreground)..."
-	@echo "📝 Press Ctrl+C to stop web server, use 'make stop' to stop all"
 	@cd web && npm run dev
+
+logs:
+	@tail -f server/server.log
 
 stop: ## Stop all running development servers
 	@echo "Stopping development servers..."
@@ -46,8 +43,12 @@ dev: ## Start local environment
 	docker-compose up
 
 # Clean up
+stop: ## Clean containers and volumes
+	docker-compose -f docker-compose.local.yml down -v --remove-orphans
+
+# Clean up
 clean: ## Clean containers and volumes
-	docker-compose down -v --remove-orphans
+	docker-compose -f docker-compose.local.yml down -v --remove-orphans
 	docker system prune -f
 
 # Logs

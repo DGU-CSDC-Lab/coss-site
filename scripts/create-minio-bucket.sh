@@ -51,6 +51,27 @@ else
     fi
 fi
 
+# 버킷 정책 설정 (public read 허용)
+POLICY='{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": "*",
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::'$BUCKET_NAME'/*"
+    }
+  ]
+}'
+
+echo "Setting bucket policy for public read access..."
+POLICY_ERROR=$(aws --endpoint-url=$MINIO_ENDPOINT s3api put-bucket-policy --bucket $BUCKET_NAME --policy "$POLICY" 2>&1)
+if [ $? -eq 0 ]; then
+    echo "✅ Bucket policy set successfully"
+else
+    echo "❌ Failed to set bucket policy: $POLICY_ERROR"
+fi
+
 # 생성된 버킷 목록 확인
 echo "Current buckets:"
 LIST_ERROR=$(aws --endpoint-url=$MINIO_ENDPOINT s3 ls 2>&1)
