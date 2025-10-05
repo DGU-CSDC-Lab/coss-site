@@ -66,7 +66,7 @@ export default function HeaderSlider() {
   if (banners?.items.length === 0) {
     return (
       <div className="h-96 bg-gray-200 flex items-center justify-center rounded-lg">
-        <div className="text-gray-500">표시할 배너가 없습니다.</div>
+        <div className="text-gray-400">표시할 배너가 없습니다.</div>
       </div>
     )
   }

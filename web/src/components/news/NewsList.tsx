@@ -8,6 +8,7 @@ import { Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
+import LoadingSpinner from '../common/LoadingSpinner'
 
 interface NewsListProps {
   posts: PaginatedResponse<Post> | null
@@ -58,7 +59,11 @@ export default function NewsList({
   }
 
   if (loading) {
-    return <div className="flex justify-center py-8">로딩 중...</div>
+    return (
+      <div className="flex flex-col w-full items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   return (

@@ -9,6 +9,7 @@ import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import Title from '@/components/common/Title'
 import Image from 'next/image'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 export default function SubjectsPage() {
   const [courses, setCourses] = useState<PagedResponse<Course> | null>(null)
@@ -88,7 +89,11 @@ export default function SubjectsPage() {
   }
 
   if (loading && !courses) {
-    return <div className="flex justify-center py-8">로딩 중...</div>
+    return (
+      <div className="flex flex-col w-full items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   return (

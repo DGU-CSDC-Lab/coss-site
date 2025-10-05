@@ -2,29 +2,51 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { LinkIcon } from '@heroicons/react/24/outline'
 import { PaginatedResponse } from '@/lib/apiClient'
 import { postsApi, Post } from '@/lib/api/posts'
+import { categoriesApi, Category } from '@/lib/api/categories'
 import Title from '@/components/common/Title'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
+import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import Image from 'next/image'
 
 export default function AdminPostsPage() {
   const [posts, setPosts] = useState<PaginatedResponse<Post> | null>(null)
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [keyword, setKeyword] = useState('')
+  const [searchType, setSearchType] = useState('title')
+  const [categoryName, setCategoryName] = useState('')
+  const [status, setStatus] = useState('')
+  const [sort, setSort] = useState('latest')
   const [currentPage, setCurrentPage] = useState(1)
 
   useEffect(() => {
+    fetchCategories()
     fetchPosts()
   }, [currentPage])
+
+  const fetchCategories = async () => {
+    try {
+      const response = await categoriesApi.getCategories()
+      setCategories(response)
+    } catch (error) {
+      console.error('Failed to fetch categories:', error)
+    }
+  }
 
   const fetchPosts = async () => {
     try {
       setLoading(true)
-      const response = await postsApi.getPosts({
+      const response = await postsApi.getAdminPosts({
         keyword: keyword || undefined,
+        searchType: searchType as 'title' | 'author',
+        categoryName: categoryName || undefined,
+        status: status as 'draft' | 'private' | 'public' || undefined,
+        sort: sort as 'latest' | 'popular',
         page: currentPage,
         size: 20,
       })
@@ -39,6 +61,16 @@ export default function AdminPostsPage() {
   const handleSearch = () => {
     setCurrentPage(1)
     fetchPosts()
+  }
+
+  const handleReset = () => {
+    setKeyword('')
+    setSearchType('title')
+    setCategoryName('')
+    setStatus('')
+    setSort('latest')
+    setCurrentPage(1)
+    setTimeout(() => fetchPosts(), 0)
   }
 
   const handleDelete = async (id: string, title: string) => {
@@ -69,7 +101,9 @@ export default function AdminPostsPage() {
       <div className="flex justify-between items-center mb-6">
         <Title>게시글 관리</Title>
         <Link href="/admin/posts/create">
-          <Button variant="primary">새 게시글 작성</Button>
+          <Button variant="info" radius="md" size="md">
+            새 게시글 작성
+          </Button>
         </Link>
       </div>
 
@@ -80,25 +114,80 @@ export default function AdminPostsPage() {
           건
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <Dropdown
+            value={searchType}
+            onChange={setSearchType}
+            options={[
+              { value: 'title', label: '제목' },
+              { value: 'author', label: '작성자' },
+            ]}
+            size="md"
+            className="w-24"
+          />
           <Input
             type="text"
-            placeholder="제목을 입력해주세요."
+            placeholder={searchType === 'title' ? '제목을 입력해주세요.' : '작성자를 입력해주세요.'}
             value={keyword}
             onChange={setKeyword}
             onKeyPress={e => e.key === 'Enter' && handleSearch()}
-            className="w-80"
+            className="w-full sm:w-60"
+            size="md"
           />
-          <Button variant="secondary" onClick={handleSearch}>
-            <MagnifyingGlassIcon className="w-4 h-4 mr-2" />
+          <Dropdown
+            value={categoryName}
+            onChange={setCategoryName}
+            options={[
+              { value: '', label: '전체 카테고리' },
+              ...categories.map(cat => ({ value: cat.name, label: cat.name }))
+            ]}
+            size="md"
+            className="w-32"
+          />
+          <Dropdown
+            value={status}
+            onChange={setStatus}
+            options={[
+              { value: '', label: '전체 상태' },
+              { value: 'draft', label: '임시저장' },
+              { value: 'private', label: '비공개' },
+              { value: 'public', label: '공개' },
+            ]}
+            size="md"
+            className="w-24"
+          />
+          <Dropdown
+            value={sort}
+            onChange={setSort}
+            options={[
+              { value: 'latest', label: '최신순' },
+              { value: 'popular', label: '인기순' },
+            ]}
+            size="md"
+            className="w-20"
+          />
+          <Button
+            variant="point_2"
+            radius="md"
+            size="md"
+            onClick={handleSearch}
+          >
             검색
+          </Button>
+          <Button
+            variant="unstyled"
+            radius="md"
+            size="md"
+            onClick={handleReset}
+          >
+            초기화
           </Button>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[800px]">
-          <thead>
+      <div className="overflow-x-auto rounded-lg border border-info-100">
+        <table className="w-full min-w-[900px]">
+          <thead className="bg-info-50 border-b border-info-100">
             <tr>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
                 제목
@@ -106,22 +195,25 @@ export default function AdminPostsPage() {
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
                 카테고리
               </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-20">
+                상태
+              </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-24">
                 조회수
               </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
                 작성일
               </th>
-              <th className="px-4 py-3 text-center font-body-18-medium text-gray-900 w-32">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
                 관리
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-info-100">
             {posts?.items.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="px-4 py-8 text-center font-caption-14 text-gray-600"
                 >
                   게시글이 없습니다.
@@ -134,36 +226,47 @@ export default function AdminPostsPage() {
                     <div className="flex items-center gap-2">
                       <Link
                         href={`/news/${post.categoryId}/${post.id}`}
-                        className="font-body-18-medium text-gray-900 hover:text-pri-500 line-clamp-1"
+                        className="font-body-14-medium text-gray-600 hover:text-gray-900 line-clamp-1"
                       >
                         {post.title}
                       </Link>
                       {post.hasFiles && (
-                        <span className="text-xs bg-info-100 text-info-600 px-2 py-1 rounded">
-                          파일 {post.fileCount}
-                        </span>
+                        <div className="flex items-center justify-center p-2 bg-gray-200 rounded-full">
+                          <LinkIcon className="w-4 h-4 text-gray-600" />
+                        </div>
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
-                    {post.categoryId}
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
+                    {post.categoryName}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      post.status === 'public' ? 'bg-green-100 text-green-800' :
+                      post.status === 'private' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {post.status === 'public' ? '공개' : 
+                       post.status === 'private' ? '비공개' : '임시저장'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {post.viewCount}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {new Date(post.createdAt).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
                       <Link href={`/admin/posts/${post.id}/edit`}>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="unstyled" size="sm" radius="md">
                           수정
                         </Button>
                       </Link>
                       <Button
-                        variant="danger"
+                        variant="delete"
                         size="sm"
+                        radius="md"
                         onClick={() => handleDelete(post.id, post.title)}
                       >
                         삭제
@@ -178,45 +281,72 @@ export default function AdminPostsPage() {
       </div>
 
       <div className="flex justify-center items-center gap-2 mt-8">
-        <Button
-          variant="secondary"
-          size="sm"
+        {/* 이전 버튼 */}
+        <button
           onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
+          className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
         >
-          이전
-        </Button>
+          <Image
+            src="/assets/icon/chevron_left.svg"
+            alt="이전"
+            width={16}
+            height={16}
+          />
+        </button>
 
+        {/* 페이지 번호 */}
         {posts &&
           Array.from(
             { length: Math.min(5, posts.meta.totalPages || 1) },
             (_, i) => {
               const pageNum = i + 1
               return (
-                <Button
+                <button
                   key={pageNum}
-                  variant={currentPage === pageNum ? 'primary' : 'secondary'}
-                  size="sm"
                   onClick={() => setCurrentPage(pageNum)}
+                  className={`px-3 py-2 font-caption-14 rounded ${
+                    currentPage === pageNum
+                      ? 'text-pri-500 font-semibold'
+                      : 'text-gray-900 hover:text-pri-500'
+                  }`}
                 >
                   {pageNum}
-                </Button>
+                </button>
               )
             }
           )}
 
-        <Button
-          variant="secondary"
-          size="sm"
+        {/* 마지막 페이지 생략 처리 */}
+        {posts && posts.meta.totalPages > 5 && (
+          <>
+            <span className="px-2 text-gray-900">...</span>
+            <button
+              onClick={() => setCurrentPage(posts.meta.totalPages)}
+              className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+            >
+              {posts.meta.totalPages}
+            </button>
+          </>
+        )}
+
+        {/* 다음 버튼 */}
+        <button
           onClick={() =>
             setCurrentPage(
               Math.min(posts?.meta.totalPages || 1, currentPage + 1)
             )
           }
           disabled={currentPage === (posts?.meta.totalPages || 1)}
+          className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
         >
-          다음
-        </Button>
+          <Image
+            src="/assets/icon/chevron_right.svg"
+            alt="다음"
+            width={16}
+            height={16}
+          />
+        </button>
       </div>
     </div>
   )

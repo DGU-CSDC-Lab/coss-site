@@ -104,7 +104,7 @@ export class FacultyService {
       office: faculty.office,
       profileImageUrl: faculty.profileImageUrl,
       department: faculty.department,
-      researchArea: faculty.researchArea,
+      researchAreas: faculty.researchAreas,
       biography: faculty.biography,
       createdAt: faculty.createdAt,
       updatedAt: faculty.updatedAt,

@@ -30,8 +30,10 @@ export const categoriesApi = {
     api.auth.post('/admin/categories', data),
 
   // 카테고리 수정 (관리자)
-  updateCategory: (id: string, data: UpdateCategoryRequest): Promise<Category> =>
-    api.auth.put(`/admin/categories/${id}`, data),
+  updateCategory: (
+    id: string,
+    data: UpdateCategoryRequest
+  ): Promise<Category> => api.auth.put(`/admin/categories/${id}`, data),
 
   // 카테고리 삭제 (관리자)
   deleteCategory: (id: string): Promise<void> =>

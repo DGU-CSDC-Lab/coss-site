@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { PhotoIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { facultyApi, CreateFacultyRequest } from '@/lib/api/faculty'
@@ -8,27 +9,36 @@ import { uploadImage } from '@/utils/fileUpload'
 import Button from '@/components/common/Button'
 import Title from '@/components/common/Title'
 import Input from '@/components/common/Input'
+import Textarea from '@/components/common/Textarea'
 import Dropdown from '@/components/common/Dropdown'
+import Label from '@/components/common/Label'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function CreateFacultyPage() {
+  // router 정의
   const router = useRouter()
+
+  // custom alert hook
+  const alert = useAlert()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
-    position: '',
-    department: 'IoT학과',
+    jobTitle: '',
+    department: '',
     email: '',
-    phone: '',
+    phoneNumber: '',
     office: '',
-    bio: '',
-    research: '',
-    education: '',
+    biography: '',
+    researchAreas: '',
   })
   const [profileImageUrl, setProfileImageUrl] = useState<string>('')
+  const [imageFileName, setImageFileName] = useState<string>('')
+  const [imageFileKey, setImageFileKey] = useState<string>('')
   const [imageUploading, setImageUploading] = useState(false)
 
   const positionOptions = [
-    { value: '', label: '직책 선택' },
+    { value: '직책 선택', label: '직책 선택' },
     { value: '교수', label: '교수' },
     { value: '부교수', label: '부교수' },
     { value: '조교수', label: '조교수' },
@@ -36,19 +46,42 @@ export default function CreateFacultyPage() {
     { value: '초빙교수', label: '초빙교수' },
   ]
 
+  const formatPhoneNumber = (value: string) => {
+    const numbers = value.replace(/[^\d]/g, '')
+    if (numbers.length <= 2) return numbers
+    if (numbers.length <= 6) return `${numbers.slice(0, 2)}-${numbers.slice(2)}`
+    if (numbers.length <= 10)
+      return `${numbers.slice(0, 2)}-${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`
+    return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`
+  }
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    setProfileImageUrl(URL.createObjectURL(file))
+    setImageFileName(file.name)
+    // 즉시 미리보기 표시
+    const previewUrl = URL.createObjectURL(file)
+    setProfileImageUrl(previewUrl)
     setImageUploading(true)
 
     try {
-      const result = await uploadImage(file)
+      // 전체 업로드 플로우 (presigned + upload + complete)
+      const result = await uploadImage(file, {
+        ownerType: 'FACULTY',
+        ownerId: 'temp',
+      })
+
+      // 업로드 완료 후 실제 URL로 교체
       setProfileImageUrl(result.fileUrl)
+      setImageFileKey(result.fileKey)
+
+      // 미리보기 URL 정리
+      URL.revokeObjectURL(previewUrl)
     } catch (error) {
       console.error('Image upload failed:', error)
-      alert('이미지 업로드 중 오류가 발생했습니다.')
+      // 업로드 실패해도 미리보기는 유지 (로컬 파일로)
+      console.log('Using local preview only')
     } finally {
       setImageUploading(false)
     }
@@ -58,217 +91,239 @@ export default function CreateFacultyPage() {
     e.preventDefault()
 
     if (!formData.name.trim()) {
-      alert('이름을 입력해주세요.')
+      alert.error('이름을 입력해주세요.')
       return
     }
 
-    if (!formData.position.trim()) {
-      alert('직책을 입력해주세요.')
+    if (!formData.jobTitle.trim()) {
+      alert.error('직책을 입력해주세요.')
       return
     }
 
     if (!formData.email.trim()) {
-      alert('이메일을 입력해주세요.')
+      alert.error('이메일을 입력해주세요.')
       return
     }
 
     setLoading(true)
 
     try {
+      // Faculty 생성
       const facultyData: CreateFacultyRequest = {
         name: formData.name,
-        position: formData.position,
+        jobTitle: formData.jobTitle,
         department: formData.department,
-        email: formData.email,
-        phone: formData.phone || undefined,
+        email: formData.email || undefined,
+        phoneNumber: formData.phoneNumber || undefined,
         office: formData.office || undefined,
-        profileImage: profileImageUrl || undefined,
-        bio: formData.bio || undefined,
-        researchAreas: formData.research ? [formData.research] : undefined,
-        education: formData.education ? [formData.education] : undefined,
+        profileImageUrl: profileImageUrl || undefined,
+        biography: formData.biography || undefined,
+        researchAreas: formData.researchAreas
+          ? formData.researchAreas.split(',').map(area => area.trim())
+          : undefined,
       }
 
       await facultyApi.createFaculty(facultyData)
-      alert('교원이 생성되었습니다.')
+      alert.success('교원이 생성되었습니다.')
       router.push('/admin/faculty')
     } catch (error) {
       console.error('Failed to create faculty:', error)
-      alert('교원 생성 중 오류가 발생했습니다.')
+      alert.error(
+        `교원 생성 중 오류가 발생했습니다. \n ${error instanceof Error ? error.message : ''}`
+      )
     } finally {
       setLoading(false)
     }
   }
 
+  const handleButtonSubmit = () => {
+    handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+  }
+
   return (
-    <div className="w-full">
-      <div className="flex items-center justify-between gap-4 mb-6">
+    <div className="w-full h-screen flex flex-col">
+      <div className="flex items-center justify-between gap-4 p-6">
         <Title>새 교원 추가</Title>
         <Link href="/admin/faculty">
-          <Button variant="secondary">목록보기</Button>
+          <Button variant="delete" size="md" radius="md">
+            나가기
+          </Button>
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="space-y-6">
-          <h2 className="font-body-18-medium text-gray-900">기본 정보</h2>
+      <div className="flex-1 overflow-auto p-6 bg-gray-50">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <Label required={true} className="mb-2">
+                  이름
+                </Label>
+                <Input
+                  type="text"
+                  value={formData.name}
+                  onChange={value => setFormData({ ...formData, name: value })}
+                  placeholder="교원 이름을 입력하세요"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                이름 *
-              </label>
-              <Input
-                type="text"
-                value={formData.name}
-                onChange={value =>
-                  setFormData({ ...formData, name: value })
-                }
-                placeholder="교원 이름을 입력하세요"
-                required
-              />
+              <div>
+                <Label required={true} className="mb-2">
+                  직책
+                </Label>
+                <Dropdown
+                  options={positionOptions}
+                  value={formData.jobTitle}
+                  onChange={value =>
+                    setFormData({ ...formData, jobTitle: value })
+                  }
+                  placeholder="직책을 선택해주세요."
+                  size="lg"
+                />
+              </div>
             </div>
 
-            <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                직책 *
-              </label>
-              <Dropdown
-                options={positionOptions}
-                value={formData.position}
-                onChange={value =>
-                  setFormData({ ...formData, position: value })
-                }
-                placeholder="직책 선택"
-              />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <Label required={true} className="mb-2">
+                  학과
+                </Label>
+                <Input
+                  type="text"
+                  value={formData.department}
+                  onChange={value =>
+                    setFormData({ ...formData, department: value })
+                  }
+                  placeholder="학과를 입력하세요"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+              <div>
+                <Label required={true} className="mb-2">
+                  이메일
+                </Label>
+                <Input
+                  type="email"
+                  value={formData.email}
+                  onChange={value => setFormData({ ...formData, email: value })}
+                  placeholder="이메일을 입력하세요"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2" optional={true}>
+                  전화번호
+                </Label>
+                <Input
+                  type="tel"
+                  value={formData.phoneNumber}
+                  onChange={value => {
+                    const formatted = formatPhoneNumber(value)
+                    setFormData({ ...formData, phoneNumber: formatted })
+                  }}
+                  placeholder="전화번호를 입력하세요"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+              <div>
+                <Label className="mb-2" optional={true}>
+                  연구실
+                </Label>
+                <Input
+                  type="text"
+                  value={formData.office}
+                  onChange={value =>
+                    setFormData({ ...formData, office: value })
+                  }
+                  placeholder="연구실을 입력하세요"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2" optional={true}>
+                  연구 분야
+                </Label>
+                <Input
+                  type="text"
+                  value={formData.researchAreas}
+                  onChange={value =>
+                    setFormData({ ...formData, researchAreas: value })
+                  }
+                  placeholder="연구 분야를 쉼표로 구분하여 입력하세요"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2" optional={true}>
+                  프로필 이미지
+                </Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onFileChange={handleImageChange}
+                  value={imageFileName}
+                  size="lg"
+                />
+                {imageUploading && <LoadingSpinner size="md" />}
+                <div className="mt-4">
+                  <div className="w-48 aspect-[4/3] rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                    {profileImageUrl ? (
+                      <img
+                        src={profileImageUrl}
+                        alt="프로필 미리보기"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <PhotoIcon className="w-12 h-12 text-gray-400" />
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <Label className="mb-2" optional={true}>
+                  소개
+                </Label>
+                <Textarea
+                  value={formData.biography}
+                  onChange={value =>
+                    setFormData({ ...formData, biography: value })
+                  }
+                  placeholder="교원 소개를 입력하세요"
+                  rows={4}
+                  size="lg"
+                />
+              </div>
             </div>
           </div>
+        </form>
+      </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                이메일 *
-              </label>
-              <Input
-                type="email"
-                value={formData.email}
-                onChange={value =>
-                  setFormData({ ...formData, email: value })
-                }
-                placeholder="이메일을 입력하세요"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                전화번호
-              </label>
-              <Input
-                type="tel"
-                value={formData.phone}
-                onChange={value =>
-                  setFormData({ ...formData, phone: value })
-                }
-                placeholder="전화번호를 입력하세요"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                연구실
-              </label>
-              <Input
-                type="text"
-                value={formData.office}
-                onChange={value =>
-                  setFormData({ ...formData, office: value })
-                }
-                placeholder="연구실을 입력하세요"
-              />
-            </div>
-
-            <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                프로필 이미지
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
-              />
-              {imageUploading && (
-                <p className="mt-2 font-caption-14 text-gray-600">
-                  업로드 중...
-                </p>
-              )}
-              {profileImageUrl && (
-                <p className="mt-2 font-caption-14 text-gray-600">
-                  업로드 완료
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <h2 className="font-body-18-medium text-gray-900">상세 정보</h2>
-
-          <div>
-            <label className="block font-body-18-medium text-gray-900 mb-3">
-              소개
-            </label>
-            <textarea
-              value={formData.bio}
-              onChange={e => setFormData({ ...formData, bio: e.target.value })}
-              placeholder="교원 소개를 입력하세요"
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
-            />
-          </div>
-
-          <div>
-            <label className="block font-body-18-medium text-gray-900 mb-3">
-              연구 분야
-            </label>
-            <textarea
-              value={formData.research}
-              onChange={e =>
-                setFormData({ ...formData, research: e.target.value })
-              }
-              placeholder="연구 분야를 입력하세요"
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
-            />
-          </div>
-
-          <div>
-            <label className="block font-body-18-medium text-gray-900 mb-3">
-              학력
-            </label>
-            <textarea
-              value={formData.education}
-              onChange={e =>
-                setFormData({ ...formData, education: e.target.value })
-              }
-              placeholder="학력을 입력하세요"
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
-            />
-          </div>
-        </div>
-
-        <div className="flex gap-4 justify-end pt-4">
-          <Link href="/admin/faculty">
-            <Button variant="secondary">취소</Button>
-          </Link>
-          <Button type="submit" variant="primary" disabled={loading}>
-            {loading ? '생성 중...' : '교원 생성'}
+      <div className="flex gap-4 justify-end p-6 bg-white flex-shrink-0">
+        <Link href="/admin/faculty">
+          <Button variant="cancel" size="lg" radius="md">
+            취소
           </Button>
-        </div>
-      </form>
+        </Link>
+        <Button
+          onClick={handleButtonSubmit}
+          variant="info"
+          size="lg"
+          radius="md"
+          disabled={loading}
+        >
+          {loading ? <LoadingSpinner size="md" /> : '교원 생성'}
+        </Button>
+      </div>
     </div>
   )
 }

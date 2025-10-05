@@ -5,6 +5,7 @@ import { facultyApi, Faculty } from '@/lib/api/faculty'
 import Title from '@/components/common/Title'
 import FacultyCard from '@/components/faculty/FacultyCard'
 import Tabs from '@/components/tabs/Tabs'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 export default function FacultyPage() {
   const [faculty, setFaculty] = useState<Faculty[]>([])
@@ -27,7 +28,11 @@ export default function FacultyPage() {
   }
 
   if (loading) {
-    return <div className="flex justify-center py-8">로딩 중...</div>
+    return (
+      <div className="flex flex-col w-full items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   return (

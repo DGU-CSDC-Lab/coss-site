@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import QueryProvider from '@/providers/query.provider'
-import Layout from '@/components/layout/Layout'
+import ConditionalLayout from '@/components/layout/ConditionalLayout'
+import Alert from '@/components/common/Alert'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -17,7 +18,8 @@ export default function RootLayout({
     <html lang="ko">
       <body>
         <QueryProvider>
-          <Layout>{children}</Layout>
+          <ConditionalLayout>{children}</ConditionalLayout>
+          <Alert />
         </QueryProvider>
       </body>
     </html>

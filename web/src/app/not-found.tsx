@@ -10,6 +10,7 @@ import EditPostPage from '@/app/admin/posts/_DYNAMIC_id_/edit/page'
 import EditSchedulePage from '@/app/admin/schedules/_DYNAMIC_id_/edit/page'
 import EditCoursePage from '@/app/admin/courses/_DYNAMIC_id_/edit/page'
 import EditHeaderAssetPage from '@/app/admin/header-assets/_DYNAMIC_id_/edit/page'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 export default function NotFound() {
   const pathname = usePathname()
@@ -27,15 +28,15 @@ export default function NotFound() {
   // news/카테고리/id 패턴 체크 및 처리
   const newsDetailPattern = /^\/news\/([^\/]+)\/([a-f0-9-]{36})$/i
   const newsMatch = pathname.match(newsDetailPattern)
-  
+
   if (newsMatch) {
     const [, category, id] = newsMatch
-    
+
     // 직접 뉴스 상세 컴포넌트 구현
     const CustomNewsDetail = () => {
       const [post, setPost] = useState(null)
       const [loading, setLoading] = useState(true)
-      
+
       useEffect(() => {
         const fetchPost = async () => {
           try {
@@ -48,44 +49,58 @@ export default function NotFound() {
             setLoading(false)
           }
         }
-        
+
         fetchPost()
       }, [])
-      
+
       if (loading) {
-        return <div className="flex justify-center py-8">로딩 중...</div>
+        return (
+          <div className="flex flex-col w-full items-center justify-center">
+            <LoadingSpinner size="lg" />
+          </div>
+        )
       }
-      
+
       if (!post) {
-        return <div className="flex justify-center py-8">게시글을 찾을 수 없습니다.</div>
+        return (
+          <div className="text-gray-400 font-body-14-regular">
+            게시글을 찾을 수 없습니다.
+          </div>
+        )
       }
-      
+
       // 뉴스 상세 컴포넌트 동적 로드
       const NewsDetail = dynamic(() => import('@/components/news/NewsDetail'), {
-        loading: () => <div>로딩 중...</div>
+        loading: () => (
+          <div className="flex flex-col w-full items-center justify-center">
+            <LoadingSpinner size="lg" />
+          </div>
+        ),
       })
-      
+
       const getBackPath = () => {
-        const categoryNameToKey = {
+        const categoryNameToKey: Record<string, string> = {
           뉴스: 'news',
-          소식: 'updates', 
-          장학정보: 'scholarship-info',
+          소식: 'updates',
+          장학정보: 'scholarship-infos',
           자료실: 'resources',
           공지사항: 'notices',
+          '공모전 정보': 'contests',
+          '교육/활동/취업 정보': 'activities',
         }
-        
+
         const decodedCategory = decodeURIComponent(category)
         const categoryKey = categoryNameToKey[decodedCategory]
-        
+
         if (categoryKey) {
           return `/news?category=${categoryKey}`
         }
         return `/news?category=${encodeURIComponent(decodedCategory)}`
       }
-      
+
       return <NewsDetail post={post} loading={false} backPath={getBackPath()} />
     }
-    
+
     return <CustomNewsDetail />
   }
 

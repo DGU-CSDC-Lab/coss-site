@@ -36,36 +36,42 @@ export default function BoardSection() {
       <hr className="border-gray-200" />
 
       <div className="">
-        {posts.map((post, index) => (
-          <div key={post.id}>
-            <div className="flex items-center justify-between py-3">
-              <div className="flex flex-col gap-1">
-                <div className="flex items-center space-x-2 flex-1">
-                  <span
-                    className={`px-2 py-1 font-caption-12 text-white rounded-full bg-info-600`}
+        {posts.length > 0 ? (
+          posts.map((post, index) => (
+            <div key={post.id}>
+              <div className="flex items-center justify-between py-3">
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center space-x-2 flex-1">
+                    <span
+                      className={`px-2 py-1 font-caption-12 text-white rounded-full bg-info-600`}
+                    >
+                      {post.categoryName}
+                    </span>
+                    <span className="text-point-1 font-caption-14">
+                      {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+                    </span>
+                  </div>
+                  <Link
+                    href={`/board/${post.id}`}
+                    className="pl-2 font-body-14-regular text-gray-900 hover:text-point-1 flex-1 truncate"
                   >
-                    {post.categoryName}
-                  </span>
-                  <span className="text-point-1 font-caption-14">
-                    {new Date(post.createdAt).toLocaleDateString('ko-KR')}
-                  </span>
+                    {post.title}
+                  </Link>
                 </div>
-                <Link
-                  href={`/board/${post.id}`}
-                  className="pl-2 font-body-14-regular text-gray-900 hover:text-point-1 flex-1 truncate"
-                >
-                  {post.title}
-                </Link>
+                {post.hasFiles && (
+                  <PaperClipIcon className="w-5 h-5 text-gray-400" />
+                )}
               </div>
-              {post.hasFiles && (
-                <PaperClipIcon className="w-5 h-5 text-gray-400" />
+              {index < posts.length - 1 && (
+                <div className="border-b border-dashed border-gray-300"></div>
               )}
             </div>
-            {index < posts.length - 1 && (
-              <div className="border-b border-dashed border-gray-300"></div>
-            )}
+          ))
+        ) : (
+          <div className="text-left text-gray-400 font-body-14-regular">
+            게시글이 없습니다.
           </div>
-        ))}
+        )}
       </div>
     </div>
   )

@@ -7,6 +7,7 @@ import { postsApi, PostDetail, UpdatePostRequest } from '@/lib/api/posts'
 import { UploadResult } from '@/utils/fileUpload'
 import FileUpload from '@/components/admin/FileUpload'
 import HtmlEditor from '@/components/admin/HtmlEditor'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 const CATEGORIES = [
   { id: 'news', name: '뉴스' },
@@ -109,11 +110,15 @@ export default function EditPostPage() {
   }
 
   if (initialLoading) {
-    return <div className="flex justify-center py-8">로딩 중...</div>
+    return (
+      <div className="flex flex-col w-full items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   if (!post) {
-    return <div className="text-center py-8">게시글을 찾을 수 없습니다.</div>
+    return <div className="text-gray-400 font-body-14-regular">게시글을 찾을 수 없습니다.</div>
   }
 
   return (

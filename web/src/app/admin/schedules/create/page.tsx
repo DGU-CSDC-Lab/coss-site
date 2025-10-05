@@ -3,15 +3,25 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { schedulesApi, CreateScheduleRequest } from '@/lib/api/schedules'
 import Input from '@/components/common/Input'
 import Title from '@/components/common/Title'
 import Button from '@/components/common/Button'
 import Dropdown from '@/components/common/Dropdown'
+import Label from '@/components/common/Label'
+import DateInput from '@/components/common/DateInput'
+import Textarea from '@/components/common/Textarea'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function CreateSchedulePage() {
+  // 페이지 라우터 정의
   const router = useRouter()
+
+  // 커스텀 Alert hook 호출
+  const alert = useAlert()
+
+  // 로딩 상태 및 폼 데이터 상태 정의
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
@@ -20,11 +30,10 @@ export default function CreateSchedulePage() {
     endDate: '',
     location: '',
     category: '',
-    isAllDay: false,
   })
 
   const categoryOptions = [
-    { value: '', label: '카테고리 선택' },
+    { value: '카테고리 선택', label: '카테고리 선택' },
     { value: 'academic', label: '학사' },
     { value: 'exam', label: '시험' },
     { value: 'event', label: '행사' },
@@ -36,12 +45,17 @@ export default function CreateSchedulePage() {
     e.preventDefault()
 
     if (!formData.title.trim()) {
-      alert('제목을 입력해주세요.')
+      alert.error('제목을 입력해주세요.')
       return
     }
 
     if (!formData.startDate) {
-      alert('시작일을 선택해주세요.')
+      alert.error('시작일을 선택해주세요.')
+      return
+    }
+
+    if (formData.endDate && formData.startDate > formData.endDate) {
+      alert.error('시작일이 종료일보다 늦을 수 없습니다.')
       return
     }
 
@@ -55,159 +69,158 @@ export default function CreateSchedulePage() {
         endDate: formData.endDate || undefined,
         location: formData.location || undefined,
         category: formData.category || undefined,
-        isAllDay: formData.isAllDay,
       }
 
       await schedulesApi.createSchedule(scheduleData)
-      alert('일정이 생성되었습니다.')
+      alert.success('일정이 생성되었습니다.')
       router.push('/admin/schedules')
     } catch (error) {
       console.error('Failed to create schedule:', error)
-      alert('일정 생성 중 오류가 발생했습니다.')
+      alert.error(
+        `일정 생성 중 오류가 발생했습니다. \n${(error as Error).message}`
+      )
     } finally {
       setLoading(false)
     }
   }
 
+  const handleButtonSubmit = () => {
+    handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+  }
+
   return (
-    <div className="w-full">
-      <div className="flex items-center gap-4 mb-6">
+    <div className="w-full h-screen flex flex-col">
+      <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
+        <Title>새 일정 추가</Title>
         <Link href="/admin/schedules">
-          <Button variant="secondary" size="sm">
-            <ArrowLeftIcon className="w-4 h-4 mr-2" />
+          <Button variant="info" size="md" radius="md">
             목록으로
           </Button>
         </Link>
-        <Title>새 일정 추가</Title>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="space-y-6">
-          <h2 className="font-body-18-medium text-gray-900">기본 정보</h2>
-
-          <div>
-            <label className="block font-body-18-medium text-gray-900 mb-3">
-              제목 *
-            </label>
-            <Input
-              type="text"
-              value={formData.title}
-              onChange={value =>
-                setFormData({ ...formData, title: value })
-              }
-              placeholder="일정 제목을 입력하세요"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block font-body-18-medium text-gray-900 mb-3">
-              설명
-            </label>
-            <textarea
-              value={formData.description}
-              onChange={e =>
-                setFormData({ ...formData, description: e.target.value })
-              }
-              placeholder="일정에 대한 상세 설명을 입력하세요"
-              rows={4}
-              className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 resize-vertical"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex-1 overflow-auto p-6">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-4">
             <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                카테고리
-              </label>
-              <Dropdown
-                options={categoryOptions}
-                value={formData.category}
-                onChange={value =>
-                  setFormData({ ...formData, category: value })
-                }
-                placeholder="카테고리 선택"
-              />
-            </div>
-
-            <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                장소
-              </label>
+              <Label required={true} className="mb-2">
+                제목
+              </Label>
               <Input
                 type="text"
-                value={formData.location}
-                onChange={value =>
-                  setFormData({ ...formData, location: value })
-                }
-                placeholder="장소를 입력하세요"
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <h2 className="font-body-18-medium text-gray-900">날짜 및 시간</h2>
-
-          <div className="flex items-center gap-3 mb-4">
-            <input
-              type="checkbox"
-              id="isAllDay"
-              checked={formData.isAllDay}
-              onChange={e =>
-                setFormData({ ...formData, isAllDay: e.target.checked })
-              }
-              className="w-4 h-4"
-            />
-            <label
-              htmlFor="isAllDay"
-              className="font-body-18-medium text-gray-900"
-            >
-              종일 일정
-            </label>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                시작일 *
-              </label>
-              <input
-                type={formData.isAllDay ? 'date' : 'datetime-local'}
-                value={formData.startDate}
-                onChange={e =>
-                  setFormData({ ...formData, startDate: e.target.value })
-                }
-                className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900"
+                value={formData.title}
+                onChange={value => setFormData({ ...formData, title: value })}
+                placeholder="일정 제목을 입력하세요"
                 required
+                className="w-full"
+                size="lg"
               />
             </div>
 
             <div>
-              <label className="block font-body-18-medium text-gray-900 mb-3">
-                종료일
-              </label>
-              <input
-                type={formData.isAllDay ? 'date' : 'datetime-local'}
-                value={formData.endDate}
-                onChange={e =>
-                  setFormData({ ...formData, endDate: e.target.value })
+              <Label className="mb-2" optional={true}>
+                설명
+              </Label>
+              <Textarea
+                value={formData.description}
+                onChange={value =>
+                  setFormData({ ...formData, description: value })
                 }
-                className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900"
+                placeholder="일정에 대한 상세 설명을 입력하세요"
+                rows={4}
+                size="lg"
               />
             </div>
-          </div>
-        </div>
 
-        <div className="flex gap-4 justify-end pt-4">
-          <Link href="/admin/schedules">
-            <Button variant="secondary">취소</Button>
-          </Link>
-          <Button type="submit" variant="primary" disabled={loading}>
-            {loading ? '생성 중...' : '일정 생성'}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <Label className="mb-2" required={true}>
+                  카테고리
+                </Label>
+                <Dropdown
+                  options={categoryOptions}
+                  value={formData.category}
+                  onChange={value =>
+                    setFormData({ ...formData, category: value })
+                  }
+                  placeholder="카테고리 선택"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2" optional={true}>
+                  장소
+                </Label>
+                <Input
+                  type="text"
+                  value={formData.location}
+                  onChange={value =>
+                    setFormData({ ...formData, location: value })
+                  }
+                  placeholder="장소를 입력하세요"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <Label className="mb-2" required={true}>
+              날짜 및 시간
+            </Label>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <Label className="mb-2" required={true}>
+                  시작일
+                </Label>
+                <DateInput
+                  type="datetime-local"
+                  value={formData.startDate}
+                  onChange={value =>
+                    setFormData({ ...formData, startDate: value })
+                  }
+                  size="md"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2" required={true}>
+                  종료일
+                </Label>
+                <DateInput
+                  type="datetime-local"
+                  value={formData.endDate}
+                  onChange={value =>
+                    setFormData({ ...formData, endDate: value })
+                  }
+                  size="md"
+                />
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <div className="flex gap-4 justify-end p-6 border-t bg-white flex-shrink-0">
+        <Link href="/admin/schedules">
+          <Button variant="cancel" radius="md" size="lg">
+            취소
           </Button>
-        </div>
-      </form>
+        </Link>
+        <Button
+          onClick={handleButtonSubmit}
+          variant="info"
+          radius="md"
+          size="lg"
+          disabled={loading}
+        >
+          {loading ? <LoadingSpinner size="md" /> : '일정 생성'}
+        </Button>
+      </div>
     </div>
   )
 }

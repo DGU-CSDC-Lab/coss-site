@@ -26,17 +26,14 @@ export interface FacultyQuery {
 
 export interface CreateFacultyRequest {
   name: string
-  position: string
-  department: string
+  jobTitle: string
   email?: string
-  phone?: string
+  phoneNumber?: string
   office?: string
-  profileImage?: string
-  bio?: string
+  profileImageUrl?: string
+  department: string
   researchAreas?: string[]
-  education?: string[]
-  career?: string[]
-  publications?: string[]
+  biography?: string
 }
 
 export interface UpdateFacultyRequest extends CreateFacultyRequest {}

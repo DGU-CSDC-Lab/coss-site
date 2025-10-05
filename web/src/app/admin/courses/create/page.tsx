@@ -17,7 +17,7 @@ export default function CreateCoursePage() {
     name: '',
     englishName: '',
     code: '',
-    department: '지능IoT학과',
+    department: '',
     grade: '',
     year: new Date().getFullYear(),
     semester: '1학기',

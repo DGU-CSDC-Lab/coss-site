@@ -4,9 +4,11 @@ import {
   IsArray,
   ValidateNested,
   MaxLength,
+  IsEnum,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import { PostStatus } from '../entities/board-post.entity';
 
 export class PostFileDto {
   @ApiProperty({
@@ -92,6 +94,17 @@ export class PostCreateRequest {
   categoryName: string;
 
   @ApiProperty({
+    description: '게시글 상태',
+    enum: PostStatus,
+    example: PostStatus.PUBLIC,
+    default: PostStatus.PUBLIC,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PostStatus)
+  status?: PostStatus = PostStatus.PUBLIC;
+
+  @ApiProperty({
     description: '썸네일 이미지 URL',
     example: 'https://example.com/images/thumbnail.jpg',
     required: false,
@@ -140,6 +153,16 @@ export class PostUpdateRequest {
   @IsOptional()
   @IsString()
   categoryName?: string;
+
+  @ApiProperty({
+    description: '게시글 상태 (임시저장은 생성 시에만 가능)',
+    enum: [PostStatus.PUBLIC, PostStatus.PRIVATE],
+    example: PostStatus.PUBLIC,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum([PostStatus.PUBLIC, PostStatus.PRIVATE])
+  status?: PostStatus.PUBLIC | PostStatus.PRIVATE;
 
   @ApiProperty({
     description: '썸네일 이미지 URL',
@@ -215,6 +238,18 @@ export class PostListQuery {
   sort?: 'latest' | 'popular' = 'latest';
 }
 
+export class AdminPostListQuery extends PostListQuery {
+  @ApiProperty({
+    description: '게시글 상태 필터 (관리자 전용)',
+    enum: PostStatus,
+    example: PostStatus.DRAFT,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(PostStatus)
+  status?: PostStatus;
+}
+
 export class PostResponse {
   @ApiProperty({
     description: '게시글 ID',
@@ -251,6 +286,13 @@ export class PostResponse {
     example: 125,
   })
   viewCount: number;
+
+  @ApiProperty({
+    description: '게시글 상태',
+    enum: PostStatus,
+    example: PostStatus.PUBLIC,
+  })
+  status: PostStatus;
 
   @ApiProperty({
     description: '썸네일 이미지 URL',

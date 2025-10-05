@@ -24,8 +24,8 @@ export class FacultyMember extends BaseEntity {
   @Column({ type: 'varchar', nullable: true })
   department?: string;
 
-  @Column({ name: 'research_area', type: 'text', nullable: true })
-  researchArea?: string;
+  @Column({ name: 'research_areas', type: 'json', nullable: true })
+  researchAreas?: string[];
 
   @Column({ type: 'text', nullable: true })
   biography?: string;

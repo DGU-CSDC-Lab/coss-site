@@ -8,6 +8,7 @@ import {
   Schedule,
   UpdateScheduleRequest,
 } from '@/lib/api/schedules'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 export default function EditSchedulePage() {
   const params = useParams()
@@ -108,11 +109,15 @@ export default function EditSchedulePage() {
   }
 
   if (initialLoading) {
-    return <div className="flex justify-center py-8">로딩 중...</div>
+    return (
+      <div className="flex flex-col w-full items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   if (!schedule) {
-    return <div className="text-center py-8">일정을 찾을 수 없습니다.</div>
+    return <div className="text-gray-400 font-body-14-regular">일정을 찾을 수 없습니다.</div>
   }
 
   return (

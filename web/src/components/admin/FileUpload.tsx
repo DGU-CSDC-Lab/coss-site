@@ -7,6 +7,7 @@ import {
   FileUploadError,
   formatFileSize,
 } from '@/utils/fileUpload'
+import Button from '../common/Button'
 
 interface FileUploadProps {
   onFilesChange: (files: UploadResult[]) => void
@@ -71,12 +72,20 @@ export default function FileUpload({
     }
   }
 
+  /**
+   *
+   * @param index 삭제할 파일의 인덱스
+   */
   const handleRemoveFile = (index: number) => {
     const updatedFiles = files.filter((_, i) => i !== index)
     setFiles(updatedFiles)
     onFilesChange(updatedFiles)
   }
 
+  /**
+   *
+   * @param e 드래그 앤 드롭 이벤트
+   */
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
@@ -86,18 +95,26 @@ export default function FileUpload({
     }
   }
 
+  /**
+   *
+   * @param e 드래그 오버 이벤트 (파일이 드래그되어 올라올 때)
+   */
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(true)
   }
 
+  /**
+   *
+   * @param e 드래그 리브 이벤트 (파일이 드래그되어 올라왔다가 나갈 때)
+   */
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault()
     setDragOver(false)
   }
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* 업로드 영역 */}
       <div
         className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
@@ -125,14 +142,16 @@ export default function FileUpload({
           <div className="font-caption-14 text-text-light">
             최대 {maxFiles}개, {formatFileSize(maxSize)} 이하
           </div>
-          <button
+          <Button
             type="button"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading || files.length >= maxFiles}
-            className="px-4 py-2 bg-pri-500 text-white rounded font-caption-14 hover:bg-pri-600 disabled:opacity-50"
+            size="sm"
+            variant="point_2"
+            radius="md"
           >
             파일 선택
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -140,7 +159,6 @@ export default function FileUpload({
       {uploading && (
         <div className="space-y-2">
           <div className="flex justify-between font-caption-14 text-text">
-            <span>업로드 중...</span>
             <span>{progress}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">

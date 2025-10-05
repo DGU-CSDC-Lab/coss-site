@@ -11,7 +11,7 @@ import {
   HttpStatus,
   Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { FacultyService } from '../services/faculty.service';
 import { AdminGuard } from '../../auth/guards/admin.guard';
 import {
@@ -70,6 +70,7 @@ export class FacultyController {
   })
   @Post('api/v1/admin/faculty')
   @UseGuards(AdminGuard)
+  @ApiBearerAuth('bearerAuth')
   async createFaculty(
     @Body() createDto: FacultyCreate,
   ): Promise<FacultyResponse> {
@@ -88,6 +89,7 @@ export class FacultyController {
   })
   @Put('api/v1/admin/faculty/:id')
   @UseGuards(AdminGuard)
+  @ApiBearerAuth('bearerAuth')
   async updateFaculty(
     @Param('id') id: string,
     @Body() updateDto: FacultyUpdate,
@@ -103,6 +105,7 @@ export class FacultyController {
   @ApiResponse({ status: 204, description: '교수진 삭제 성공' })
   @Delete('api/v1/admin/faculty/:id')
   @UseGuards(AdminGuard)
+  @ApiBearerAuth('bearerAuth')
   @HttpCode(HttpStatus.NO_CONTENT)
   async deleteFaculty(@Param('id') id: string): Promise<void> {
     return this.facultyService.delete(id);

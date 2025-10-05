@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEmail } from 'class-validator';
+import { IsString, IsOptional, IsEmail, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PaginationQuery } from '../../common/dto/pagination.dto';
 
@@ -86,12 +86,13 @@ export class FacultyCreate {
 
   @ApiProperty({
     description: '연구 분야',
-    example: 'IoT, 인공지능, 빅데이터',
+    example: ['IoT', '인공지능', '빅데이터'],
     required: false,
   })
   @IsOptional()
-  @IsString()
-  researchArea?: string;
+  @IsArray()
+  @IsString({ each: true })
+  researchAreas?: string[];
 
   @ApiProperty({
     description: '약력',
@@ -169,12 +170,13 @@ export class FacultyUpdate {
 
   @ApiProperty({
     description: '연구 분야',
-    example: 'IoT, 인공지능, 빅데이터',
+    example: ['IoT', '인공지능', '빅데이터'],
     required: false,
   })
   @IsOptional()
-  @IsString()
-  researchArea?: string;
+  @IsArray()
+  @IsString({ each: true })
+  researchAreas?: string[];
 
   @ApiProperty({
     description: '약력',
@@ -237,9 +239,9 @@ export class FacultyResponse {
 
   @ApiProperty({
     description: '연구 분야',
-    example: 'IoT, 인공지능, 빅데이터',
+    example: ['IoT', '인공지능', '빅데이터'],
   })
-  researchArea?: string;
+  researchAreas?: string[];
 
   @ApiProperty({
     description: '약력',

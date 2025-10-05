@@ -1,3 +1,8 @@
+'use client'
+
+import { useState, useRef, useEffect } from 'react'
+import { ChevronDownIcon } from '@heroicons/react/24/outline'
+
 interface DropdownOption {
   value: string
   label: string
@@ -23,54 +28,74 @@ export default function Dropdown({
   disabled = false,
   className = '',
 }: DropdownProps) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-5 py-3 text-base',
+    sm: 'px-2 py-1.5 font-caption-12',
+    md: 'px-3 py-2 font-caption-14',
+    lg: 'px-4 py-3 font-body-14-regular',
   }
 
   const baseClasses =
-    'rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-gray-200 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors appearance-none cursor-pointer'
+    'rounded-md bg-white ring-1 ring-gray-100 focus:outline-none focus:ring-1 focus:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors cursor-pointer'
+
+  const selectedOption = options.find(option => option.value === value)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSelect = (optionValue: string) => {
+    onChange(optionValue)
+    setIsOpen(false)
+  }
 
   return (
-    <div className="relative">
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
+    <div className="relative" ref={dropdownRef}>
+      <button
+        type="button"
+        onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`${baseClasses} ${sizeClasses[size]} ${className} pr-8`}
+        className={`${baseClasses} ${sizeClasses[size]} ${className} w-full text-left flex items-center justify-between`}
       >
-        {placeholder && (
-          <option value="" disabled>
-            {placeholder}
-          </option>
-        )}
-        {options.map(option => (
-          <option
-            key={option.value}
-            value={option.value}
-            disabled={option.disabled}
-          >
-            {option.label}
-          </option>
-        ))}
-      </select>
-      {/* 드롭다운 화살표 */}
-      <div className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
-        <svg
-          className="w-4 h-4 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </div>
+        <span className={selectedOption ? 'text-gray-900' : 'text-gray-400'}>
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        <ChevronDownIcon
+          className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white ring-1 ring-gray-100 rounded-md ring-1 max-h-60 overflow-auto">
+          {options.slice(1).map(option => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => !option.disabled && handleSelect(option.value)}
+              disabled={option.disabled}
+              className={`w-full ${sizeClasses[size]} text-left hover:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors ${
+                value === option.value
+                  ? 'bg-gray-50 text-gray-900'
+                  : 'text-gray-700'
+              }`}
+            >
+              {option.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

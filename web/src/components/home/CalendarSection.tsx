@@ -175,7 +175,7 @@ export default function CalendarSection() {
           <div className="grid grid-cols-7 gap-1 font-caption-12 text-gray-600">
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
               <div
-                key={day}
+                key={index}
                 className={`text-center font-caption-12 p-2 ${index === 0 || index === 6 ? 'text-point-1' : ''}`}
               >
                 {day}
@@ -218,7 +218,7 @@ export default function CalendarSection() {
               )
             })
           ) : (
-            <div className="text-gray-500 font-body-14-regular">
+            <div className="text-gray-400 font-body-14-regular">
               선택한 날짜 이후 일정이 없습니다.
             </div>
           )}

@@ -32,17 +32,28 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`
 
     const config: RequestInit = {
+      ...options,
       headers: {
         'Content-Type': 'application/json',
-        ...options.headers,
+        ...(options.headers || {}),
       },
-      ...options,
     }
+
+    // FormData일 경우 Content-Type 제거 (브라우저가 boundary 포함한 헤더 자동 설정)
+    if (config.body instanceof FormData) {
+      delete (config.headers as any)['Content-Type']
+    }
+
+    console.log('Final request config:', config)
+    console.log('Final headers:', config.headers)
 
     const response = await fetch(url, config)
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`)
+      const errorData = await response.json().catch(() => ({}))
+      throw new Error(
+        `API Error: ${response.status} - ${errorData.message || 'Unknown error'}`
+      )
     }
 
     // 204 No Content 또는 빈 응답 처리
@@ -93,7 +104,14 @@ class ApiClient {
               },
             })
           } catch (refreshError) {
-            // 리프레시 실패 시 로그아웃
+            // refresh API에서도 401 발생 시
+            if (
+              refreshError instanceof Error &&
+              refreshError.message.includes('401')
+            ) {
+              alert('재로그인이 필요합니다.')
+              window.location.href = '/login'
+            }
             logout()
             throw new Error('Authentication failed')
           }
@@ -128,9 +146,11 @@ class ApiClient {
     data?: any,
     authenticated = false
   ): Promise<T> {
+    const body = data ? JSON.stringify(data) : undefined
+
     const options: RequestInit = {
       method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
+      body: body,
     }
 
     if (authenticated) {

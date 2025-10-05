@@ -4,7 +4,7 @@ interface ButtonProps {
   children: React.ReactNode
   onClick?: () => void
   size?: 'sm' | 'md' | 'lg'
-  variant?: 'point_2' | 'info' | 'outline' | 'primary' | 'secondary' | 'danger'
+  variant?: 'point_2' | 'info' | 'cancel' | 'unstyled' | 'delete'
   radius?: 'none' | 'sm' | 'md' | 'lg' | 'full'
   iconUrl?: string
   disabled?: boolean
@@ -31,11 +31,10 @@ export default function Button({
 
   const variantClasses = {
     point_2: 'bg-point-2 text-white hover:bg-gray-600',
-    info: 'bg-info-600 text-white hover:bg-info-800',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-600 text-white hover:bg-gray-700',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
+    info: 'bg-info-600 text-white hover:bg-info-700',
+    cancel: 'text-gray-700 bg-gray-100 hover:bg-gray-200',
+    unstyled: 'text-gray-400 bg-gray-100 hover:bg-gray-200',
+    delete: 'bg-red-500 text-white hover:bg-red-600',
   }
 
   const radiusClasses = {
