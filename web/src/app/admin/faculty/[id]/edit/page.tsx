@@ -121,15 +121,14 @@ export default function EditFacultyPage() {
     try {
       const facultyData: UpdateFacultyRequest = {
         name: formData.name,
-        position: formData.position,
+        jobTitle: formData.position,
         department: formData.department,
         email: formData.email,
-        phone: formData.phone || undefined,
+        phoneNumber: formData.phone || undefined,
         office: formData.office || undefined,
-        profileImage: profileImageUrl || undefined,
-        bio: formData.bio || undefined,
+        profileImageUrl: profileImageUrl || undefined,
+        biography: formData.bio || undefined,
         researchAreas: formData.research ? [formData.research] : undefined,
-        education: formData.education ? [formData.education] : undefined,
       }
 
       await facultyApi.updateFaculty(params.id as string, facultyData)
@@ -167,7 +166,7 @@ export default function EditFacultyPage() {
     <div className="w-full">
       <div className="flex items-center gap-4 mb-6">
         <Link href="/admin/faculty">
-          <Button variant="secondary" size="sm">
+          <Button variant="cancel" size="sm">
             <ArrowLeftIcon className="w-4 h-4 mr-2" />
             목록으로
           </Button>
@@ -329,9 +328,9 @@ export default function EditFacultyPage() {
 
         <div className="flex gap-4 justify-end pt-4">
           <Link href="/admin/faculty">
-            <Button variant="secondary">취소</Button>
+            <Button variant="cancel">취소</Button>
           </Link>
-          <Button type="submit" variant="primary" disabled={loading}>
+          <Button type="submit" variant="info" disabled={loading}>
             {loading ? '수정 중...' : '교원 수정'}
           </Button>
         </div>

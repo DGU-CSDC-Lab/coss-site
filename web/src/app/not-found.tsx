@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import { PostDetail } from '@/lib/api/posts'
 
 export default function NotFound() {
   const pathname = usePathname()
@@ -27,7 +28,7 @@ export default function NotFound() {
 
     // 직접 뉴스 상세 컴포넌트 구현
     const CustomNewsDetail = () => {
-      const [post, setPost] = useState(null)
+      const [post, setPost] = useState<PostDetail | null>(null)
       const [loading, setLoading] = useState(true)
 
       useEffect(() => {

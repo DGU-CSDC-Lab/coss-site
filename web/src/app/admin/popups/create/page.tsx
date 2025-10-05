@@ -153,7 +153,7 @@ export default function CreatePopupPage() {
                   시작일
                 </Label>
                 <Input
-                  type="datetime-local"
+                  type="text"
                   value={formData.startDate}
                   onChange={value => setFormData({ ...formData, startDate: value })}
                   className="w-full"
@@ -167,7 +167,7 @@ export default function CreatePopupPage() {
                   종료일
                 </Label>
                 <Input
-                  type="datetime-local"
+                  type="text"
                   value={formData.endDate}
                   onChange={value => setFormData({ ...formData, endDate: value })}
                   className="w-full"

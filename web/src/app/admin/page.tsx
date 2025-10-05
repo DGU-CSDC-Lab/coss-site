@@ -54,7 +54,7 @@ export default function AdminDashboard() {
           schedulesApi.getSchedules({ size: 1 }),
           facultyApi.getFaculty({ size: 1 }),
           coursesApi.getCourses({ size: 1 }),
-          headerAssetsApi.getHeaderAssetsByType('banner'),
+          headerAssetsApi.getHeaderAssets({ size: 1 }),
           popupsApi.getPopups({ size: 1 }),
         ])
 
@@ -63,8 +63,8 @@ export default function AdminDashboard() {
         schedules: schedulesRes.meta.totalElements,
         faculty: facultyRes.meta.totalElements,
         courses: coursesRes.meta.totalElements,
-        banners: bannersRes.length,
-        popups: popupsRes.meta.totalElements,
+        banners: bannersRes.meta.totalElements,
+        popups: (popupsRes as any).meta.totalElements,
       })
     } catch (error) {
       console.error('Failed to fetch stats:', error)

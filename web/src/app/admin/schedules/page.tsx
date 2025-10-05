@@ -115,7 +115,7 @@ export default function AdminSchedulesPage() {
       <div className="flex justify-between items-center mb-6">
         <Title>학사일정 관리</Title>
         <Link href="/admin/schedules/create">
-          <Button variant="primary">새 일정 추가</Button>
+          <Button variant="info">새 일정 추가</Button>
         </Link>
       </div>
 
@@ -233,12 +233,12 @@ export default function AdminSchedulesPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
                       <Link href={`/admin/schedules/${schedule.id}/edit`}>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="cancel" size="sm">
                           수정
                         </Button>
                       </Link>
                       <Button
-                        variant="danger"
+                        variant="delete"
                         size="sm"
                         onClick={() =>
                           handleDelete(schedule.id, schedule.title)

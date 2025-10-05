@@ -17,7 +17,7 @@ export default function PopupsPage() {
     try {
       setLoading(true)
       const response = await popupsApi.getPopups()
-      setPopups(response.items)
+      setPopups((response as any).items)
     } catch (error) {
       console.error('Failed to load popups:', error)
       alert.error('팝업 목록을 불러오는데 실패했습니다.')

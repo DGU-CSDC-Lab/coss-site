@@ -69,7 +69,6 @@ export default function CreatePostPage() {
         const parsed = JSON.parse(savedData)
         if (parsed.formData) setFormData(parsed.formData)
         if (parsed.files) setFiles(parsed.files)
-        if (parsed.thumbnailUrl) setThumbnailUrl(parsed.thumbnailUrl)
         if (parsed.isPublic !== undefined) setIsPublic(parsed.isPublic)
       } catch (error) {
         console.error('Failed to restore draft:', error)

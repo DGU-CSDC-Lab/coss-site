@@ -1,6 +1,13 @@
 import { api } from '../apiClient'
 import { PagedResponse } from '../apiClient'
 
+export enum HeaderAssetType {
+  LOGO = 'logo',
+  BANNER = 'banner',
+  BACKGROUND = 'background',
+  ANNOUNCEMENT = 'announcement',
+}
+
 export interface HeaderAsset {
   id: string
   title: string

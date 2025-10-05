@@ -204,7 +204,7 @@ export default function EditPopupPage({ params }: EditPopupPageProps) {
                   시작일
                 </Label>
                 <Input
-                  type="datetime-local"
+                  type="text"
                   value={formData.startDate}
                   onChange={value => setFormData({ ...formData, startDate: value })}
                   className="w-full"
@@ -218,7 +218,7 @@ export default function EditPopupPage({ params }: EditPopupPageProps) {
                   종료일
                 </Label>
                 <Input
-                  type="datetime-local"
+                  type="text"
                   value={formData.endDate}
                   onChange={value => setFormData({ ...formData, endDate: value })}
                   className="w-full"
