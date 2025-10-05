@@ -5,7 +5,7 @@ import { PhotoIcon } from '@heroicons/react/24/outline'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { facultyApi, CreateFacultyRequest } from '@/lib/api/faculty'
-import { uploadImage } from '@/utils/fileUpload'
+import { useImageUpload } from '@/hooks/useImageUpload'
 import Button from '@/components/common/Button'
 import Title from '@/components/common/Title'
 import Input from '@/components/common/Input'
@@ -32,10 +32,20 @@ export default function CreateFacultyPage() {
     biography: '',
     researchAreas: '',
   })
-  const [profileImageUrl, setProfileImageUrl] = useState<string>('')
-  const [imageFileName, setImageFileName] = useState<string>('')
-  const [imageFileKey, setImageFileKey] = useState<string>('')
-  const [imageUploading, setImageUploading] = useState(false)
+
+  const {
+    imageUrl: profileImageUrl,
+    uploading: imageUploading,
+    fileName: imageFileName,
+    fileKey: imageFileKey,
+    handleImageChange,
+  } = useImageUpload({
+    ownerType: 'FACULTY',
+    ownerId: 'temp',
+    onError: (error) => {
+      console.error('Image upload failed:', error)
+    }
+  })
 
   const positionOptions = [
     { value: '직책 선택', label: '직책 선택' },
@@ -53,38 +63,6 @@ export default function CreateFacultyPage() {
     if (numbers.length <= 10)
       return `${numbers.slice(0, 2)}-${numbers.slice(2, 6)}-${numbers.slice(6, 10)}`
     return `${numbers.slice(0, 3)}-${numbers.slice(3, 7)}-${numbers.slice(7, 11)}`
-  }
-
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    setImageFileName(file.name)
-    // 즉시 미리보기 표시
-    const previewUrl = URL.createObjectURL(file)
-    setProfileImageUrl(previewUrl)
-    setImageUploading(true)
-
-    try {
-      // 전체 업로드 플로우 (presigned + upload + complete)
-      const result = await uploadImage(file, {
-        ownerType: 'FACULTY',
-        ownerId: 'temp',
-      })
-
-      // 업로드 완료 후 실제 URL로 교체
-      setProfileImageUrl(result.fileUrl)
-      setImageFileKey(result.fileKey)
-
-      // 미리보기 URL 정리
-      URL.revokeObjectURL(previewUrl)
-    } catch (error) {
-      console.error('Image upload failed:', error)
-      // 업로드 실패해도 미리보기는 유지 (로컬 파일로)
-      console.log('Using local preview only')
-    } finally {
-      setImageUploading(false)
-    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {

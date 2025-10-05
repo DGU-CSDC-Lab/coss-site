@@ -4,8 +4,10 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { headerAssetsApi, HeaderAsset } from '@/lib/api/headerAssets'
+import { PagedResponse } from '@/lib/apiClient'
 import Button from '@/components/common/Button'
 import Title from '@/components/common/Title'
+import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import {
   PlusIcon,
@@ -17,21 +19,30 @@ import {
 } from '@heroicons/react/24/outline'
 
 export default function HeaderAssetsPage() {
-  const [assets, setAssets] = useState<HeaderAsset[]>([])
+  const [assets, setAssets] = useState<PagedResponse<HeaderAsset> | null>(null)
   const [loading, setLoading] = useState(true)
-  const [selectedType, setSelectedType] = useState<
-    'all' | 'logo' | 'banner' | 'background' | 'announcement'
-  >('all')
+  const [isActiveFilter, setIsActiveFilter] = useState('')
+  const [currentPage, setCurrentPage] = useState(1)
+
+  const activeOptions = [
+    { value: '', label: '전체 상태' },
+    { value: 'true', label: '활성' },
+    { value: 'false', label: '비활성' },
+  ]
 
   useEffect(() => {
     fetchAssets()
-  }, [])
+  }, [currentPage, isActiveFilter])
 
   const fetchAssets = async () => {
     try {
       setLoading(true)
-      const response = await headerAssetsApi.getHeaderAssets({ size: 50 })
-      setAssets(response.items)
+      const response = await headerAssetsApi.getHeaderAssets({
+        isActive: isActiveFilter ? isActiveFilter === 'true' : undefined,
+        page: currentPage,
+        size: 20,
+      })
+      setAssets(response)
     } catch (error) {
       console.error('Failed to fetch assets:', error)
     } finally {
@@ -45,185 +56,233 @@ export default function HeaderAssetsPage() {
       fetchAssets()
     } catch (error) {
       console.error('Failed to toggle asset:', error)
+      alert('상태 변경 중 오류가 발생했습니다.')
     }
   }
 
-  const deleteAsset = async (id: string) => {
-    if (confirm('정말 삭제하시겠습니까?')) {
+  const deleteAsset = async (id: string, title: string) => {
+    if (confirm(`"${title}" 에셋을 삭제하시겠습니까?`)) {
       try {
         await headerAssetsApi.deleteHeaderAsset(id)
+        alert('에셋이 삭제되었습니다.')
         fetchAssets()
       } catch (error) {
         console.error('Failed to delete asset:', error)
+        alert('삭제 중 오류가 발생했습니다.')
       }
     }
   }
 
-  const filteredAssets =
-    selectedType === 'all'
-      ? assets
-      : assets.filter(asset => asset.type === selectedType)
+  const typeLabels = {}
 
-  const typeLabels = {
-    logo: '로고',
-    banner: '배너',
-    background: '배경',
-    announcement: '공지',
+  if (loading) {
+    return (
+      <div className="w-full">
+        <div className="flex justify-center py-8">
+          <LoadingSpinner />
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
-        <div>
-          <Title>헤더 에셋 관리</Title>
-          <p className="font-caption-14 text-gray-600 mt-1">
-            홈페이지 헤더 요소들을 관리하세요
-          </p>
-        </div>
+        <Title>헤더 에셋 관리</Title>
         <Link href="/admin/header-assets/create">
-          <Button variant="info">
-            <PlusIcon className="w-5 h-5 mr-2" />새 에셋 추가
-          </Button>
+          <Button variant="info" radius="md" size="md">새 에셋 추가</Button>
         </Link>
       </div>
 
-      <div className="mb-8">
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg w-fit">
-          {(
-            ['all', 'logo', 'banner', 'background', 'announcement'] as const
-          ).map(type => (
-            <button
-              key={type}
-              onClick={() => setSelectedType(type)}
-              className={`px-4 py-2 rounded-md font-body-18-medium transition-colors ${
-                selectedType === type
-                  ? 'bg-white text-gray-900 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              {type === 'all' ? '전체' : typeLabels[type]}
-            </button>
-          ))}
+      <div className="flex justify-between items-center mb-6">
+        <div className="font-body-18-medium text-gray-900">
+          전체{' '}
+          <span className="text-pri-500">{assets?.meta.totalElements || 0}</span>{' '}
+          건
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Dropdown
+            value={isActiveFilter}
+            onChange={setIsActiveFilter}
+            options={activeOptions}
+            size="md"
+            className="w-24"
+          />
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-8">
-          <LoadingSpinner />
-        </div>
-      ) : filteredAssets.length === 0 ? (
-        <div className="text-center py-12">
-          <PhotoIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="font-body-18-medium text-gray-900 mb-2">
-            에셋이 없습니다
-          </h3>
-          <p className="font-caption-14 text-gray-600 mb-6">
-            첫 번째 헤더 에셋을 추가해보세요.
-          </p>
-          <Link href="/admin/header-assets/create">
-            <Button variant="info">에셋 추가하기</Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAssets.map(asset => (
-            <div
-              key={asset.id}
-              className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow"
-            >
-              <div className="aspect-video bg-gray-100 rounded-t-lg overflow-hidden relative">
-                {asset.imageUrl ? (
-                  <Image
-                    src={asset.imageUrl}
-                    alt={asset.title}
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300">
-                    <div className="text-center text-gray-600">
-                      <h3 className="font-body-18-medium">{asset.title}</h3>
-                      {asset.textContent && (
-                        <p className="font-caption-14 mt-1">
-                          {asset.textContent}
-                        </p>
-                      )}
+      <div className="overflow-x-auto rounded-lg border border-info-100">
+        <table className="w-full min-w-[800px]">
+          <thead className="bg-info-50 border-b border-info-100">
+            <tr>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                미리보기
+              </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                제목
+              </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                상태
+              </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                생성일
+              </th>
+              <th className="px-4 py-3 text-center font-body-18-medium text-gray-900">
+                관리
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-info-100">
+            {assets?.items.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                >
+                  헤더 에셋이 없습니다.
+                </td>
+              </tr>
+            ) : (
+              assets?.items.map(asset => (
+                <tr key={asset.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <div className="w-16 h-12 bg-gray-100 rounded overflow-hidden">
+                      <Image
+                        src={asset.imageUrl}
+                        alt={asset.title}
+                        width={64}
+                        height={48}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                  </div>
-                )}
-
-                <div className="absolute top-2 right-2">
-                  <span
-                    className={`px-2 py-1 font-caption-14 rounded-full ${
-                      asset.isActive
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}
-                  >
-                    {asset.isActive ? '활성' : '비활성'}
-                  </span>
-                </div>
-
-                <div className="absolute top-2 left-2">
-                  <span className="px-2 py-1 font-caption-14 bg-blue-100 text-blue-800 rounded-full">
-                    {typeLabels[asset.type]}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-4">
-                <h3 className="font-body-18-medium text-gray-900 mb-1 truncate">
-                  {asset.title}
-                </h3>
-                <p className="font-caption-14 text-gray-600 mb-3">
-                  순서: {asset.displayOrder}
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleActive(asset.id, asset.isActive)}
-                      className={`p-1.5 rounded-md transition-colors ${
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="font-body-14-medium text-gray-900">
+                      {asset.title}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
                         asset.isActive
-                          ? 'text-green-600 hover:bg-green-50'
-                          : 'text-gray-400 hover:bg-gray-50'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
                       }`}
-                      title={asset.isActive ? '비활성화' : '활성화'}
                     >
-                      {asset.isActive ? (
-                        <EyeIcon className="w-4 h-4" />
-                      ) : (
-                        <EyeSlashIcon className="w-4 h-4" />
-                      )}
-                    </button>
-
-                    <Link href={`/admin/header-assets/${asset.id}/edit`}>
-                      <button
-                        className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
-                        title="수정"
-                      >
-                        <PencilIcon className="w-4 h-4" />
-                      </button>
-                    </Link>
-
-                    <button
-                      onClick={() => deleteAsset(asset.id)}
-                      className="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                      title="삭제"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <span className="font-caption-14 text-gray-600">
+                      {asset.isActive ? '활성' : '비활성'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {new Date(asset.createdAt).toLocaleDateString('ko-KR')}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex gap-2 justify-center">
+                      <button
+                        onClick={() => toggleActive(asset.id, asset.isActive)}
+                        className={`p-1.5 rounded-md transition-colors ${
+                          asset.isActive
+                            ? 'text-green-600 hover:bg-green-50'
+                            : 'text-gray-400 hover:bg-gray-50'
+                        }`}
+                        title={asset.isActive ? '비활성화' : '활성화'}
+                      >
+                        {asset.isActive ? (
+                          <EyeIcon className="w-4 h-4" />
+                        ) : (
+                          <EyeSlashIcon className="w-4 h-4" />
+                        )}
+                      </button>
+                      <Link href={`/admin/header-assets/${asset.id}/edit`}>
+                        <Button variant="unstyled" size="sm" radius="md">
+                          수정
+                        </Button>
+                      </Link>
+                      <Button
+                        variant="delete"
+                        size="sm"
+                        radius="md"
+                        onClick={() => deleteAsset(asset.id, asset.title)}
+                      >
+                        삭제
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="flex justify-center items-center gap-2 mt-8">
+        {/* 이전 버튼 */}
+        <button
+          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+          disabled={currentPage === 1}
+          className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
+        >
+          <Image
+            src="/assets/icon/chevron_left.svg"
+            alt="이전"
+            width={16}
+            height={16}
+          />
+        </button>
+
+        {/* 페이지 번호 */}
+        {assets &&
+          Array.from(
+            { length: Math.min(5, assets.meta.totalPages || 1) },
+            (_, i) => {
+              const pageNum = i + 1
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`px-3 py-2 font-caption-14 rounded ${
+                    currentPage === pageNum
+                      ? 'text-pri-500 font-semibold'
+                      : 'text-gray-900 hover:text-pri-500'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              )
+            }
+          )}
+
+        {/* 마지막 페이지 생략 처리 */}
+        {assets && assets.meta.totalPages > 5 && (
+          <>
+            <span className="px-2 text-gray-900">...</span>
+            <button
+              onClick={() => setCurrentPage(assets.meta.totalPages)}
+              className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+            >
+              {assets.meta.totalPages}
+            </button>
+          </>
+        )}
+
+        {/* 다음 버튼 */}
+        <button
+          onClick={() =>
+            setCurrentPage(
+              Math.min(assets?.meta.totalPages || 1, currentPage + 1)
+            )
+          }
+          disabled={currentPage === (assets?.meta.totalPages || 1)}
+          className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
+        >
+          <Image
+            src="/assets/icon/chevron_right.svg"
+            alt="다음"
+            width={16}
+            height={16}
+          />
+        </button>
+      </div>
     </div>
   )
 }

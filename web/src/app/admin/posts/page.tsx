@@ -29,6 +29,12 @@ export default function AdminPostsPage() {
     fetchPosts()
   }, [currentPage])
 
+  // categoryName, status, sort 변경 시 자동 검색
+  useEffect(() => {
+    setCurrentPage(1)
+    fetchPosts()
+  }, [categoryName, status, sort])
+
   const fetchCategories = async () => {
     try {
       const response = await categoriesApi.getCategories()
@@ -45,7 +51,7 @@ export default function AdminPostsPage() {
         keyword: keyword || undefined,
         searchType: searchType as 'title' | 'author',
         categoryName: categoryName || undefined,
-        status: status as 'draft' | 'private' | 'public' || undefined,
+        status: (status as 'draft' | 'private' | 'public') || undefined,
         sort: sort as 'latest' | 'popular',
         page: currentPage,
         size: 20,
@@ -127,7 +133,11 @@ export default function AdminPostsPage() {
           />
           <Input
             type="text"
-            placeholder={searchType === 'title' ? '제목을 입력해주세요.' : '작성자를 입력해주세요.'}
+            placeholder={
+              searchType === 'title'
+                ? '제목을 입력해주세요.'
+                : '작성자를 입력해주세요.'
+            }
             value={keyword}
             onChange={setKeyword}
             onKeyPress={e => e.key === 'Enter' && handleSearch()}
@@ -139,7 +149,7 @@ export default function AdminPostsPage() {
             onChange={setCategoryName}
             options={[
               { value: '', label: '전체 카테고리' },
-              ...categories.map(cat => ({ value: cat.name, label: cat.name }))
+              ...categories.map(cat => ({ value: cat.name, label: cat.name })),
             ]}
             size="md"
             className="w-32"
@@ -189,22 +199,22 @@ export default function AdminPostsPage() {
         <table className="w-full min-w-[900px]">
           <thead className="bg-info-50 border-b border-info-100">
             <tr>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-4/10">
                 제목
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10">
                 카테고리
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-20">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10">
                 상태
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-24">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10">
                 조회수
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10">
                 작성일
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-2/10">
                 관리
               </th>
             </tr>
@@ -241,13 +251,20 @@ export default function AdminPostsPage() {
                     {post.categoryName}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      post.status === 'public' ? 'bg-green-100 text-green-800' :
-                      post.status === 'private' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {post.status === 'public' ? '공개' : 
-                       post.status === 'private' ? '비공개' : '임시저장'}
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        post.status === 'public'
+                          ? 'bg-green-100 text-green-800'
+                          : post.status === 'private'
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {post.status === 'public'
+                        ? '공개'
+                        : post.status === 'private'
+                          ? '비공개'
+                          : '임시저장'}
                     </span>
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">

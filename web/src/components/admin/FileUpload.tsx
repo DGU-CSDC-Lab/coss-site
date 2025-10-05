@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
-  uploadFile,
+  uploadFileOnly,
   UploadResult,
   FileUploadError,
   formatFileSize,
@@ -11,6 +11,7 @@ import Button from '../common/Button'
 
 interface FileUploadProps {
   onFilesChange: (files: UploadResult[]) => void
+  initialFiles?: UploadResult[]
   maxFiles?: number
   accept?: string
   maxSize?: number
@@ -18,15 +19,21 @@ interface FileUploadProps {
 
 export default function FileUpload({
   onFilesChange,
+  initialFiles = [],
   maxFiles = 5,
   accept = '*/*',
   maxSize = 10 * 1024 * 1024,
 }: FileUploadProps) {
-  const [files, setFiles] = useState<UploadResult[]>([])
+  const [files, setFiles] = useState<UploadResult[]>(initialFiles)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // initialFiles가 변경되면 files 상태 업데이트
+  useEffect(() => {
+    setFiles(initialFiles)
+  }, [initialFiles])
 
   const handleFileSelect = async (selectedFiles: FileList) => {
     if (files.length + selectedFiles.length > maxFiles) {
@@ -44,7 +51,7 @@ export default function FileUpload({
         const file = selectedFiles[i]
 
         try {
-          const result = await uploadFile(file, {
+          const result = await uploadFileOnly(file, {
             maxSize,
             onProgress: fileProgress => {
               const totalProgress =

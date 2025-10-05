@@ -1,27 +1,13 @@
 import {
   IsString,
   IsOptional,
-  IsEnum,
   IsBoolean,
-  IsInt,
-  IsDateString,
-  Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { HeaderAssetType } from '../entities';
 import { PaginationQuery } from '../../common/dto/pagination.dto';
 
 export class HeaderAssetQuery extends PaginationQuery {
-  @ApiProperty({
-    description: '헤더 요소 타입',
-    enum: HeaderAssetType,
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(HeaderAssetType)
-  type?: HeaderAssetType;
-
   @ApiProperty({
     description: '활성 상태 필터',
     example: true,
@@ -35,46 +21,25 @@ export class HeaderAssetQuery extends PaginationQuery {
 
 export class HeaderAssetCreate {
   @ApiProperty({
-    description: '헤더 요소 타입',
-    enum: HeaderAssetType,
-    example: HeaderAssetType.BANNER,
-  })
-  @IsEnum(HeaderAssetType)
-  type: HeaderAssetType;
-
-  @ApiProperty({
     description: '제목',
-    example: '메인 로고',
+    example: '메인 헤더',
   })
   @IsString()
   title: string;
 
   @ApiProperty({
     description: '이미지 URL',
-    example: '/uploads/logo.png',
-    required: false,
+    example: '/uploads/header.jpg',
   })
-  @IsOptional()
   @IsString()
-  imageUrl?: string;
+  imageUrl: string;
 
   @ApiProperty({
     description: '링크 URL',
     example: '/',
-    required: false,
   })
-  @IsOptional()
   @IsString()
-  linkUrl?: string;
-
-  @ApiProperty({
-    description: '텍스트 내용',
-    example: '중요 공지사항입니다',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  textContent?: string;
+  linkUrl: string;
 
   @ApiProperty({
     description: '활성 상태',
@@ -85,41 +50,12 @@ export class HeaderAssetCreate {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean = true;
-
-  @ApiProperty({
-    description: '표시 순서',
-    example: 1,
-    minimum: 0,
-    required: false,
-  })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  displayOrder?: number = 0;
-
-  @ApiProperty({
-    description: '시작일시',
-    example: '2024-01-01T00:00:00.000Z',
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  startDate?: string;
-
-  @ApiProperty({
-    description: '종료일시',
-    example: '2024-12-31T23:59:59.000Z',
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  endDate?: string;
 }
 
 export class HeaderAssetUpdate {
   @ApiProperty({
     description: '제목',
-    example: '메인 로고',
+    example: '메인 헤더',
     required: false,
   })
   @IsOptional()
@@ -128,7 +64,7 @@ export class HeaderAssetUpdate {
 
   @ApiProperty({
     description: '이미지 URL',
-    example: '/uploads/logo.png',
+    example: '/uploads/header.jpg',
     required: false,
   })
   @IsOptional()
@@ -145,15 +81,6 @@ export class HeaderAssetUpdate {
   linkUrl?: string;
 
   @ApiProperty({
-    description: '텍스트 내용',
-    example: '중요 공지사항입니다',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  textContent?: string;
-
-  @ApiProperty({
     description: '활성 상태',
     example: true,
     required: false,
@@ -161,35 +88,6 @@ export class HeaderAssetUpdate {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
-
-  @ApiProperty({
-    description: '표시 순서',
-    example: 1,
-    minimum: 0,
-    required: false,
-  })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  displayOrder?: number;
-
-  @ApiProperty({
-    description: '시작일시',
-    example: '2024-01-01T00:00:00.000Z',
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  startDate?: string;
-
-  @ApiProperty({
-    description: '종료일시',
-    example: '2024-12-31T23:59:59.000Z',
-    required: false,
-  })
-  @IsOptional()
-  @IsDateString()
-  endDate?: string;
 }
 
 export class HeaderAssetResponse {
@@ -200,63 +98,28 @@ export class HeaderAssetResponse {
   id: string;
 
   @ApiProperty({
-    description: '헤더 요소 타입',
-    enum: HeaderAssetType,
-  })
-  type: HeaderAssetType;
-
-  @ApiProperty({
     description: '제목',
-    example: '메인 로고',
+    example: '메인 헤더',
   })
   title: string;
 
   @ApiProperty({
     description: '이미지 URL',
-    example: '/uploads/logo.png',
-    required: false,
+    example: '/uploads/header.jpg',
   })
-  imageUrl?: string;
+  imageUrl: string;
 
   @ApiProperty({
     description: '링크 URL',
     example: '/',
-    required: false,
   })
-  linkUrl?: string;
-
-  @ApiProperty({
-    description: '텍스트 내용',
-    example: '중요 공지사항입니다',
-    required: false,
-  })
-  textContent?: string;
+  linkUrl: string;
 
   @ApiProperty({
     description: '활성 상태',
     example: true,
   })
   isActive: boolean;
-
-  @ApiProperty({
-    description: '표시 순서',
-    example: 1,
-  })
-  displayOrder: number;
-
-  @ApiProperty({
-    description: '시작일시',
-    example: '2024-01-01T00:00:00.000Z',
-    required: false,
-  })
-  startDate?: Date;
-
-  @ApiProperty({
-    description: '종료일시',
-    example: '2024-12-31T23:59:59.000Z',
-    required: false,
-  })
-  endDate?: Date;
 
   @ApiProperty({
     description: '생성일시',

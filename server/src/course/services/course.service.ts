@@ -149,7 +149,21 @@ export class CourseService {
     // 새 데이터 추가
     for (let i = 0; i < courses.length; i++) {
       try {
-        const courseData = { ...courses[i], year, semester };
+        const courseData = {
+          year,
+          semester,
+          department: courses[i].department,
+          code: courses[i].courseCode,
+          name: courses[i].subjectName,
+          englishName: courses[i].englishName,
+          grade: courses[i].grade,
+          credit: courses[i].credit,
+          time: courses[i].classTime,
+          instructor: courses[i].instructor,
+          classroom: courses[i].classroom,
+          courseType: courses[i].courseType,
+          syllabusUrl: courses[i].syllabusUrl,
+        };
         const course = this.courseRepository.create(courseData);
         await this.courseRepository.save(course);
         successCount++;

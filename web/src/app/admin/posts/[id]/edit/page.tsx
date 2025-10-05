@@ -1,13 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline'
-import { postsApi, CreatePostRequest } from '@/lib/api/posts'
-import { UploadResult } from '@/utils/fileUpload'
-import { useImageUpload } from '@/hooks/useImageUpload'
+import { postsApi, UpdatePostRequest, PostDetail } from '@/lib/api/posts'
+import { UploadResult, uploadImage } from '@/utils/fileUpload'
 import FileUpload from '@/components/admin/FileUpload'
 import HtmlEditor from '@/components/admin/HtmlEditor'
 import Button from '@/components/common/Button'
@@ -28,12 +27,17 @@ const CATEGORIES = [
   { value: 'activities', label: '교육/활동/취업 정보' },
 ]
 
-export default function CreatePostPage() {
+export default function EditPostPage() {
+  const pathname = usePathname()
   const router = useRouter()
   const alert = useAlert()
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  
+  // URL에서 ID 추출
+  const postId = pathname.split('/')[3]
 
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
   const [showPublishModal, setShowPublishModal] = useState(false)
   const [isPublic, setIsPublic] = useState(true)
   const [showTitle, setShowTitle] = useState(true)
@@ -43,53 +47,72 @@ export default function CreatePostPage() {
     contentHtml: '',
   })
   const [files, setFiles] = useState<UploadResult[]>([])
+  const [thumbnailUrl, setThumbnailUrl] = useState<string>('')
+  const [thumbnailUploading, setThumbnailUploading] = useState(false)
+  const [originalStatus, setOriginalStatus] = useState<string>('')
   const [getEditorImageFileKeys, setGetEditorImageFileKeys] = useState<
     (() => string[]) | null
   >(null)
 
-  const {
-    imageUrl: thumbnailUrl,
-    uploading: thumbnailUploading,
-    handleImageChange: handleThumbnailChange,
-  } = useImageUpload({
-    onError: (error) => {
-      alert.error('썸네일 업로드 중 오류가 발생했습니다.')
+  useEffect(() => {
+    if (postId) {
+      fetchPost()
     }
-  })
+  }, [postId])
+
+  const fetchPost = async () => {
+    try {
+      const post: PostDetail = await postsApi.getAdminPost(postId)
+      setFormData({
+        title: post.title,
+        categoryId: CATEGORIES.find(cat => cat.label === post.categoryName)?.value || 'news',
+        contentHtml: post.contentHtml,
+      })
+      setThumbnailUrl(post.thumbnailUrl || '')
+      setIsPublic(post.status === 'public')
+      setOriginalStatus(post.status)
+      
+      // 기존 파일들을 UploadResult 형태로 변환
+      if (post.files && post.files.length > 0) {
+        const existingFiles: UploadResult[] = post.files.map(file => ({
+          fileKey: file.id,
+          fileUrl: file.downloadUrl,
+          originalName: file.originalName,
+          fileSize: file.fileSize,
+          mimeType: 'application/octet-stream', // 기본값
+        }))
+        setFiles(existingFiles)
+      }
+    } catch (error) {
+      console.error('Failed to fetch post:', error)
+      alert.error('게시글을 불러오는데 실패했습니다.')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop
     setShowTitle(scrollTop < 100)
   }
 
-  useEffect(() => {
-    const savedData = localStorage.getItem('draft-post')
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData)
-        if (parsed.formData) setFormData(parsed.formData)
-        if (parsed.files) setFiles(parsed.files)
-        if (parsed.thumbnailUrl) setThumbnailUrl(parsed.thumbnailUrl)
-        if (parsed.isPublic !== undefined) setIsPublic(parsed.isPublic)
-      } catch (error) {
-        console.error('Failed to restore draft:', error)
-      }
-    }
-  }, [])
+  const handleThumbnailChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const draftData = {
-        formData,
-        files,
-        thumbnailUrl,
-        isPublic,
-        lastSaved: new Date().toISOString(),
-      }
-      localStorage.setItem('draft-post', JSON.stringify(draftData))
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [formData, files, thumbnailUrl, isPublic])
+    setThumbnailUrl(URL.createObjectURL(file))
+    setThumbnailUploading(true)
+
+    try {
+      const result = await uploadImage(file)
+      setThumbnailUrl(result.fileUrl)
+    } catch (error) {
+      console.error('Thumbnail upload failed:', error)
+      alert.error('썸네일 업로드 중 오류가 발생했습니다.')
+    } finally {
+      setThumbnailUploading(false)
+    }
+  }
 
   const handlePublish = () => {
     if (!formData.title.trim()) {
@@ -114,6 +137,7 @@ export default function CreatePostPage() {
       const editorImageFileKeys = getEditorImageFileKeys && typeof getEditorImageFileKeys === 'function' 
         ? getEditorImageFileKeys() 
         : []
+      
       const allFiles = [
         ...files.map(file => ({
           fileKey: file.fileKey,
@@ -129,26 +153,43 @@ export default function CreatePostPage() {
         })),
       ]
 
-      const postData: CreatePostRequest = {
+      const updateData: UpdatePostRequest = {
         title: formData.title,
         contentHtml: formData.contentHtml,
         categoryName: CATEGORIES.find(cat => cat.value === formData.categoryId)?.label || '뉴스',
-        status: isDraft ? 'draft' : isPublic ? 'public' : 'private',
-        thumbnailUrl: thumbnailUrl || null,
+        thumbnailUrl: thumbnailUrl || undefined,
         files: allFiles,
       }
 
-      await postsApi.createPost(postData)
-      localStorage.removeItem('draft-post')
-      alert.success(isDraft ? '임시저장 되었습니다.' : '게시글이 생성되었습니다.')
+      // draft인 경우: isDraft에 따라 draft 유지 또는 상태 변경
+      // draft가 아닌 경우: 기존 상태 유지하며 수정
+      if (originalStatus === 'draft') {
+        if (!isDraft) {
+          updateData.status = isPublic ? 'public' : 'private'
+        }
+        // isDraft=true면 status 필드 없음 (draft 유지)
+      } else {
+        updateData.status = isPublic ? 'public' : 'private'
+      }
+      
+      await postsApi.updatePost(postId, updateData)
+      alert.success('게시글이 수정되었습니다.')
       router.push('/admin/posts')
     } catch (error) {
-      console.error('Failed to create post:', error)
-      alert.error('게시글 생성 중 오류가 발생했습니다.')
+      console.error('Failed to update post:', error)
+      alert.error('게시글 수정 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
       setShowPublishModal(false)
     }
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    )
   }
 
   return (
@@ -163,18 +204,26 @@ export default function CreatePostPage() {
           </Link>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            size="md"
-            variant="cancel"
-            radius="md"
-            onClick={handleDraftSave}
-            disabled={loading}
-          >
-            임시저장
-          </Button>
-          <Button size="md" variant="info" radius="md" onClick={handlePublish}>
-            출간하기
-          </Button>
+          {originalStatus === 'draft' ? (
+            <>
+              <Button
+                size="md"
+                variant="cancel"
+                radius="md"
+                onClick={handleDraftSave}
+                disabled={loading}
+              >
+                임시저장
+              </Button>
+              <Button size="md" variant="info" radius="md" onClick={handlePublish}>
+                저장하기
+              </Button>
+            </>
+          ) : (
+            <Button size="md" variant="info" radius="md" onClick={handlePublish}>
+              수정하기
+            </Button>
+          )}
         </div>
       </div>
 
@@ -319,6 +368,7 @@ export default function CreatePostPage() {
                   </Label>
                   <FileUpload
                     onFilesChange={setFiles}
+                    initialFiles={files}
                     maxFiles={5}
                     maxSize={10 * 1024 * 1024}
                   />
@@ -342,7 +392,7 @@ export default function CreatePostPage() {
                 onClick={handleSubmit}
                 disabled={loading}
               >
-                {loading ? <LoadingSpinner size="md" /> : '출간하기'}
+                {loading ? <LoadingSpinner size="md" /> : '수정하기'}
               </Button>
             </div>
           </div>

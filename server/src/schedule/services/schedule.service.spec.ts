@@ -94,6 +94,17 @@ describe('ScheduleService', () => {
         { category: ScheduleCategory.ADMISSION },
       );
     });
+
+    it('should filter by search keyword', async () => {
+      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+
+      await service.findAll({ search: '개강' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'schedule.title LIKE :search',
+        { search: '%개강%' },
+      );
+    });
   });
 
   describe('findOne', () => {

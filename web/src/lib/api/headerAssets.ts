@@ -3,47 +3,32 @@ import { PagedResponse } from '../apiClient'
 
 export interface HeaderAsset {
   id: string
-  type: 'logo' | 'banner' | 'background' | 'announcement'
   title: string
-  imageUrl?: string
-  linkUrl?: string
-  textContent?: string
+  imageUrl: string
+  linkUrl: string
   isActive: boolean
-  displayOrder: number
-  startDate?: string
-  endDate?: string
   createdAt: string
   updatedAt: string
 }
 
 export interface HeaderAssetsQuery {
-  type?: 'logo' | 'banner' | 'background' | 'announcement'
   isActive?: boolean
   page?: number
   size?: number
 }
 
 export interface CreateHeaderAssetRequest {
-  type: 'logo' | 'banner' | 'background' | 'announcement'
   title: string
-  imageUrl?: string
-  linkUrl?: string
-  textContent?: string
+  imageUrl: string
+  linkUrl: string
   isActive?: boolean
-  displayOrder?: number
-  startDate?: string
-  endDate?: string
 }
 
 export interface UpdateHeaderAssetRequest {
   title?: string
   imageUrl?: string
   linkUrl?: string
-  textContent?: string
   isActive?: boolean
-  displayOrder?: number
-  startDate?: string
-  endDate?: string
 }
 
 // Header Assets API 함수들
@@ -61,11 +46,6 @@ export const headerAssetsApi = {
 
     return api.get(`/header-assets?${searchParams.toString()}`)
   },
-
-  // 특정 타입의 활성화된 헤더 요소들 조회
-  getHeaderAssetsByType: (
-    type: 'logo' | 'banner' | 'background' | 'announcement'
-  ): Promise<HeaderAsset[]> => api.get(`/header-assets/type/${type}`),
 
   // 헤더 요소 상세 조회
   getHeaderAsset: (id: string): Promise<HeaderAsset> =>

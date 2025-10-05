@@ -1,18 +1,22 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { coursesApi, CreateCourseRequest } from '@/lib/api/courses'
+import { coursesApi, Course, UpdateCourseRequest } from '@/lib/api/courses'
 import Title from '@/components/common/Title'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import Label from '@/components/common/Label'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
 
-export default function CreateCoursePage() {
+export default function EditCoursePage() {
+  const params = useParams()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [course, setCourse] = useState<Course | null>(null)
   const [formData, setFormData] = useState({
     subjectName: '',
     englishName: '',
@@ -55,6 +59,39 @@ export default function CreateCoursePage() {
     { value: '공통기초', label: '공통기초' },
   ]
 
+  useEffect(() => {
+    if (params.id) {
+      fetchCourse(params.id as string)
+    }
+  }, [params.id])
+
+  const fetchCourse = async (id: string) => {
+    try {
+      setInitialLoading(true)
+      const courseData = await coursesApi.getCourse(id)
+      setCourse(courseData)
+      setFormData({
+        subjectName: courseData.subjectName,
+        englishName: courseData.englishName || '',
+        courseCode: courseData.courseCode,
+        department: courseData.department,
+        grade: courseData.grade || '',
+        year: courseData.year,
+        semester: courseData.semester,
+        instructor: courseData.instructor || '',
+        classroom: courseData.classroom || '',
+        courseType: courseData.courseType || '',
+        credit: courseData.credit || 3,
+      })
+    } catch (error) {
+      console.error('Failed to fetch course:', error)
+      alert('과목 정보를 불러올 수 없습니다.')
+      router.push('/admin/courses')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -71,7 +108,7 @@ export default function CreateCoursePage() {
     setLoading(true)
 
     try {
-      const courseData: CreateCourseRequest = {
+      const courseData: UpdateCourseRequest = {
         subjectName: formData.subjectName,
         englishName: formData.englishName || undefined,
         courseCode: formData.courseCode,
@@ -85,21 +122,41 @@ export default function CreateCoursePage() {
         credit: formData.credit,
       }
 
-      await coursesApi.createCourse(courseData)
-      alert('과목이 생성되었습니다.')
+      await coursesApi.updateCourse(params.id as string, courseData)
+      alert('과목이 수정되었습니다.')
       router.push('/admin/courses')
     } catch (error) {
-      console.error('Failed to create course:', error)
-      alert('과목 생성 중 오류가 발생했습니다.')
+      console.error('Failed to update course:', error)
+      alert('과목 수정 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
     }
   }
 
+  if (initialLoading) {
+    return (
+      <div className="w-full">
+        <div className="flex justify-center py-8">
+          <LoadingSpinner />
+        </div>
+      </div>
+    )
+  }
+
+  if (!course) {
+    return (
+      <div className="w-full">
+        <div className="text-center py-8 font-caption-14 text-gray-600">
+          과목을 찾을 수 없습니다.
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="w-full h-screen flex flex-col">
       <div className="flex items-center justify-between gap-4 p-6">
-        <Title>새 과목 추가</Title>
+        <Title>과목 수정</Title>
         <Link href="/admin/courses">
           <Button variant="delete" size="md" radius="md">
             나가기
@@ -118,7 +175,9 @@ export default function CreateCoursePage() {
                 <Input
                   type="text"
                   value={formData.subjectName}
-                  onChange={value => setFormData({ ...formData, subjectName: value })}
+                  onChange={value =>
+                    setFormData({ ...formData, subjectName: value })
+                  }
                   placeholder="과목명을 입력하세요"
                   className="w-full"
                   size="lg"
@@ -149,7 +208,9 @@ export default function CreateCoursePage() {
                 <Input
                   type="text"
                   value={formData.courseCode}
-                  onChange={value => setFormData({ ...formData, courseCode: value })}
+                  onChange={value =>
+                    setFormData({ ...formData, courseCode: value })
+                  }
                   placeholder="예: IOT101-01"
                   className="w-full"
                   size="lg"
@@ -293,7 +354,7 @@ export default function CreateCoursePage() {
               size="md"
               disabled={loading}
             >
-              {loading ? '생성 중...' : '과목 생성'}
+              {loading ? '수정 중...' : '과목 수정'}
             </Button>
           </div>
         </form>

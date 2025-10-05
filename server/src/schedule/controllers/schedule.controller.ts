@@ -31,7 +31,7 @@ export class ScheduleController {
   @ApiOperation({
     summary: '학사일정 목록 조회',
     description:
-      '전체 학사일정을 조회하거나 월별/연도별/카테고리별로 필터링하여 조회합니다. 페이지네이션을 지원합니다.',
+      '전체 학사일정을 조회하거나 월별/연도별/카테고리별로 필터링하여 조회합니다. 일정명으로 키워드 검색도 가능합니다. 페이지네이션을 지원합니다.',
   })
   @ApiResponse({
     status: 200,

@@ -3,24 +3,26 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
-import {
-  headerAssetsApi,
-  CreateHeaderAssetRequest,
-} from '@/lib/api/headerAssets'
+import { popupsApi, CreatePopupRequest } from '@/lib/api/popups'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import Title from '@/components/common/Title'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
+import Textarea from '@/components/common/Textarea'
 import Label from '@/components/common/Label'
 import Checkbox from '@/components/common/Checkbox'
+import { useAlert } from '@/hooks/useAlert'
 
-export default function CreateHeaderAssetPage() {
+export default function CreatePopupPage() {
   const router = useRouter()
+  const alert = useAlert()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: '',
+    content: '',
     linkUrl: '',
+    startDate: '',
+    endDate: '',
     isActive: true,
   })
 
@@ -30,7 +32,7 @@ export default function CreateHeaderAssetPage() {
     handleImageChange,
   } = useImageUpload({
     onError: (error) => {
-      alert('이미지 업로드 중 오류가 발생했습니다.')
+      alert.error('이미지 업로드 중 오류가 발생했습니다.')
     }
   })
 
@@ -38,36 +40,49 @@ export default function CreateHeaderAssetPage() {
     e.preventDefault()
 
     if (!formData.title.trim()) {
-      alert('제목을 입력해주세요.')
+      alert.error('제목을 입력해주세요.')
       return
     }
 
-    if (!imageUrl.trim()) {
-      alert('이미지를 업로드해주세요.')
+    if (!formData.content.trim()) {
+      alert.error('내용을 입력해주세요.')
       return
     }
 
-    if (!formData.linkUrl.trim()) {
-      alert('링크 URL을 입력해주세요.')
+    if (!formData.startDate) {
+      alert.error('시작일을 선택해주세요.')
+      return
+    }
+
+    if (!formData.endDate) {
+      alert.error('종료일을 선택해주세요.')
+      return
+    }
+
+    if (new Date(formData.startDate) >= new Date(formData.endDate)) {
+      alert.error('종료일은 시작일보다 늦어야 합니다.')
       return
     }
 
     setLoading(true)
 
     try {
-      const assetData: CreateHeaderAssetRequest = {
+      const popupData: CreatePopupRequest = {
         title: formData.title,
-        imageUrl: imageUrl,
-        linkUrl: formData.linkUrl,
+        content: formData.content,
+        imageUrl: imageUrl || undefined,
+        linkUrl: formData.linkUrl || undefined,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
         isActive: formData.isActive,
       }
 
-      await headerAssetsApi.createHeaderAsset(assetData)
-      alert('헤더 에셋이 생성되었습니다.')
-      router.push('/admin/header-assets')
+      await popupsApi.createPopup(popupData)
+      alert.success('팝업이 생성되었습니다.')
+      router.push('/admin/popups')
     } catch (error) {
-      console.error('Failed to create header asset:', error)
-      alert('헤더 에셋 생성 중 오류가 발생했습니다.')
+      console.error('Failed to create popup:', error)
+      alert.error('팝업 생성 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
     }
@@ -76,8 +91,8 @@ export default function CreateHeaderAssetPage() {
   return (
     <div className="w-full h-screen flex flex-col">
       <div className="flex items-center justify-between gap-4 p-6">
-        <Title>새 헤더 에셋 추가</Title>
-        <Link href="/admin/header-assets">
+        <Title>새 팝업 추가</Title>
+        <Link href="/admin/popups">
           <Button variant="delete" size="md" radius="md">
             나가기
           </Button>
@@ -95,10 +110,52 @@ export default function CreateHeaderAssetPage() {
                 <Input
                   type="text"
                   value={formData.title}
-                  onChange={value =>
-                    setFormData({ ...formData, title: value })
-                  }
-                  placeholder="제목을 입력하세요"
+                  onChange={value => setFormData({ ...formData, title: value })}
+                  placeholder="팝업 제목을 입력하세요"
+                  className="w-full"
+                  size="lg"
+                  required
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2" optional={true}>
+                  링크 URL
+                </Label>
+                <Input
+                  type="url"
+                  value={formData.linkUrl}
+                  onChange={value => setFormData({ ...formData, linkUrl: value })}
+                  placeholder="https://example.com"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label required={true} className="mb-2">
+                내용
+              </Label>
+              <Textarea
+                value={formData.content}
+                onChange={value => setFormData({ ...formData, content: value })}
+                placeholder="팝업 내용을 입력하세요"
+                rows={6}
+                size="lg"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <Label required={true} className="mb-2">
+                  시작일
+                </Label>
+                <Input
+                  type="datetime-local"
+                  value={formData.startDate}
+                  onChange={value => setFormData({ ...formData, startDate: value })}
                   className="w-full"
                   size="lg"
                   required
@@ -107,15 +164,12 @@ export default function CreateHeaderAssetPage() {
 
               <div>
                 <Label required={true} className="mb-2">
-                  링크 URL
+                  종료일
                 </Label>
                 <Input
-                  type="url"
-                  value={formData.linkUrl}
-                  onChange={value =>
-                    setFormData({ ...formData, linkUrl: value })
-                  }
-                  placeholder="https://example.com"
+                  type="datetime-local"
+                  value={formData.endDate}
+                  onChange={value => setFormData({ ...formData, endDate: value })}
                   className="w-full"
                   size="lg"
                   required
@@ -125,7 +179,7 @@ export default function CreateHeaderAssetPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
-                <Label required={true} className="mb-2">
+                <Label className="mb-2" optional={true}>
                   이미지
                 </Label>
                 <input
@@ -133,7 +187,6 @@ export default function CreateHeaderAssetPage() {
                   accept="image/*"
                   onChange={handleImageChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
-                  required
                 />
                 {imageUploading && (
                   <p className="mt-2 font-caption-14 text-gray-600">
@@ -145,12 +198,10 @@ export default function CreateHeaderAssetPage() {
                     <p className="font-caption-14 text-gray-600 mb-2">
                       미리보기:
                     </p>
-                    <Image
+                    <img
                       src={imageUrl}
                       alt="미리보기"
-                      width={320}
-                      height={128}
-                      className="w-full max-w-xs h-32 object-cover rounded-md border"
+                      className="w-full max-w-xs h-auto rounded-md border"
                     />
                   </div>
                 )}
@@ -159,9 +210,7 @@ export default function CreateHeaderAssetPage() {
               <div className="flex items-center pt-8">
                 <Checkbox
                   checked={formData.isActive}
-                  onChange={checked =>
-                    setFormData({ ...formData, isActive: checked })
-                  }
+                  onChange={checked => setFormData({ ...formData, isActive: checked })}
                   label="활성화"
                 />
               </div>
@@ -169,11 +218,11 @@ export default function CreateHeaderAssetPage() {
           </div>
 
           <div className="flex gap-4 justify-end pt-4">
-            <Link href="/admin/header-assets">
+            <Link href="/admin/popups">
               <Button variant="cancel" radius="md" size="md">취소</Button>
             </Link>
             <Button type="submit" variant="info" radius="md" size="md" disabled={loading}>
-              {loading ? '생성 중...' : '에셋 생성'}
+              {loading ? '생성 중...' : '팝업 생성'}
             </Button>
           </div>
         </form>

@@ -5,9 +5,11 @@ import {
   IsNumber,
   Min,
   IsEnum,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { PaginationQuery } from '../../common/dto/pagination.dto';
 
 export class CourseQuery extends PaginationQuery {
@@ -450,6 +452,9 @@ export class CourseBulkInitRequest {
     description: '교과목 목록',
     type: [CourseCreate],
   })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CourseCreate)
   courses: CourseCreate[];
 }
 

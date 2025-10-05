@@ -109,7 +109,7 @@ export class BoardController {
     name: 'status',
     required: false,
     enum: PostStatus,
-    description: '게시글 상태 필터 (draft: 임시저장, private: 비공개, public: 공개)',
+    description: '게시글 상태 필터 (draft: 임시저장, private: 비공개, public: 공개). 생략 시 전체 상태 조회',
   })
   @ApiQuery({
     name: 'categoryName',

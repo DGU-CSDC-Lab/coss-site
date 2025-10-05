@@ -3,13 +3,6 @@
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
-
-// 동적 라우트 컴포넌트들 import (이름 변경된 폴더에서)
-import EditFacultyPage from '@/app/admin/faculty/_DYNAMIC_id_/edit/page'
-import EditPostPage from '@/app/admin/posts/_DYNAMIC_id_/edit/page'
-import EditSchedulePage from '@/app/admin/schedules/_DYNAMIC_id_/edit/page'
-import EditCoursePage from '@/app/admin/courses/_DYNAMIC_id_/edit/page'
-import EditHeaderAssetPage from '@/app/admin/header-assets/_DYNAMIC_id_/edit/page'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 
 export default function NotFound() {
@@ -104,29 +97,7 @@ export default function NotFound() {
     return <CustomNewsDetail />
   }
 
-  // 관리자 동적 라우트 처리
-  if (pathname.includes('/admin/faculty/') && pathname.includes('/edit')) {
-    return <EditFacultyPage />
-  }
-
-  if (pathname.includes('/admin/posts/') && pathname.includes('/edit')) {
-    return <EditPostPage />
-  }
-
-  if (pathname.includes('/admin/schedules/') && pathname.includes('/edit')) {
-    return <EditSchedulePage />
-  }
-
-  if (pathname.includes('/admin/courses/') && pathname.includes('/edit')) {
-    return <EditCoursePage />
-  }
-
-  if (
-    pathname.includes('/admin/header-assets/') &&
-    pathname.includes('/edit')
-  ) {
-    return <EditHeaderAssetPage />
-  }
+  // 관리자 동적 라우트는 이제 올바른 Next.js 라우팅으로 처리됨
 
   // 실제 404 페이지
   return (

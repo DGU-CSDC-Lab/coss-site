@@ -39,6 +39,15 @@ export class ScheduleQuery extends PaginationQuery {
   @IsOptional()
   @IsEnum(ScheduleCategory)
   category?: ScheduleCategory;
+
+  @ApiProperty({
+    description: '일정명 검색 키워드. 제목에서 키워드를 포함하는 일정을 검색',
+    example: '개강',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  search?: string;
 }
 
 export class ScheduleCreate {

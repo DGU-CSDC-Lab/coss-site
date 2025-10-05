@@ -9,12 +9,14 @@ import {
   PhotoIcon,
   AcademicCapIcon,
   ChevronRightIcon,
+  SpeakerWaveIcon,
 } from '@heroicons/react/24/outline'
 import { postsApi } from '@/lib/api/posts'
 import { schedulesApi } from '@/lib/api/schedules'
 import { facultyApi } from '@/lib/api/faculty'
 import { coursesApi } from '@/lib/api/courses'
 import { headerAssetsApi } from '@/lib/api/headerAssets'
+import { popupsApi } from '@/lib/api/popups'
 import Information from '@/components/common/Information'
 import Title from '@/components/common/Title'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
@@ -25,6 +27,7 @@ interface DashboardStats {
   faculty: number
   courses: number
   banners: number
+  popups: number
 }
 
 export default function AdminDashboard() {
@@ -34,6 +37,7 @@ export default function AdminDashboard() {
     faculty: 0,
     courses: 0,
     banners: 0,
+    popups: 0,
   })
   const [loading, setLoading] = useState(true)
 
@@ -44,13 +48,14 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const [postsRes, schedulesRes, facultyRes, coursesRes, bannersRes] =
+      const [postsRes, schedulesRes, facultyRes, coursesRes, bannersRes, popupsRes] =
         await Promise.all([
-          postsApi.getPosts({ size: 1 }),
+          postsApi.getAdminPosts({ size: 1 }),
           schedulesApi.getSchedules({ size: 1 }),
           facultyApi.getFaculty({ size: 1 }),
           coursesApi.getCourses({ size: 1 }),
           headerAssetsApi.getHeaderAssetsByType('banner'),
+          popupsApi.getPopups({ size: 1 }),
         ])
 
       setStats({
@@ -59,6 +64,7 @@ export default function AdminDashboard() {
         faculty: facultyRes.meta.totalElements,
         courses: coursesRes.meta.totalElements,
         banners: bannersRes.length,
+        popups: popupsRes.meta.totalElements,
       })
     } catch (error) {
       console.error('Failed to fetch stats:', error)
@@ -87,16 +93,22 @@ export default function AdminDashboard() {
       href: '/admin/faculty/create',
     },
     {
+      title: '팝업 등록',
+      description: '사이트 팝업을 등록합니다.',
+      icon: SpeakerWaveIcon,
+      href: '/admin/popups/create',
+    },
+    {
       title: '개설과목 일괄등록',
       description: 'Excel 파일로 개설과목을 일괄 등록합니다.',
       icon: AcademicCapIcon,
       href: '/admin/courses/bulk-upload',
     },
     {
-      title: '배너 관리',
-      description: '메인 배너 이미지를 수정합니다.',
+      title: '배너 생성',
+      description: '메인 배너 이미지를 생성합니다.',
       icon: PhotoIcon,
-      href: '/admin/header-assets',
+      href: '/admin/header-assets/create',
     },
   ]
 
@@ -121,6 +133,12 @@ export default function AdminDashboard() {
           href: '/admin/faculty',
           icon: UserGroupIcon,
           count: stats.faculty,
+        },
+        {
+          name: '팝업 관리',
+          href: '/admin/popups',
+          icon: SpeakerWaveIcon,
+          count: stats.popups,
         },
       ],
     },

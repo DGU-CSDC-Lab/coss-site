@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { PlusIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
 import { coursesApi, Course } from '@/lib/api/courses'
 import { PagedResponse } from '@/lib/apiClient'
 import Title from '@/components/common/Title'
@@ -87,71 +87,61 @@ export default function AdminCoursesPage() {
         <Title>개설과목 관리</Title>
         <div className="flex gap-3">
           <Link href="/admin/courses/bulk-upload">
-            <Button variant="secondary">일괄 등록</Button>
+            <Button variant="unstyled" radius="md" size="md">일괄 등록</Button>
           </Link>
           <Link href="/admin/courses/create">
-            <Button variant="primary">
-              <PlusIcon className="w-4 h-4 mr-2" />새 과목 추가
-            </Button>
+            <Button variant="info" radius="md" size="md">새 과목 추가</Button>
           </Link>
         </div>
       </div>
 
-      {/* 필터 */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
-        <div>
-          <label className="block font-body-18-medium text-gray-900 mb-2">
-            년도
-          </label>
+      <div className="flex justify-between items-center mb-6">
+        <div className="font-body-18-medium text-gray-900">
+          전체{' '}
+          <span className="text-pri-500">
+            {courses?.meta.totalElements || 0}
+          </span>{' '}
+          건
+        </div>
+
+        <div className="flex flex-wrap gap-2">
           <Dropdown
             options={yearOptions}
             value={selectedYear.toString()}
             onChange={value => setSelectedYear(parseInt(value))}
+            size="md"
+            className="w-24"
           />
-        </div>
-        <div>
-          <label className="block font-body-18-medium text-gray-900 mb-2">
-            학기
-          </label>
           <Dropdown
             options={semesterOptions}
             value={selectedSemester}
             onChange={setSelectedSemester}
+            size="md"
+            className="w-24"
           />
-        </div>
-        <div>
-          <label className="block font-body-18-medium text-gray-900 mb-2">
-            검색
-          </label>
           <Input
             type="text"
             placeholder="과목명, 학수번호 검색"
             value={keyword}
             onChange={setKeyword}
             onKeyPress={e => e.key === 'Enter' && handleSearch()}
+            className="w-full sm:w-60"
+            size="md"
           />
-        </div>
-        <div className="flex items-end">
-          <Button variant="secondary" onClick={handleSearch}>
-            <MagnifyingGlassIcon className="w-4 h-4 mr-2" />
+          <Button
+            variant="point_2"
+            radius="md"
+            size="md"
+            onClick={handleSearch}
+          >
             검색
           </Button>
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-4">
-        <div className="font-body-18-medium text-gray-900">
-          {selectedYear}년 {selectedSemester} - 전체{' '}
-          <span className="text-pri-500">
-            {courses?.meta.totalElements || 0}
-          </span>{' '}
-          건
-        </div>
-      </div>
-
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-lg border border-info-100">
         <table className="w-full min-w-[1000px]">
-          <thead>
+          <thead className="bg-info-50 border-b border-info-100">
             <tr>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
                 학수번호
@@ -179,7 +169,7 @@ export default function AdminCoursesPage() {
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-info-100">
             {courses?.items.length === 0 ? (
               <tr>
                 <td
@@ -192,12 +182,12 @@ export default function AdminCoursesPage() {
             ) : (
               courses?.items.map(course => (
                 <tr key={course.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 font-body-18-medium text-gray-900">
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {course.courseCode}
                   </td>
                   <td className="px-4 py-3">
                     <div>
-                      <div className="font-body-18-medium text-gray-900">
+                      <div className="font-body-14-medium text-gray-900">
                         {course.subjectName}
                       </div>
                       {course.englishName && (
@@ -207,31 +197,32 @@ export default function AdminCoursesPage() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {course.department}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {course.grade || '-'}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {course.credit || '-'}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {course.instructor || '-'}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {course.classroom || '-'}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
                       <Link href={`/admin/courses/${course.id}/edit`}>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="unstyled" size="sm" radius="md">
                           수정
                         </Button>
                       </Link>
                       <Button
-                        variant="danger"
+                        variant="delete"
                         size="sm"
+                        radius="md"
                         onClick={() =>
                           handleDelete(course.id, course.subjectName)
                         }
@@ -247,47 +238,73 @@ export default function AdminCoursesPage() {
         </table>
       </div>
 
-      {/* 페이지네이션 */}
       <div className="flex justify-center items-center gap-2 mt-8">
-        <Button
-          variant="secondary"
-          size="sm"
+        {/* 이전 버튼 */}
+        <button
           onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
+          className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
         >
-          이전
-        </Button>
+          <Image
+            src="/assets/icon/chevron_left.svg"
+            alt="이전"
+            width={16}
+            height={16}
+          />
+        </button>
 
+        {/* 페이지 번호 */}
         {courses &&
           Array.from(
             { length: Math.min(5, courses.meta.totalPages || 1) },
             (_, i) => {
               const pageNum = i + 1
               return (
-                <Button
+                <button
                   key={pageNum}
-                  variant={currentPage === pageNum ? 'primary' : 'secondary'}
-                  size="sm"
                   onClick={() => setCurrentPage(pageNum)}
+                  className={`px-3 py-2 font-caption-14 rounded ${
+                    currentPage === pageNum
+                      ? 'text-pri-500 font-semibold'
+                      : 'text-gray-900 hover:text-pri-500'
+                  }`}
                 >
                   {pageNum}
-                </Button>
+                </button>
               )
             }
           )}
 
-        <Button
-          variant="secondary"
-          size="sm"
+        {/* 마지막 페이지 생략 처리 */}
+        {courses && courses.meta.totalPages > 5 && (
+          <>
+            <span className="px-2 text-gray-900">...</span>
+            <button
+              onClick={() => setCurrentPage(courses.meta.totalPages)}
+              className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+            >
+              {courses.meta.totalPages}
+            </button>
+          </>
+        )}
+
+        {/* 다음 버튼 */}
+        <button
           onClick={() =>
             setCurrentPage(
               Math.min(courses?.meta.totalPages || 1, currentPage + 1)
             )
           }
           disabled={currentPage === (courses?.meta.totalPages || 1)}
+          className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
         >
-          다음
-        </Button>
+          <Image
+            src="/assets/icon/chevron_right.svg"
+            alt="다음"
+            width={16}
+            height={16}
+          />
+        </button>
       </div>
     </div>
   )

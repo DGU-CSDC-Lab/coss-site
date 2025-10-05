@@ -102,7 +102,7 @@ describe('BoardController', () => {
 
       const result = await controller.getPost(postId);
 
-      expect(boardService.findOne).toHaveBeenCalledWith(postId);
+      expect(boardService.findOne).toHaveBeenCalledWith(postId, false);
       expect(result).toEqual(expectedPost);
     });
   });

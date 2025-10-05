@@ -20,13 +20,18 @@ export class ScheduleService {
   async findAll(
     query: ScheduleQuery,
   ): Promise<PagedResponse<ScheduleResponse>> {
-    const { month, category, year, page = 1, size = 10 } = query;
+    const { month, category, year, date, search, page = 1, size = 10 } = query;
 
     const queryBuilder = this.scheduleRepository
       .createQueryBuilder('schedule')
       .where('schedule.deletedAt IS NULL');
 
-    if (month) {
+    if (date) {
+      queryBuilder.andWhere(
+        'DATE(schedule.startDate) <= :date AND (schedule.endDate IS NULL OR DATE(schedule.endDate) >= :date)',
+        { date },
+      );
+    } else if (month) {
       const [yearNum, monthNum] = month.split('-');
       queryBuilder.andWhere(
         'YEAR(schedule.startDate) = :year AND MONTH(schedule.startDate) = :month',
@@ -43,6 +48,12 @@ export class ScheduleService {
 
     if (category) {
       queryBuilder.andWhere('schedule.category = :category', { category });
+    }
+
+    if (search) {
+      queryBuilder.andWhere('schedule.title LIKE :search', {
+        search: `%${search}%`,
+      });
     }
 
     const [schedules, totalElements] = await queryBuilder

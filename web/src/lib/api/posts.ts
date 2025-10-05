@@ -69,7 +69,8 @@ export interface CreatePostRequest {
 export interface UpdatePostRequest {
   title?: string
   contentHtml?: string
-  status?: 'private' | 'public' // draft는 수정 불가
+  categoryName?: string
+  status?: 'draft' | 'private' | 'public'
   thumbnailUrl?: string
   files?: CreatePostFile[]
 }

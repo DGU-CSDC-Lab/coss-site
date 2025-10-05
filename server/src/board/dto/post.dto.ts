@@ -240,7 +240,7 @@ export class PostListQuery {
 
 export class AdminPostListQuery extends PostListQuery {
   @ApiProperty({
-    description: '게시글 상태 필터 (관리자 전용)',
+    description: '게시글 상태 필터 (관리자 전용). 생략 시 전체 상태의 게시글 조회',
     enum: PostStatus,
     example: PostStatus.DRAFT,
     required: false,

@@ -33,9 +33,9 @@ export interface CoursesQuery {
 }
 
 export interface CreateCourseRequest {
-  name: string
+  subjectName: string
   englishName?: string
-  code: string
+  courseCode: string
   department: string
   grade: string
   year: number

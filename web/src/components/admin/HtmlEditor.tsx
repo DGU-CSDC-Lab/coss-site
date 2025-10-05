@@ -7,7 +7,7 @@ import {
   ScissorsIcon,
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
-import { filesApi } from '@/lib/api/files'
+import { uploadImageFile, insertImageToEditor } from '@/utils/imageUpload'
 import { useAlert } from '@/hooks/useAlert'
 
 interface HtmlEditorProps {
@@ -30,6 +30,7 @@ export default function HtmlEditor({
   onGetImageFileKeys,
 }: HtmlEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const isInitialized = useRef(false)
   const alert = useAlert()
   const [currentFormat, setCurrentFormat] = useState<string>('p')
@@ -43,48 +44,70 @@ export default function HtmlEditor({
   const [showLinkModal, setShowLinkModal] = useState(false)
   const [linkData, setLinkData] = useState({ name: '', url: '' })
 
+  const [savedRange, setSavedRange] = useState<Range | null>(null)
+
   // 이미지 업로드 (임시)
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
 
     try {
-      console.log('Starting image upload for:', file.name)
+      const imageResult = await uploadImageFile(file)
       
-      // 1. Presigned URL 생성
-      const presignData = await filesApi.getPresignedUrl({
-        fileName: file.name,
-        fileType: file.type,
-        contentType: file.type,
-        fileSize: file.size,
-        ownerType: 'POST',
-        ownerId: 'temp',
-      })
-
-      console.log('Presign data received:', presignData)
-
-      // 2. S3에 파일 업로드
-      await filesApi.uploadFile(file, presignData.uploadUrl)
-      console.log('File uploaded successfully')
-
-      // 3. 에디터에 이미지 삽입 (임시 URL 사용)
-      const imgHtml = `<img src="${presignData.fileUrl}" alt="업로드된 이미지" style="max-width: 100%; height: auto; margin: 10px 0;" data-file-key="${presignData.fileKey}">`
-      console.log('Inserting image HTML:', imgHtml)
-      console.log('Editor ref:', editorRef.current)
-      
+      // 에디터에 포커스를 주고 잠시 기다린 후 이미지 삽입
       if (editorRef.current) {
         editorRef.current.focus()
-        document.execCommand('insertHTML', false, imgHtml)
-        handleInput()
         
-        // 삽입 후 에디터 내용 확인
         setTimeout(() => {
-          console.log('Editor content after insert:', editorRef.current?.innerHTML)
-        }, 100)
+          // 저장된 커서 위치가 있으면 복원
+          if (savedRange) {
+            const selection = window.getSelection()
+            selection?.removeAllRanges()
+            selection?.addRange(savedRange)
+          }
+          
+          insertImageToEditor(editorRef, imageResult)
+          handleInput() // 변경사항 반영
+          setSavedRange(null)
+        }, 50)
       }
     } catch (error) {
       console.error('Image upload failed:', error)
-      alert.error('이미지 업로드 중 오류가 발생했습니다.')
+      alert.error(
+        `이미지 업로드 중 오류가 발생했습니다. \n${(error as Error).message}`
+      )
+    }
+  }
+
+  // 파일 선택 버튼 클릭 시 현재 커서 위치 저장
+  const handleImageButtonClick = () => {
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      setSavedRange(selection.getRangeAt(0).cloneRange())
+    }
+    // 파일 입력 클릭
+    fileInputRef.current?.click()
+  }
+
+  // 드래그 앤 드롭 처리
+  const handleDragOver = (e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+  }
+
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const files = e.dataTransfer?.files
+    if (!files || files.length === 0) return
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      if (file.type.startsWith('image/')) {
+        handleImageFile(file)
+        break // 첫 번째 이미지만 처리
+      }
     }
   }
 
@@ -132,29 +155,14 @@ export default function HtmlEditor({
   // 이미지 파일 처리 (업로드 + 삽입)
   const handleImageFile = async (file: File) => {
     try {
-      // 1. Presigned URL 생성
-      const presignData = await filesApi.getPresignedUrl({
-        fileName: file.name,
-        fileType: file.type,
-        contentType: file.type,
-        fileSize: file.size,
-        ownerType: 'POST',
-        ownerId: 'temp',
-      })
-
-      // 2. S3에 파일 업로드
-      await filesApi.uploadFile(file, presignData.uploadUrl)
-
-      // 3. 에디터에 이미지 삽입 (임시 URL 사용)
-      document.execCommand(
-        'insertHTML',
-        false,
-        `<img src="${presignData.fileUrl}" alt="업로드된 이미지" style="max-width: 100%; height: auto; margin: 10px 0;" data-file-key="${presignData.fileKey}">`
-      )
-      handleInput()
+      const imageResult = await uploadImageFile(file)
+      insertImageToEditor(editorRef, imageResult)
+      handleInput() // 변경사항 반영
     } catch (error) {
       console.error('Image upload failed:', error)
-      alert.error('이미지 업로드 중 오류가 발생했습니다.')
+      alert.error(
+        `이미지 업로드 중 오류가 발생했습니다. \n${(error as Error).message}`
+      )
     }
   }
 
@@ -216,16 +224,38 @@ export default function HtmlEditor({
     }
   }
 
+  // 링크 버튼 클릭 시 현재 커서 위치 저장
+  const handleLinkButtonClick = () => {
+    const selection = window.getSelection()
+    if (selection && selection.rangeCount > 0) {
+      setSavedRange(selection.getRangeAt(0).cloneRange())
+    }
+    setShowLinkModal(true)
+  }
+
   // 링크 추가
   const handleAddLink = () => {
     if (linkData.name && linkData.url) {
-      document.execCommand(
-        'insertHTML',
-        false,
-        `<a href="${linkData.url}" target="_blank">${linkData.name}</a>`
-      )
+      // 에디터에 포커스를 주고 저장된 커서 위치 복원
+      if (editorRef.current) {
+        editorRef.current.focus()
+        
+        if (savedRange) {
+          const selection = window.getSelection()
+          selection?.removeAllRanges()
+          selection?.addRange(savedRange)
+        }
+        
+        document.execCommand(
+          'insertHTML',
+          false,
+          `<a href="${linkData.url}" target="_blank">${linkData.name}</a>`
+        )
+      }
+      
       setLinkData({ name: '', url: '' })
       setShowLinkModal(false)
+      setSavedRange(null)
       handleInput()
     }
   }
@@ -326,7 +356,7 @@ export default function HtmlEditor({
     if (!editor) return
 
     // 초기 내용 설정
-    editor.innerHTML = value || `<p>${placeholder}</p>`
+    editor.innerHTML = value || `<p">${placeholder}</p>`
 
     // 이벤트 리스너
     editor.addEventListener('input', handleInput)
@@ -335,6 +365,8 @@ export default function HtmlEditor({
     editor.addEventListener('paste', handlePasteEvent)
     editor.addEventListener('keyup', updateCurrentFormat)
     editor.addEventListener('mouseup', updateCurrentFormat)
+    editor.addEventListener('dragover', handleDragOver)
+    editor.addEventListener('drop', handleDrop)
   }
 
   const handleInput = () => {
@@ -365,10 +397,13 @@ export default function HtmlEditor({
     const editor = editorRef.current
     if (!editor) return
 
+    const hasImages = editor.querySelectorAll('img').length > 0
+    const hasText = editor.textContent?.trim() !== ''
+
     if (
-      editor.innerHTML === '<p><br></p>' ||
-      editor.innerHTML === '' ||
-      editor.textContent?.trim() === ''
+      !hasImages &&
+      !hasText &&
+      (editor.innerHTML === '<p><br></p>' || editor.innerHTML === '')
     ) {
       editor.innerHTML = `<p>${placeholder}</p>`
     }
@@ -704,25 +739,28 @@ export default function HtmlEditor({
 
           <button
             type="button"
-            onClick={() => setShowLinkModal(true)}
+            onClick={handleLinkButtonClick}
             className="px-3 py-1 hover:bg-gray-100 rounded font-caption-14 text-gray-700 flex items-center"
             title="링크"
           >
             <LinkIcon className="w-4 h-4" />
           </button>
 
-          <label
+          <button
+            type="button"
             className="px-3 py-1 hover:bg-gray-100 rounded font-caption-14 text-gray-700 cursor-pointer flex items-center"
             title="이미지"
+            onClick={handleImageButtonClick}
           >
             <PhotoIcon className="w-4 h-4" />
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageUpload}
-              className="hidden"
-            />
-          </label>
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
 
           <div className="w-px bg-gray-300 mx-1"></div>
 

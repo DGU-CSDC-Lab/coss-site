@@ -151,20 +151,29 @@ describe('BoardService', () => {
         categoryId: 'cat1',
         authorId: 'user1',
         viewCount: 5,
+        status: 'public',
         createdAt: new Date(),
         updatedAt: new Date(),
         author: { username: 'testuser' },
+        category: { id: 'cat1', name: 'Test Category' },
       };
 
-      mockPostRepository.findOne.mockResolvedValue(mockPost);
+      // Set up the main query to return the post
+      mockQueryBuilder.getOne.mockResolvedValueOnce(mockPost);
+      // Set up prev/next queries to return null
+      mockQueryBuilder.getOne.mockResolvedValueOnce(null);
+      mockQueryBuilder.getOne.mockResolvedValueOnce(null);
+
       mockPostRepository.save.mockResolvedValue({ ...mockPost, viewCount: 6 });
 
-      const result = await service.findOne('1');
+      const result = await service.findOne('1', false);
 
-      expect(mockPostRepository.findOne).toHaveBeenCalledWith({
-        where: { id: '1' },
-        relations: ['author', 'category', 'files'],
-      });
+      expect(mockPostRepository.createQueryBuilder).toHaveBeenCalledWith('post');
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('post.author', 'author');
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('post.category', 'category');
+      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('post.files', 'files');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('post.id = :id', { id: '1' });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('post.status = :status', { status: 'public' });
       expect(mockPostRepository.save).toHaveBeenCalledWith({
         ...mockPost,
         viewCount: 6,
@@ -174,9 +183,9 @@ describe('BoardService', () => {
     });
 
     it('should throw NotFoundException when post not found', async () => {
-      mockPostRepository.findOne.mockResolvedValue(null);
+      mockQueryBuilder.getOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
+      await expect(service.findOne('nonexistent', false)).rejects.toThrow(
         NotFoundException,
       );
     });
@@ -237,20 +246,34 @@ describe('BoardService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         author: { username: 'testuser' },
+        status: 'PUBLIC',
+        category: { name: 'test' },
+      };
+
+      const mockUpdatedResult = {
+        id: '1',
+        title: 'Updated Post',
+        contentHtml: 'Updated content',
+        author: 'testuser',
+        viewCount: 0,
+        createdAt: mockPost.createdAt,
+        updatedAt: mockPost.updatedAt,
       };
 
       mockPostRepository.findOne.mockResolvedValue(mockPost);
       mockPostRepository.save.mockResolvedValue({
         ...mockPost,
-        ...updateDto,
+        title: updateDto.title,
         content: updateDto.contentHtml,
       });
+      
+      jest.spyOn(service, 'findOne').mockResolvedValue(mockUpdatedResult as any);
 
       const result = await service.update('1', updateDto);
 
       expect(mockPostRepository.findOne).toHaveBeenCalledWith({
         where: { id: '1' },
-        relations: ['author'],
+        relations: ['author', 'category'],
       });
       expect(result.title).toBe('Updated Post');
     });

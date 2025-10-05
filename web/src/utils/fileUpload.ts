@@ -50,6 +50,57 @@ export const validateFile = (file: File, options: UploadOptions = {}): void => {
   }
 }
 
+// 단일 파일 업로드 (complete 없이)
+export const uploadFileOnly = async (
+  file: File,
+  options: UploadOptions = {}
+): Promise<UploadResult> => {
+  const { onProgress, ownerType, ownerId } = options
+
+  try {
+    // 파일 검증
+    validateFile(file, options)
+
+    // 진행률 시작
+    onProgress?.(0)
+
+    // 1. Presigned URL 생성
+    const presignData = await filesApi.getPresignedUrl({
+      fileName: file.name,
+      fileType: file.type,
+      contentType: file.type,
+      fileSize: file.size,
+      ownerType,
+      ownerId,
+    })
+
+    // 2. S3에 파일 업로드
+    await filesApi.uploadFile(file, presignData.uploadUrl)
+
+    // 진행률 완료
+    onProgress?.(100)
+
+    return {
+      fileKey: presignData.fileKey,
+      fileUrl: presignData.fileUrl,
+      originalName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+    }
+  } catch (error) {
+    if (error instanceof FileUploadError) {
+      throw error
+    }
+
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : '파일 업로드 중 오류가 발생했습니다.'
+
+    throw new FileUploadError(errorMessage, 'UPLOAD_FAILED')
+  }
+}
+
 // 단일 파일 업로드
 export const uploadFile = async (
   file: File,

@@ -21,7 +21,6 @@ import {
   HeaderAssetResponse,
   HeaderAssetQuery,
 } from '../dto/header-asset.dto';
-import { HeaderAssetType } from '../entities';
 import { PagedResponse } from '../../common/dto/pagination.dto';
 
 @ApiTags('Header Assets')
@@ -32,7 +31,7 @@ export class HeaderAssetController {
   @ApiOperation({
     summary: '헤더 요소 목록 조회',
     description:
-      '헤더 요소 목록을 조회합니다. 타입별 필터링과 페이지네이션을 지원합니다.',
+      '헤더 요소 목록을 조회합니다. 페이지네이션을 지원합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -44,27 +43,6 @@ export class HeaderAssetController {
     @Query() query: HeaderAssetQuery,
   ): Promise<PagedResponse<HeaderAssetResponse>> {
     return this.headerAssetService.findAll(query);
-  }
-
-  @ApiOperation({
-    summary: '타입별 헤더 요소 조회',
-    description: '특정 타입의 활성화된 헤더 요소들을 조회합니다.',
-  })
-  @ApiParam({
-    name: 'type',
-    enum: HeaderAssetType,
-    description: '헤더 요소 타입',
-  })
-  @ApiResponse({
-    status: 200,
-    description: '타입별 헤더 요소 조회 성공',
-    type: [HeaderAssetResponse],
-  })
-  @Get('api/v1/header-assets/type/:type')
-  async getHeaderAssetsByType(
-    @Param('type') type: HeaderAssetType,
-  ): Promise<HeaderAssetResponse[]> {
-    return this.headerAssetService.findByType(type);
   }
 
   @ApiOperation({
@@ -97,7 +75,9 @@ export class HeaderAssetController {
     @Body() createDto: HeaderAssetCreate,
     @Request() req: any,
   ): Promise<HeaderAssetResponse> {
-    return this.headerAssetService.create(createDto, req.user.sub);
+    console.log('Controller - req.user:', req.user);
+    console.log('Controller - req.user.id:', req.user?.id);
+    return this.headerAssetService.create(createDto, req.user.id);
   }
 
   @ApiOperation({

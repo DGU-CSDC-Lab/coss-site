@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { HeaderAsset, HeaderAssetType } from '../entities';
+import { HeaderAsset } from '../entities';
 import {
   HeaderAssetCreate,
   HeaderAssetUpdate,
@@ -20,30 +20,18 @@ export class HeaderAssetService {
   async findAll(
     query: HeaderAssetQuery,
   ): Promise<PagedResponse<HeaderAssetResponse>> {
-    const { type, isActive, page = 1, size = 10 } = query;
+    const { isActive, page = 1, size = 10 } = query;
 
     const queryBuilder = this.headerAssetRepository
       .createQueryBuilder('asset')
       .where('asset.deletedAt IS NULL');
 
-    if (type) {
-      queryBuilder.andWhere('asset.type = :type', { type });
-    }
-
     if (isActive !== undefined) {
       queryBuilder.andWhere('asset.isActive = :isActive', { isActive });
     }
 
-    // 현재 시간 기준으로 유효한 것만 (기간이 설정된 경우)
-    const now = new Date();
-    queryBuilder.andWhere(
-      '(asset.startDate IS NULL OR asset.startDate <= :now) AND (asset.endDate IS NULL OR asset.endDate >= :now)',
-      { now },
-    );
-
     const [assets, totalElements] = await queryBuilder
-      .orderBy('asset.displayOrder', 'ASC')
-      .addOrderBy('asset.createdAt', 'DESC')
+      .orderBy('asset.createdAt', 'DESC')
       .skip((page - 1) * size)
       .take(size)
       .getManyAndCount();
@@ -52,28 +40,15 @@ export class HeaderAssetService {
     return new PagedResponse(items, page, size, totalElements);
   }
 
-  async findByType(type: HeaderAssetType): Promise<HeaderAssetResponse[]> {
-    const now = new Date();
-    const assets = await this.headerAssetRepository
-      .createQueryBuilder('asset')
-      .where('asset.deletedAt IS NULL')
-      .andWhere('asset.type = :type', { type })
-      .andWhere('asset.isActive = :isActive', { isActive: true })
-      .andWhere(
-        '(asset.startDate IS NULL OR asset.startDate <= :now) AND (asset.endDate IS NULL OR asset.endDate >= :now)',
-        { now },
-      )
-      .orderBy('asset.displayOrder', 'ASC')
-      .getMany();
-
-    return assets.map(this.toResponse);
-  }
-
   async findOne(id: string): Promise<HeaderAssetResponse> {
-    const asset = await this.headerAssetRepository.findOne({ where: { id } });
+    const asset = await this.headerAssetRepository.findOne({
+      where: { id, deletedAt: null },
+    });
+
     if (!asset) {
       throw new NotFoundException('Header asset not found');
     }
+
     return this.toResponse(asset);
   }
 
@@ -81,14 +56,15 @@ export class HeaderAssetService {
     createDto: HeaderAssetCreate,
     createdById: string,
   ): Promise<HeaderAssetResponse> {
+    console.log('Creating header asset with createdById:', createdById);
+    console.log('CreateDto:', createDto);
+    
     const asset = this.headerAssetRepository.create({
       ...createDto,
-      startDate: createDto.startDate
-        ? new Date(createDto.startDate)
-        : undefined,
-      endDate: createDto.endDate ? new Date(createDto.endDate) : undefined,
       createdById,
     });
+
+    console.log('Created asset entity:', asset);
 
     const saved = await this.headerAssetRepository.save(asset);
     return this.toResponse(saved);
@@ -98,43 +74,39 @@ export class HeaderAssetService {
     id: string,
     updateDto: HeaderAssetUpdate,
   ): Promise<HeaderAssetResponse> {
-    const asset = await this.headerAssetRepository.findOne({ where: { id } });
+    const asset = await this.headerAssetRepository.findOne({
+      where: { id, deletedAt: null },
+    });
+
     if (!asset) {
       throw new NotFoundException('Header asset not found');
     }
 
-    Object.assign(asset, {
-      ...updateDto,
-      startDate: updateDto.startDate
-        ? new Date(updateDto.startDate)
-        : asset.startDate,
-      endDate: updateDto.endDate ? new Date(updateDto.endDate) : asset.endDate,
-    });
+    Object.assign(asset, updateDto);
 
     const saved = await this.headerAssetRepository.save(asset);
     return this.toResponse(saved);
   }
 
   async delete(id: string): Promise<void> {
-    const asset = await this.headerAssetRepository.findOne({ where: { id } });
+    const asset = await this.headerAssetRepository.findOne({
+      where: { id, deletedAt: null },
+    });
+
     if (!asset) {
       throw new NotFoundException('Header asset not found');
     }
+
     await this.headerAssetRepository.softRemove(asset);
   }
 
   private toResponse(asset: HeaderAsset): HeaderAssetResponse {
     return {
       id: asset.id,
-      type: asset.type,
       title: asset.title,
       imageUrl: asset.imageUrl,
       linkUrl: asset.linkUrl,
-      textContent: asset.textContent,
       isActive: asset.isActive,
-      displayOrder: asset.displayOrder,
-      startDate: asset.startDate,
-      endDate: asset.endDate,
       createdAt: asset.createdAt,
       updatedAt: asset.updatedAt,
     };

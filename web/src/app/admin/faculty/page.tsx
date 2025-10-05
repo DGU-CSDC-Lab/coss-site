@@ -12,7 +12,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 export default function AdminFacultyPage() {
   const [faculty, setFaculty] = useState<PagedResponse<Faculty> | null>(null)
   const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(1)
   const size = 10
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function AdminFacultyPage() {
       <div className="flex justify-between items-center mb-6">
         <Title>교원 관리</Title>
         <Link href="/admin/faculty/create">
-          <Button variant="primary">새 교원 추가</Button>
+          <Button variant="info" radius="md" size="md">새 교원 추가</Button>
         </Link>
       </div>
 
@@ -73,9 +73,9 @@ export default function AdminFacultyPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto rounded-lg border border-info-100">
         <table className="w-full min-w-[800px]">
-          <thead>
+          <thead className="bg-info-50 border-b border-info-100">
             <tr>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
                 이름
@@ -97,7 +97,7 @@ export default function AdminFacultyPage() {
               </th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="bg-white divide-y divide-info-100">
             {faculty?.items?.length === 0 ? (
               <tr>
                 <td
@@ -149,13 +149,14 @@ export default function AdminFacultyPage() {
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
                       <Link href={`/admin/faculty/${member.id}/edit`}>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="unstyled" size="sm" radius="md">
                           수정
                         </Button>
                       </Link>
                       <Button
-                        variant="danger"
+                        variant="delete"
                         size="sm"
+                        radius="md"
                         onClick={() => handleDelete(member.id, member.name)}
                       >
                         삭제
@@ -170,34 +171,67 @@ export default function AdminFacultyPage() {
       </div>
 
       <div className="flex justify-center items-center gap-2 mt-8">
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setPage(prev => Math.max(prev - 1, 0))}
-          disabled={currentPage === 0}
+        {/* 이전 버튼 */}
+        <button
+          onClick={() => setPage(Math.max(1, page - 1))}
+          disabled={page === 1}
+          className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
         >
-          이전
-        </Button>
+          <Image
+            src="/assets/icon/chevron_left.svg"
+            alt="이전"
+            width={16}
+            height={16}
+          />
+        </button>
 
-        {Array.from({ length: totalPages }, (_, idx) => (
-          <Button
-            key={idx}
-            variant={idx === currentPage ? 'primary' : 'secondary'}
-            size="sm"
-            onClick={() => setPage(idx)}
-          >
-            {idx + 1}
-          </Button>
-        ))}
+        {/* 페이지 번호 */}
+        {Array.from(
+          { length: Math.min(5, totalPages || 1) },
+          (_, i) => {
+            const pageNum = i + 1
+            return (
+              <button
+                key={pageNum}
+                onClick={() => setPage(pageNum)}
+                className={`px-3 py-2 font-caption-14 rounded ${
+                  page === pageNum
+                    ? 'text-pri-500 font-semibold'
+                    : 'text-gray-900 hover:text-pri-500'
+                }`}
+              >
+                {pageNum}
+              </button>
+            )
+          }
+        )}
 
-        <Button
-          variant="secondary"
-          size="sm"
-          onClick={() => setPage(prev => Math.min(prev + 1, totalPages - 1))}
-          disabled={currentPage >= totalPages - 1}
+        {/* 마지막 페이지 생략 처리 */}
+        {totalPages > 5 && (
+          <>
+            <span className="px-2 text-gray-900">...</span>
+            <button
+              onClick={() => setPage(totalPages)}
+              className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        {/* 다음 버튼 */}
+        <button
+          onClick={() => setPage(Math.min(totalPages || 1, page + 1))}
+          disabled={page === (totalPages || 1)}
+          className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
         >
-          다음
-        </Button>
+          <Image
+            src="/assets/icon/chevron_right.svg"
+            alt="다음"
+            width={16}
+            height={16}
+          />
+        </button>
       </div>
     </div>
   )

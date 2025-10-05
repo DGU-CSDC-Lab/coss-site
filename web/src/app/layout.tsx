@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import QueryProvider from '@/providers/query.provider'
 import ConditionalLayout from '@/components/layout/ConditionalLayout'
 import Alert from '@/components/common/Alert'
+import PopupProvider from '@/components/common/PopupProvider'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
         <QueryProvider>
           <ConditionalLayout>{children}</ConditionalLayout>
           <Alert />
+          <PopupProvider />
         </QueryProvider>
       </body>
     </html>

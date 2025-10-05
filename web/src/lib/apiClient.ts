@@ -44,9 +44,6 @@ class ApiClient {
       delete (config.headers as any)['Content-Type']
     }
 
-    console.log('Final request config:', config)
-    console.log('Final headers:', config.headers)
-
     const response = await fetch(url, config)
 
     if (!response.ok) {

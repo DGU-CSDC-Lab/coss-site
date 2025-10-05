@@ -9,7 +9,8 @@ export default function ConditionalLayout({
   children: React.ReactNode
 }) {
   const pathname = usePathname()
-  const isAdminCreatePage = pathname.startsWith('/admin/') && pathname.endsWith('/create')
+  const isAdminCreatePage = pathname.startsWith('/admin/') && 
+    (pathname.endsWith('/create') || pathname.includes('/bulk-upload'))
 
   if (isAdminCreatePage) {
     return <>{children}</>

@@ -8,6 +8,7 @@ import {
   headerAssetsApi,
   HeaderAsset,
   UpdateHeaderAssetRequest,
+  HeaderAssetType,
 } from '@/lib/api/headerAssets'
 import { uploadImage } from '@/utils/fileUpload'
 import Title from '@/components/common/Title'
@@ -28,7 +29,11 @@ export default function EditHeaderAssetPage() {
     title: '',
     imageUrl: '',
     linkUrl: '',
+    textContent: '',
     isActive: true,
+    displayOrder: 1,
+    startDate: '',
+    endDate: '',
   })
   const [imageUploading, setImageUploading] = useState(false)
 
@@ -45,9 +50,13 @@ export default function EditHeaderAssetPage() {
       setAsset(assetData)
       setFormData({
         title: assetData.title,
-        imageUrl: assetData.imageUrl,
-        linkUrl: assetData.linkUrl,
+        imageUrl: assetData.imageUrl || '',
+        linkUrl: assetData.linkUrl || '',
+        textContent: assetData.textContent || '',
         isActive: assetData.isActive,
+        displayOrder: assetData.displayOrder,
+        startDate: assetData.startDate ? assetData.startDate.slice(0, 16) : '',
+        endDate: assetData.endDate ? assetData.endDate.slice(0, 16) : '',
       })
     } catch (error) {
       console.error('Failed to fetch header asset:', error)
@@ -82,24 +91,18 @@ export default function EditHeaderAssetPage() {
       return
     }
 
-    if (!formData.imageUrl.trim()) {
-      alert('이미지를 업로드해주세요.')
-      return
-    }
-
-    if (!formData.linkUrl.trim()) {
-      alert('링크 URL을 입력해주세요.')
-      return
-    }
-
     setLoading(true)
 
     try {
       const assetData: UpdateHeaderAssetRequest = {
         title: formData.title,
-        imageUrl: formData.imageUrl,
-        linkUrl: formData.linkUrl,
+        imageUrl: formData.imageUrl || undefined,
+        linkUrl: formData.linkUrl || undefined,
+        textContent: formData.textContent || undefined,
         isActive: formData.isActive,
+        displayOrder: formData.displayOrder,
+        startDate: formData.startDate || undefined,
+        endDate: formData.endDate || undefined,
       }
 
       await headerAssetsApi.updateHeaderAsset(params.id as string, assetData)
@@ -133,6 +136,13 @@ export default function EditHeaderAssetPage() {
     )
   }
 
+  const typeLabels = {
+    [HeaderAssetType.LOGO]: '로고',
+    [HeaderAssetType.BANNER]: '배너',
+    [HeaderAssetType.BACKGROUND]: '배경',
+    [HeaderAssetType.ANNOUNCEMENT]: '공지사항',
+  }
+
   return (
     <div className="w-full h-screen flex flex-col">
       <div className="flex items-center justify-between gap-4 p-6">
@@ -149,6 +159,15 @@ export default function EditHeaderAssetPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
+                <Label className="mb-2">
+                  타입
+                </Label>
+                <div className="px-4 py-3 bg-gray-100 rounded-md font-body-18-medium text-gray-900">
+                  {typeLabels[asset.type]}
+                </div>
+              </div>
+
+              <div>
                 <Label required={true} className="mb-2">
                   제목
                 </Label>
@@ -164,28 +183,11 @@ export default function EditHeaderAssetPage() {
                   required
                 />
               </div>
-
-              <div>
-                <Label required={true} className="mb-2">
-                  링크 URL
-                </Label>
-                <Input
-                  type="url"
-                  value={formData.linkUrl}
-                  onChange={value =>
-                    setFormData({ ...formData, linkUrl: value })
-                  }
-                  placeholder="https://example.com"
-                  className="w-full"
-                  size="lg"
-                  required
-                />
-              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
-                <Label required={true} className="mb-2">
+                <Label className="mb-2">
                   이미지
                 </Label>
                 <input
@@ -215,6 +217,43 @@ export default function EditHeaderAssetPage() {
                 )}
               </div>
 
+              <div>
+                <Label className="mb-2">
+                  링크 URL
+                </Label>
+                <Input
+                  type="url"
+                  value={formData.linkUrl}
+                  onChange={value =>
+                    setFormData({ ...formData, linkUrl: value })
+                  }
+                  placeholder="https://example.com"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <Label className="mb-2">
+                  표시 순서
+                </Label>
+                <Input
+                  type="number"
+                  value={formData.displayOrder.toString()}
+                  onChange={value =>
+                    setFormData({
+                      ...formData,
+                      displayOrder: parseInt(value) || 1,
+                    })
+                  }
+                  min="1"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
+
               <div className="flex items-center pt-8">
                 <Checkbox
                   checked={formData.isActive}
@@ -222,6 +261,52 @@ export default function EditHeaderAssetPage() {
                     setFormData({ ...formData, isActive: checked })
                   }
                   label="활성화"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label className="mb-2">
+                텍스트 내용
+              </Label>
+              <Textarea
+                value={formData.textContent}
+                onChange={value =>
+                  setFormData({ ...formData, textContent: value })
+                }
+                placeholder="텍스트 내용을 입력하세요"
+                rows={4}
+                className="w-full"
+                size="lg"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <Label className="mb-2">
+                  시작일
+                </Label>
+                <input
+                  type="datetime-local"
+                  value={formData.startDate}
+                  onChange={e =>
+                    setFormData({ ...formData, startDate: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900"
+                />
+              </div>
+
+              <div>
+                <Label className="mb-2">
+                  종료일
+                </Label>
+                <input
+                  type="datetime-local"
+                  value={formData.endDate}
+                  onChange={e =>
+                    setFormData({ ...formData, endDate: e.target.value })
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-md font-body-18-medium text-gray-900"
                 />
               </div>
             </div>
