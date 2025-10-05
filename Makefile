@@ -72,6 +72,11 @@ test-server: ## Run server tests
 test-web: ## Run web tests
 	cd web && npm test
 
+# Builds
+build: ## Run builds
+	cd server && npm run build
+	cd web && npm run build
+
 # Lints
 lint: ## Run linting for all projects
 	cd server && npm run lint
