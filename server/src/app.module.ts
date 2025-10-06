@@ -12,6 +12,7 @@ import { FacultyModule } from './faculty/faculty.module';
 import { HistoryModule } from './history/history.module';
 import { FileModule } from './file/file.module';
 import { HeaderAssetModule } from './header-asset/header-asset.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { HeaderAssetModule } from './header-asset/header-asset.module';
     HistoryModule,
     FileModule,
     HeaderAssetModule,
+    HealthModule,
   ],
 })
 export class AppModule {}
