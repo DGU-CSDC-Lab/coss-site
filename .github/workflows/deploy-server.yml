@@ -177,9 +177,9 @@ jobs:
             SERVER_IMAGE=$SERVER_IMAGE
             EOF
 
-            docker-compose -f deploy/docker-compose.server.prod.yml down || true
-            docker-compose --env-file .env.prod -f deploy/docker-compose.server.prod.yml pull
-            docker-compose --env-file .env.prod -f deploy/docker-compose.server.prod.yml up -d
+            docker-compose -f docker-compose.server.prod.yml down || true
+            docker-compose --env-file .env.prod -f docker-compose.server.prod.yml pull
+            docker-compose --env-file .env.prod -f docker-compose.server.prod.yml up -d
 
             echo "⏳ Waiting for services to start..."
             sleep 60
@@ -195,13 +195,13 @@ jobs:
               fi
               if [ $i -eq 12 ]; then
                 echo "❌ API server health check failed"
-                docker-compose -f deploy/docker-compose.server.prod.yml logs server
+                docker-compose -f docker-compose.server.prod.yml logs server
                 exit 1
               fi
             done
 
             echo "📊 Container status:"
-            docker-compose -f deploy/docker-compose.server.prod.yml ps
+            docker-compose -f docker-compose.server.prod.yml ps
 
             echo "🐳 Deployed images:"
             echo "Server: $SERVER_IMAGE"
