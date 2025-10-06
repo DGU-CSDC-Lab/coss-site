@@ -168,6 +168,7 @@ jobs:
             
             cat > .env.prod << EOF
             DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=3306
             DB_USERNAME=advisor
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_DATABASE=coss

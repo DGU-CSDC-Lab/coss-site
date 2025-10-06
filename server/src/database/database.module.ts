@@ -26,11 +26,11 @@ import { HeaderAsset } from '../header-asset/entities';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         type: 'mysql',
-        host: configService.get('DB_HOST', 'localhost'),
-        port: configService.get('DB_PORT', 3308),
-        username: configService.get('DB_USERNAME', 'local'),
-        password: configService.get('DB_PASSWORD', 'user_password'),
-        database: configService.get('DB_DATABASE', 'coss'),
+        host: configService.get('DB_HOST'),
+        port: configService.get('DB_PORT'),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_DATABASE'),
         entities: [
           Account,
           User,
