@@ -68,8 +68,10 @@ jobs:
         run: cd web && npm ci
       
       - name: Build static site
-        run: cd web && npm run build
-      
+        run: | 
+          cd web && npm run build
+          ls -la out/ || echo "ERROR: out directory not found"
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
