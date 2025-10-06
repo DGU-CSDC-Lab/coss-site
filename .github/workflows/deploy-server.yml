@@ -166,7 +166,7 @@ jobs:
 
             cd deploy
             
-            cat > .env.prod << EOF
+            cat > .env.prod << 'EOF'
             DB_HOST=${{ secrets.DB_HOST }}
             DB_PORT=3306
             DB_USERNAME=advisor
