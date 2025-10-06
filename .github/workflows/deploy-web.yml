@@ -70,7 +70,7 @@ jobs:
       - name: Build static site
         run: | 
           cd web && npm run build
-          ls -la out/ || echo "ERROR: out directory not found"
+          ls -la .next/ || echo "ERROR: .next directory not found"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
