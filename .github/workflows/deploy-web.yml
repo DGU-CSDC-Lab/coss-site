@@ -67,8 +67,18 @@ jobs:
         if: steps.cache-web-deps.outputs.cache-hit != 'true'
         run: cd web && npm ci
       
+      - name: Create production environment file
+        run: |
+          cd web
+          cat > .env.prod << EOF
+          VITE_API_URL=${{ secrets.VITE_API_URL }}
+          VITE_API_VERSION=v1
+          VITE_MAX_FILE_SIZE=${{ secrets.VITE_MAX_FILE_SIZE }}
+          VITE_S3_REGION=${{ env.AWS_REGION }}
+          EOF
+      
       - name: Build static site
-        run: cd web && npm run build
+        run: cd web && npm run build:prod
       
       - name: Debug paths
         run: |

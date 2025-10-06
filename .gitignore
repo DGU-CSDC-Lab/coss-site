@@ -1,14 +1,15 @@
 # Dependencies
-node_modules/
+**/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Next.js
-web/.next/
-web/out/
+# Vite
+web/dist/
 web/.env*.local
-web/.swc/
+
+# TypeScript
+*.tsbuildinfo
 
 # NestJS
 server/dist/
