@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-build
-          path: web/out/
+          path: web/.next/
           if-no-files-found: error
 
   deploy-web-to-s3:
