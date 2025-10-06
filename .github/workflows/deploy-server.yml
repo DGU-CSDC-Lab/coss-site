@@ -188,15 +188,15 @@ jobs:
             sleep 60
 
             echo "🔍 Running health checks..."
-            for i in {1..12}; do
+            for i in {1..10}; do
               if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
                 echo "✅ API server is healthy"
                 break
               else
-                echo "⏳ API server not ready, attempt $i/12"
+                echo "⏳ API server not ready, attempt $i/10"
                 sleep 10
               fi
-              if [ $i -eq 12 ]; then
+              if [ $i -eq 10 ]; then
                 echo "❌ API server health check failed"
                 docker-compose -f docker-compose.server.prod.yml logs server
                 exit 1
