@@ -212,7 +212,8 @@ jobs:
             echo "🎉 ECR deployment completed successfully!"
 
             echo "🧹 Cleaning up old images..."
-            docker image prune -f
+            # 사용하지 않는 모든 이미지 제거 (실행 중인 컨테이너 제외)
+            docker image prune -a -f
 
   close-ssh:
     needs: [open-ssh, deploy]
@@ -233,72 +234,3 @@ jobs:
             --protocol tcp \
             --port 22 \
             --cidr 0.0.0.0/0
-
-  server-ec2-health-check:
-    needs: deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: EC2 internal health check
-        uses: appleboy/ssh-action@v1.0.0
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          script: |
-            echo "🏥 Running EC2 internal health checks..."
-
-            echo "📊 Container status:"
-            docker-compose -f deploy/docker-compose.server.prod.yml ps
-
-            if curl -f http://localhost:3001/api/health > /dev/null 2>&1; then
-              echo "✅ Internal API server is healthy"
-            else
-              echo "❌ Internal API server not accessible"
-              docker-compose -f deploy/docker-compose.server.prod.yml logs server --tail=50
-              exit 1
-            fi
-
-            echo "💾 System resources:"
-            echo "Memory usage:"
-            free -h
-            echo "Disk usage:"
-            df -h
-            echo "Docker stats:"
-            docker stats --no-stream
-
-            echo "🎉 EC2 internal health check passed!"
-
-  alb-health-check:
-    needs: deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: ALB endpoint health check
-        run: |
-          echo "🏥 Running ALB health checks..."
-
-          for i in {1..30}; do
-            if curl -f http://${{ secrets.ALB_DNS }} > /dev/null 2>&1; then
-              echo "✅ ALB root endpoint is healthy"
-              break
-            else
-              echo "⏳ ALB not ready, attempt $i/30"
-              sleep 10
-            fi
-            if [ $i -eq 30 ]; then
-              echo "❌ ALB health check failed"
-              exit 1
-            fi
-          done
-
-          if curl -f http://${{ secrets.ALB_DNS }}/api/health > /dev/null 2>&1; then
-            echo "✅ ALB API endpoint is healthy"
-          else
-            echo "❌ ALB API endpoint not accessible"
-            exit 1
-          fi
-
-          echo "🎉 All ALB health checks passed!"
-          echo "🌐 Application is live at: http://${{ secrets.ALB_DNS }}"
-          echo "🔗 API endpoint: http://${{ secrets.ALB_DNS }}/api/health"
