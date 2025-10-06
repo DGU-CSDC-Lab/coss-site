@@ -15,26 +15,25 @@ async function bootstrap() {
     }),
   );
 
-  // CORS
+  // CORS - 환경변수 기반 설정
+  const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim());
+
   app.enableCors({
     origin: [
-      'http://localhost:3000', 
-      'http://localhost:3001',
-      /^https:\/\/.*\.cloudfront\.net$/  // CloudFront 도메인 허용
+      ...allowedOrigins
     ],
     credentials: true,
   });
 
-  // Swagger setup
+  const swaggerServerUrl = process.env.SWAGGER_SERVER_URL || 'http://localhost:3001';
+  
   const config = new DocumentBuilder()
     .setTitle('COSS Backend API')
     .setDescription(
       '동국대학교 COSS 사이트 백엔드 API (계층형 카테고리, 관리자 /admin/**, S3 Presigned Upload, 디버깅 친화적 에러 응답)',
     )
     .setVersion('4.0.0')
-    .addServer('https://api.coss.dongguk.edu', 'Production')
-    .addServer('https://staging.api.coss.dongguk.edu', 'Staging')
-    .addServer('http://localhost:3001', 'Local')
+    .addServer(swaggerServerUrl, process.env.NODE_ENV === 'production' ? 'Production' : 'Development')
     .addBearerAuth(
       {
         type: 'http',
@@ -56,5 +55,6 @@ async function bootstrap() {
   await app.listen(3001, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
   console.log(`Swagger docs available at: ${await app.getUrl()}/api-docs`);
+  console.log(`CORS origins: ${JSON.stringify([...allowedOrigins, /^https:\/\/.*\.cloudfront\.net$/])}`);
 }
 bootstrap();

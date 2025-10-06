@@ -178,6 +178,8 @@ jobs:
             GITHUB_SHA=${{ github.sha }}
             REGISTRY_URL=${{ secrets.ECR_REGISTRY }}
             REPOSITORY_NAME=${{ secrets.ECR_REPOSITORY }}
+            SWAGGER_SERVER_URL=${{ secrets.SWAGGER_PRODUCTION_SERVER_URL }}
+            ALLOWED_ORIGINS=${{ secrets.SWAGGER_ALLOWED_ORIGINS }}
             EOF
 
             docker-compose -f docker-compose.server.prod.yml down || true
