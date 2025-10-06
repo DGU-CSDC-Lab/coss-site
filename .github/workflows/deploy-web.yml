@@ -75,14 +75,13 @@ jobs:
           pwd
           ls -la
           ls -la web/
-          find . -name ".next" -type d
+          find . -name "dist" -type d
       
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: web-build
-          path: |
-            web/.next/**/*
+          path: web/dist/
           if-no-files-found: error
 
   deploy-web-to-s3:
