@@ -137,7 +137,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           source: "deploy/docker-compose.server.prod.yml"
-          target: "/home/${{ secrets.EC2_USERNAME }}/deploy/docker-compose.server.prod.yml"
+          target: "/home/${{ secrets.EC2_USERNAME }}/deploy/"
 
       - name: Deploy docker-compose to EC2
         uses: appleboy/ssh-action@v1.0.0
