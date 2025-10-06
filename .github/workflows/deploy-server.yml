@@ -175,6 +175,8 @@ jobs:
             REGION=${{ env.AWS_REGION }}
             BUCKET_NAME=${{ secrets.S3_BUCKET }}
             GITHUB_SHA=${{ github.sha }}
+            REGISTRY_URL=${{ secrets.ECR_REGISTRY }}
+            REPOSITORY_NAME=${{ secrets.ECR_REPOSITORY }}
             EOF
 
             docker-compose -f docker-compose.server.prod.yml down || true
