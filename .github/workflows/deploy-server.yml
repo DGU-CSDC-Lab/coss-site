@@ -172,9 +172,9 @@ jobs:
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             DB_DATABASE=coss
             JWT_SECRET=${{ secrets.JWT_SECRET }}
-            AWS_REGION=${{ env.AWS_REGION }}
-            S3_BUCKET=${{ secrets.S3_BUCKET }}
-            SERVER_IMAGE=$SERVER_IMAGE
+            REGION=${{ env.AWS_REGION }}
+            BUCKET_NAME=${{ secrets.S3_BUCKET }}
+            GITHUB_SHA=${{ github.sha }}
             EOF
 
             docker-compose -f docker-compose.server.prod.yml down || true

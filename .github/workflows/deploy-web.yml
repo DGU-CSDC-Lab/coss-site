@@ -78,10 +78,12 @@ jobs:
           find . -name ".next" -type d
       
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: web-build
-          path: ./web/.next/
+          path: |
+            web/.next/**/*
+          if-no-files-found: error
 
   deploy-web-to-s3:
     runs-on: ubuntu-latest

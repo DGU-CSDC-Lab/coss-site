@@ -20,7 +20,7 @@ export class S3Service {
     if (!this.isProduction) {
       this.s3Client = new S3Client({
         endpoint: process.env.MINIO_ENDPOINT,
-        region: process.env.MINIO_REGION,
+        region: process.env.REGION,
         credentials: {
           accessKeyId: process.env.MINIO_ACCESS_KEY,
           secretAccessKey: process.env.MINIO_SECRET_KEY,
@@ -30,7 +30,7 @@ export class S3Service {
     } else if (this.bucketName) {
       // 프로덕션 환경에서는 실제 S3 사용
       this.s3Client = new S3Client({
-        region: process.env.AWS_REGION,
+        region: process.env.REGION,
         ...(process.env.AWS_ACCESS_KEY_ID && {
           credentials: {
             accessKeyId: process.env.AWS_ACCESS_KEY_ID,

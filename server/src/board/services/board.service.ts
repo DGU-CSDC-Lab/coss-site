@@ -387,8 +387,8 @@ export class BoardService {
   }
 
   private generateDownloadUrl(fileKey: string): string {
-    const bucket = process.env.S3_BUCKET;
-    const region = process.env.AWS_REGION;
+    const bucket = process.env.BUCKET_NAME;
+    const region = process.env.REGION;
     return `https://${bucket}.s3.${region}.amazonaws.com/${fileKey}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600`;
   }
 }
