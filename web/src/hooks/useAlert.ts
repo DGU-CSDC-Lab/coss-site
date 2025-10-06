@@ -1,12 +1,12 @@
-import { useAlertStore } from '@/stores/alertStore'
+import { useAlertStore } from '@/store/alert.store'
 
 export const useAlert = () => {
-  const { addAlert } = useAlertStore()
+  const { showAlert } = useAlertStore()
 
   return {
-    success: (message: string) => addAlert('success', message),
-    error: (message: string) => addAlert('error', message),
-    warning: (message: string) => addAlert('warning', message),
-    info: (message: string) => addAlert('info', message)
+    success: (message: string) => showAlert(message, 'success'),
+    error: (message: string) => showAlert(message, 'error'),
+    warning: (message: string) => showAlert(message, 'warning'),
+    info: (message: string) => showAlert(message, 'info')
   }
 }

@@ -249,7 +249,7 @@ export default function HtmlEditor({
         document.execCommand(
           'insertHTML',
           false,
-          `<a href="${linkData.url}" target="_blank">${linkData.name}</a>`
+          `<a to="${linkData.url}" target="_blank">${linkData.name}</a>`
         )
       }
       
@@ -506,7 +506,7 @@ export default function HtmlEditor({
           document.execCommand(
             'insertHTML',
             false,
-            `<a href="${url}" target="_blank">${selectedText}</a>`
+            `<a to="${url}" target="_blank">${selectedText}</a>`
           )
         }
         return

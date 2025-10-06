@@ -1,6 +1,6 @@
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { Faculty } from '@/lib/api/faculty'
-import Image from 'next/image'
+
 
 interface FacultyCardProps {
   faculty: Faculty
@@ -12,12 +12,10 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
       {/* 프로필 이미지 */}
       <div className="flex-shrink-0 aspect-[3/4] w-48 bg-gray-100 relative overflow-hidden self-start">
         {faculty.profileImage ? (
-          <Image
+          <img
             src={faculty.profileImage}
             alt={faculty.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 100vw, 192px"
+            className="absolute inset-0 w-full h-full object-cover"
           />
         ) : (
           <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
@@ -43,7 +41,7 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
         {/** 
         <div className="h-4" />
         <Link
-          href={`/about/faculty/${faculty.id}`}
+          to={`/about/faculty/${faculty.id}`}
           className="inline-flex items-center gap-2 text-info-500 hover:text-info-600 font-caption-14 underline underline-offset-2 transition-colors"
         >
           more information

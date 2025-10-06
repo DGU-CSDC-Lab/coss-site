@@ -1,5 +1,5 @@
-import Image from 'next/image'
-import Link from 'next/link'
+
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
   return (
@@ -9,14 +9,14 @@ const Footer = () => {
         <div className="bg-point-3 py-3">
           <div className="w-full px-4 mobile:px-2 tablet:px-6 flex gap-4">
             <Link
-              href="https://www.dongguk.edu/page/534"
+              to="https://www.dongguk.edu/page/534"
               className="text-pri-800 font-caption-12 hover:text-pri-900 transition-colors"
             >
               개인정보처리방침
             </Link>
             <span className="text-gray-50">|</span>
             <Link
-              href="https://www.dongguk.edu/article/privacyNotice/list"
+              to="https://www.dongguk.edu/article/privacyNotice/list"
               className="text-white font-caption-12 hover:text-gray-200 transition-colors"
             >
               이용약관
@@ -29,7 +29,7 @@ const Footer = () => {
           <div className="w-full px-4 mobile:px-2 tablet:px-6 flex justify-between items-start mobile:flex-col mobile:gap-6 tablet:flex-row">
             {/* 로고 영역 */}
             <div className="flex-shrink-0">
-              <Image
+              <img
                 src="/assets/images/logo.png"
                 alt="사물인터넷 혁신융합대학사업단"
                 width={100}

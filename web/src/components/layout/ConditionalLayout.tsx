@@ -1,20 +1,18 @@
-'use client'
-
-import { usePathname } from 'next/navigation'
+import { useLocation, Outlet } from 'react-router-dom'
 import Layout from './Layout'
 
-export default function ConditionalLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  const pathname = usePathname()
-  const isAdminCreatePage = pathname.startsWith('/admin/') && 
-    (pathname.endsWith('/create') || pathname.includes('/bulk-upload'))
+export default function ConditionalLayout() {
+  const location = useLocation()
+  const isAdminCreatePage = location.pathname.startsWith('/admin/') && 
+    (location.pathname.endsWith('/create') || location.pathname.includes('/bulk-upload'))
 
   if (isAdminCreatePage) {
-    return <>{children}</>
+    return <Outlet />
   }
 
-  return <Layout>{children}</Layout>
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  )
 }

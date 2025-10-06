@@ -1,6 +1,4 @@
-'use client'
-
-import { usePathname } from 'next/navigation'
+import { useLocation } from 'react-router-dom'
 import TopNav from './TopNav'
 import Sidebar from './Sidebar'
 import Footer from './Footer'
@@ -12,7 +10,8 @@ interface LayoutProps {
 }
 
 const Layout = ({ children }: LayoutProps) => {
-  const pathname = usePathname()
+  const location = useLocation()
+  const pathname = location.pathname
 
   // 배너를 표시하지 않을 페이지들
   const excludedRoutes = ['/', '/login']

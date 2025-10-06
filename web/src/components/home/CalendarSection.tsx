@@ -1,8 +1,8 @@
-'use client'
+
 
 import { useState, useEffect } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { schedulesApi, Schedule } from '@/lib/api/schedules'
 import Button from '@/components/common/Button'
 
@@ -148,7 +148,7 @@ export default function CalendarSection() {
     <div className="bg-white flex flex-col gap-3 rounded-lg p-4">
       <div className="flex justify-between items-center">
         <h2 className="font-body-20-medium text-gray-900">학사일정</h2>
-        <Link href="/calendar">
+        <Link to="/calendar">
           <Button radius="md" size="sm" variant="point_2">
             더보기
           </Button>

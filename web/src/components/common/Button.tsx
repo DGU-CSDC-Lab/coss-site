@@ -1,4 +1,4 @@
-import Image from 'next/image'
+
 
 interface ButtonProps {
   children: React.ReactNode
@@ -58,7 +58,7 @@ export default function Button({
       <div className="flex items-center gap-2">
         <span>{children}</span>
         {iconUrl && (
-          <Image
+          <img
             src={iconUrl}
             alt=""
             width={16}

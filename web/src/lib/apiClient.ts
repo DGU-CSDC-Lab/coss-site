@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/store/auth.store'
 import { authApi } from './api/auth'
 
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/${process.env.NEXT_PUBLIC_API_VERSION}`
+const API_BASE_URL = `${import.meta.env.VITE_API_URL}/${import.meta.env.VITE_API_VERSION}`
 
 // 공통 타입 정의
 export interface PagedResponse<T> {

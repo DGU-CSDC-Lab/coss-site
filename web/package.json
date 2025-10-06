@@ -6,28 +6,34 @@
     "node": ">=24.0.0"
   },
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "lint": "eslint src --ext ts,tsx,js,jsx",
+    "lint:fix": "eslint src --ext ts,tsx,js,jsx --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\""
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/typography": "^0.5.19",
+    "@tanstack/react-query": "^5.90.2",
+    "@vitejs/plugin-react": "^5.0.4",
     "clsx": "^2.1.1",
-    "next": "14.0.0",
     "react": "^18",
     "react-dom": "^18",
-    "react-query": "^3.39.3",
+    "react-router-dom": "^7.9.3",
+    "vite": "^7.1.9",
     "xlsx": "^0.18.5",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.28.3",
+    "@babel/preset-react": "^7.27.1",
+    "@babel/preset-typescript": "^7.27.1",
     "@testing-library/jest-dom": "^6.1.4",
     "@testing-library/react": "^13.4.0",
     "@types/node": "^20",
@@ -36,8 +42,8 @@
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
     "autoprefixer": "^10.4.16",
+    "babel-jest": "^30.2.0",
     "eslint": "^8.54.0",
-    "eslint-config-next": "14.0.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react": "^7.33.2",
@@ -47,6 +53,7 @@
     "postcss": "^8.4.32",
     "prettier": "^3.1.0",
     "tailwindcss": "^3.3.6",
+    "ts-jest": "^29.4.4",
     "typescript": "^5"
   }
 }

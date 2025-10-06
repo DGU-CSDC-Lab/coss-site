@@ -1,14 +1,14 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { Link } from 'react-router-dom'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import { useState } from 'react'
 import menuConfig from '@/config/menuConfig'
 import clsx from 'clsx'
 
 export default function Tabs() {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+  const location = useLocation(); const pathname = location.pathname
+  const [searchParams] = useSearchParams()
   const segments = pathname.split('/').filter(Boolean)
   const [hoveredTab, setHoveredTab] = useState<string | null>(null)
 
@@ -75,7 +75,7 @@ export default function Tabs() {
               onMouseEnter={() => hasChildren && setHoveredTab(tab.path)}
             >
               <Link
-                href={getTabHref(tab)}
+                to={getTabHref(tab)}
                 className={clsx(
                   'p-2 font-body-14-medium transition-colors block',
                   isActive
@@ -107,7 +107,7 @@ export default function Tabs() {
               return (
                 <Link
                   key={subTab.path}
-                  href={subTab.path}
+                  to={subTab.path}
                   className={clsx(
                     'p-2 font-body-14-medium transition-colors block',
                     isActiveSubTab

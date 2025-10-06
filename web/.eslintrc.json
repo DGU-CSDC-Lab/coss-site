@@ -1,9 +1,25 @@
 {
   "extends": [
-    "next/core-web-vitals",
+    "eslint:recommended",
+    "@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
     "prettier"
   ],
-  "plugins": ["prettier"],
+  "plugins": ["@typescript-eslint", "react", "react-hooks", "prettier"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
   "rules": {
     "prefer-const": "error",
     "no-var": "error",
@@ -11,6 +27,6 @@
     "@typescript-eslint/no-unused-vars": "off",
     "prettier/prettier": "warn",
     "react-hooks/exhaustive-deps": "off",
-    "@next/next/no-img-element": "warn"
+    "react/react-in-jsx-scope": "off"
   }
 }

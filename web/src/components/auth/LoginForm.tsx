@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useNavigate } from 'react-router-dom'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { authApi } from '@/lib/api/auth'
 import { useAuthStore } from '@/store/auth.store'
@@ -11,7 +11,7 @@ import Button from '@/components/common/Button'
 import Information from '../common/Information'
 
 export default function LoginForm() {
-  const router = useRouter()
+  const navigate = useNavigate()
   const { login } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
@@ -50,7 +50,7 @@ export default function LoginForm() {
         response.role as 'ADMIN' | 'USER' | null
       )
 
-      router.push('/')
+      navigate('/')
     } catch (error) {
       setError(getErrorMessage(error))
     } finally {

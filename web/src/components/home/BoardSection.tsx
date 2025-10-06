@@ -1,8 +1,8 @@
-'use client'
+
 
 import { useState, useEffect } from 'react'
 import { PaperClipIcon } from '@heroicons/react/24/outline'
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { postsApi, Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
 
@@ -26,7 +26,7 @@ export default function BoardSection() {
     <div className="bg-white flex flex-col gap-3 rounded-lg p-4">
       <div className="flex justify-between items-center">
         <h2 className="font-body-20-medium text-gray-900">게시판</h2>
-        <Link href="/news/news">
+        <Link to="/news/news">
           <Button radius="md" size="sm" variant="point_2">
             더보기
           </Button>
@@ -52,7 +52,7 @@ export default function BoardSection() {
                     </span>
                   </div>
                   <Link
-                    href={`/board/${post.id}`}
+                    to={`/board/${post.id}`}
                     className="pl-2 font-body-14-regular text-gray-900 hover:text-point-1 flex-1 truncate"
                   >
                     {post.title}

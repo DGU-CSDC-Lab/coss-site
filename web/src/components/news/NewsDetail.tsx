@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { PostDetail } from '@/lib/api/posts'
 import LoadingSpinner from '../common/LoadingSpinner'
 
@@ -123,7 +123,7 @@ export default function NewsDetail({
           <>
             <hr className="border-surface border-1 border-gray-700" />
             <Link
-              href={`${backPath}/${post.prevPost.id}`}
+              to={`${backPath}/${post.prevPost.id}`}
               className="flex items-center gap-3 px-2 py-4 hover:bg-gray-100 rounded-md transition-colors"
             >
               <span className="px-2 py-1 font-caption-12 text-white rounded-full bg-info-600">
@@ -139,7 +139,7 @@ export default function NewsDetail({
           <>
             <hr className="border-surface border-1 border-gray-700" />
             <Link
-              href={`${backPath}/${post.nextPost.id}`}
+              to={`${backPath}/${post.nextPost.id}`}
               className="flex items-center gap-3 px-2 py-4 hover:bg-gray-100 rounded-md transition-colors"
             >
               <span className="px-2 py-1 font-caption-12 text-white rounded-full bg-info-600">
@@ -157,7 +157,7 @@ export default function NewsDetail({
       {/* 목록보기 버튼 */}
       <div className="text-center">
         <Link
-          href={backPath}
+          to={backPath}
           className="inline-block px-8 py-3 bg-info-600 text-white rounded-md font-body-14-medium hover:bg-info-800 transition-colors"
         >
           목록보기

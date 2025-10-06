@@ -1,7 +1,7 @@
-'use client'
 
-import Link from 'next/link'
-import Image from 'next/image'
+
+import { Link } from 'react-router-dom'
+
 import { CalendarIcon, UserIcon, EyeIcon } from '@heroicons/react/24/outline'
 import { PaginatedResponse } from '@/lib/apiClient'
 import { Post } from '@/lib/api/posts'
@@ -119,7 +119,7 @@ export default function NewsList({
           posts?.items.map((post, index) => (
             <Link
               key={post.id}
-              href={`${basePath}/${post.categoryName}/${post.id}`}
+              to={`${basePath}/${post.categoryName}/${post.id}`}
             >
               <div className="flex items-center gap-4 p-4 hover:bg-gray-100 transition-colors">
                 <div className="w-8 font-caption-14 text-point-1 text-center">
@@ -161,7 +161,7 @@ export default function NewsList({
           disabled={currentPage === 1}
           className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
         >
-          <Image
+          <img
             src="/assets/icon/chevron_left.svg"
             alt="이전"
             width={16}
@@ -209,7 +209,7 @@ export default function NewsList({
           disabled={currentPage === (posts?.meta.totalPages || 1)}
           className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
         >
-          <Image
+          <img
             src="/assets/icon/chevron_right.svg"
             alt="다음"
             width={16}

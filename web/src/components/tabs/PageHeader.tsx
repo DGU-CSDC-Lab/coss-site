@@ -1,11 +1,11 @@
-'use client'
 
-import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+
+
+import { useLocation } from 'react-router-dom'
 import menuConfig from '@/config/menuConfig'
 
 const PageHeader = () => {
-  const pathname = usePathname()
+  const location = useLocation(); const pathname = location.pathname
   const segments = pathname.split('/').filter(Boolean) // 예: ["about", "greeting"]
 
   // 1. main 메뉴 찾기
@@ -18,11 +18,10 @@ const PageHeader = () => {
   return (
     <div className="relative w-full rounded-lg overflow-hidden mb-12">
       {/* 배경 이미지 */}
-      <Image
+      <img
         src="/assets/images/header_bg.png"
         alt="banner"
-        fill
-        className="object-cover absolute inset-0"
+        className="absolute inset-0 w-full h-full object-cover"
       />
 
       {/* 텍스트 영역 */}

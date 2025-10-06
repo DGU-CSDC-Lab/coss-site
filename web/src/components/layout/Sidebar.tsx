@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { useUIStore } from '@/store/ui.store'
 import menuConfig from '@/config/menuConfig'
 
@@ -86,7 +85,7 @@ export default function SideNav() {
             aria-label="사이드바 닫기"
             className="hover:opacity-80 transition"
           >
-            <Image
+            <img
               src="/assets/icon/close.svg"
               alt="닫기"
               width={20}
@@ -160,7 +159,7 @@ export default function SideNav() {
                             {sub.children.map(detail => (
                               <li key={detail.path}>
                                 <Link
-                                  href={detail.path}
+                                  to={detail.path}
                                   className="pl-12 p-2 block text-gray-50 hover:bg-gray-600 rounded-sm transition"
                                   onClick={closeSidebar}
                                 >
@@ -172,7 +171,7 @@ export default function SideNav() {
                         </>
                       ) : (
                         <Link
-                          href={sub.path}
+                          to={sub.path}
                           className="block pl-8 p-3 text-gray-50 hover:bg-gray-600 rounded-sm transition"
                           onClick={closeSidebar}
                         >

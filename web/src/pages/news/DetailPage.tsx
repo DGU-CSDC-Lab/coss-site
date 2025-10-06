@@ -1,0 +1,40 @@
+import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { postsApi } from '@/lib/api/posts'
+import NewsDetail from '@/components/news/NewsDetail'
+import LoadingSpinner from '@/components/common/LoadingSpinner'
+
+export default function DetailPage() {
+  const { id, category } = useParams()
+  
+  const { data: post, isLoading } = useQuery({
+    queryKey: ['post', id],
+    queryFn: () => postsApi.getPost(id!),
+    enabled: !!id,
+  })
+
+  const getBackPath = () => {
+    if (category) {
+      return `/news/${category}`
+    }
+    return '/news'
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
+  if (!post) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-600">게시글을 찾을 수 없습니다.</p>
+      </div>
+    )
+  }
+
+  return <NewsDetail post={post} loading={false} backPath={getBackPath()} />
+}

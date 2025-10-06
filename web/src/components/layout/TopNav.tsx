@@ -1,7 +1,6 @@
 'use client'
 
-import Image from 'next/image'
-import Link from 'next/link'
+import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useUIStore } from '@/store/ui.store'
 import { useAuthStore } from '@/store/auth.store'
@@ -28,8 +27,8 @@ export default function TopNav() {
       <div className="w-full">
         <div className="flex justify-between items-center h-16 p-4">
           {/* 로고 */}
-          <Link href="/" className="flex items-center">
-            <Image
+          <Link to="/" className="flex items-center">
+            <img
               src="/assets/images/logo.png"
               alt="사물인터넷 혁신융합대학사업단"
               width={200}
@@ -93,7 +92,7 @@ export default function TopNav() {
                   >
                     <ul className="flex flex-col">
                       {group.children.map(sub => (
-                        <Link key={sub.path} href={sub.path}>
+                        <Link key={sub.path} to={sub.path}>
                           <li
                             onMouseEnter={() => {
                               setHoveredSub(sub.path)
@@ -129,14 +128,14 @@ export default function TopNav() {
                   로그아웃
                 </button>
                 <Link
-                  href="/admin"
+                  to="/admin"
                   className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"
                 >
                   <span className="text-caption-14 text-gray-700 font-medium">
                     {userName}
                   </span>
                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Image
+                    <img
                       src="/assets/icon/user.svg"
                       alt="user"
                       width={24}
@@ -147,12 +146,12 @@ export default function TopNav() {
               </div>
             ) : (
               <Link
-                href="/login"
+                to="/login"
                 className="flex items-center gap-3 transition-colors"
               >
                 <span className="text-caption-14 text-gray-500">로그인</span>
                 <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
-                  <Image
+                  <img
                     src="/assets/icon/user.svg"
                     alt="user"
                     width={24}
@@ -166,7 +165,7 @@ export default function TopNav() {
               onClick={toggleSidebar}
               className="flex items-center justify-center hover:bg-gray-100 transition-colors"
             >
-              <Image
+              <img
                 src="/assets/icon/menu-bar.svg"
                 alt="메뉴"
                 width={32}

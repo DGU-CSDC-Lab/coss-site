@@ -1,4 +1,4 @@
-import Image from 'next/image'
+
 
 interface InformationProps {
   type: 'info' | 'warning' | 'error'
@@ -33,7 +33,7 @@ export default function Information({
       className={`flex items-center gap-3 p-3 rounded-lg ${styles.bg} ${className}`}
     >
       <div className={`flex-shrink-0`}>
-        <Image
+        <img
           src={
             type === 'info'
               ? '/assets/icon/info/blue.svg'

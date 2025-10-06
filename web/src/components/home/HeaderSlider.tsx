@@ -1,10 +1,10 @@
-'use client'
+
 
 import { useState, useEffect } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { headerAssetsApi, HeaderAsset } from '@/lib/api/headerAssets'
-import Image from 'next/image'
-import Link from 'next/link'
+
+import { Link } from 'react-router-dom'
 import { PagedResponse } from '@/lib/apiClient'
 
 export default function HeaderSlider() {
@@ -80,14 +80,12 @@ export default function HeaderSlider() {
         {banners?.items.map((banner, index) => (
           <div key={banner.id} className="w-full h-full flex-shrink-0 relative">
             {banner.linkUrl ? (
-              <Link href={banner.linkUrl} className="block w-full h-full">
+              <Link to={banner.linkUrl} className="block w-full h-full">
                 {banner.imageUrl ? (
-                  <Image
+                  <img
                     src={banner.imageUrl}
                     alt={banner.title}
-                    fill
-                    className="object-cover rounded-lg"
-                    priority={index === 0}
+                    className="absolute inset-0 w-full h-full object-cover rounded-lg"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center">
@@ -102,12 +100,10 @@ export default function HeaderSlider() {
             ) : (
               <>
                 {banner.imageUrl ? (
-                  <Image
+                  <img
                     src={banner.imageUrl}
                     alt={banner.title}
-                    fill
-                    className="object-cover"
-                    priority={index === 0}
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center">
