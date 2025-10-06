@@ -211,6 +211,9 @@ jobs:
 
             echo "🎉 ECR deployment completed successfully!"
 
+            echo "🧹 Cleaning up old images..."
+            docker image prune -f
+
   close-ssh:
     needs: [open-ssh, deploy]
     runs-on: ubuntu-latest
