@@ -70,7 +70,7 @@ jobs:
       - name: Create production environment file
         run: |
           cd web
-          cat > .env.prod << EOF
+          cat > .env.prod << 'EOF'
           VITE_API_URL=${{ secrets.VITE_API_URL }}
           VITE_API_VERSION=v1
           VITE_MAX_FILE_SIZE=${{ secrets.VITE_MAX_FILE_SIZE }}
