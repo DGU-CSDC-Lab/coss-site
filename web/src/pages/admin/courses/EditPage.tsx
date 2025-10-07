@@ -8,6 +8,7 @@ import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import Label from '@/components/common/Label'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function AdminCoursesEditPage() {
   const params = useParams()
@@ -144,9 +145,7 @@ export default function AdminCoursesEditPage() {
   if (!course) {
     return (
       <div className="w-full">
-        <div className="text-center py-8 text-caption-14 text-gray-600">
-          과목을 찾을 수 없습니다.
-        </div>
+        <EmptyState message="과목을 찾을 수 없습니다." />
       </div>
     )
   }

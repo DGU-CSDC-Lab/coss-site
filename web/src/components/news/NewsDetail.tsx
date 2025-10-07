@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { PostDetail } from '@/lib/api/posts'
 import LoadingSpinner from '../common/LoadingSpinner'
+import EmptyState from '../common/EmptyState'
 
 interface NewsDetailProps {
   post: PostDetail | null
@@ -18,7 +19,7 @@ export default function NewsDetail({
   }
 
   if (!post) {
-    return <div className="text-center py-8">게시글을 찾을 수 없습니다.</div>
+    return <EmptyState message="게시글을 찾을 수 없습니다." />
   }
 
   return (

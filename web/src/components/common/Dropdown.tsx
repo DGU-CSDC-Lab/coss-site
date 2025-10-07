@@ -67,7 +67,7 @@ export default function Dropdown({
         type="button"
         onClick={() => !disabled && setIsOpen(!isOpen)}
         disabled={disabled}
-        className={`${baseClasses} ${sizeClasses[size]} ${className} w-full text-left flex items-center justify-between`}
+        className={`${baseClasses} ${sizeClasses[size]} ${className} w-full text-left flex items-center justify-between gap-2`}
       >
         <span className={selectedOption ? 'text-gray-900' : 'text-gray-400'}>
           {selectedOption ? selectedOption.label : placeholder}

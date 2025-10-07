@@ -1,11 +1,10 @@
-
-
 import { useState, useEffect } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { headerAssetsApi, HeaderAsset } from '@/lib/api/headerAssets'
 
 import { Link } from 'react-router-dom'
 import { PagedResponse } from '@/lib/apiClient'
+import EmptyState from '../common/EmptyState'
 
 export default function HeaderSlider() {
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -66,7 +65,7 @@ export default function HeaderSlider() {
   if (banners?.items.length === 0) {
     return (
       <div className="relative aspect-[3/1] bg-gray-200 flex items-center justify-center rounded-lg">
-        <div className="text-gray-00">표시할 배너가 없습니다.</div>
+        <EmptyState message="표시할 배너가 없습니다." />
       </div>
     )
   }

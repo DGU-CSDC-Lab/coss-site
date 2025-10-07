@@ -1,10 +1,9 @@
-
-
 import { useState, useEffect } from 'react'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { Link } from 'react-router-dom'
 import { schedulesApi, Schedule } from '@/lib/api/schedules'
 import Button from '@/components/common/Button'
+import EmptyState from '../common/EmptyState'
 
 export default function CalendarSection() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -218,9 +217,7 @@ export default function CalendarSection() {
               )
             })
           ) : (
-            <div className="text-gray-400 text-body-14-regular">
-              선택한 날짜 이후 일정이 없습니다.
-            </div>
+            <EmptyState message="선택한 날짜 이후 일정이 없습니다." />
           )}
         </div>
       </div>

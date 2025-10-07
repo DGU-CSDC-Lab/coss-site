@@ -13,6 +13,7 @@ import Label from '@/components/common/Label'
 import Checkbox from '@/components/common/Checkbox'
 import Title from '@/components/common/Title'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function AdminHeaderAssetsEditPage() {
   const params = useParams()
@@ -93,9 +94,7 @@ export default function AdminHeaderAssetsEditPage() {
   if (!asset) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-gray-400 text-body-14-regular">
-          헤더 에셋을 찾을 수 없습니다.
-        </div>
+        <EmptyState message="헤더 에셋을 찾을 수 없습니다." />
       </div>
     )
   }
@@ -130,12 +129,12 @@ export default function AdminHeaderAssetsEditPage() {
               </div>
 
               <div>
-                <Label className="mb-2">
-                  이미지 URL
-                </Label>
+                <Label className="mb-2">이미지 URL</Label>
                 <Input
                   value={formData.imageUrl}
-                  onChange={value => setFormData({ ...formData, imageUrl: value })}
+                  onChange={value =>
+                    setFormData({ ...formData, imageUrl: value })
+                  }
                   placeholder="이미지 URL을 입력하세요"
                   className="w-full"
                   size="lg"
@@ -145,12 +144,12 @@ export default function AdminHeaderAssetsEditPage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
-                <Label className="mb-2">
-                  링크 URL
-                </Label>
+                <Label className="mb-2">링크 URL</Label>
                 <Input
                   value={formData.linkUrl}
-                  onChange={value => setFormData({ ...formData, linkUrl: value })}
+                  onChange={value =>
+                    setFormData({ ...formData, linkUrl: value })
+                  }
                   placeholder="링크 URL을 입력하세요"
                   className="w-full"
                   size="lg"
@@ -160,7 +159,9 @@ export default function AdminHeaderAssetsEditPage() {
               <div className="flex items-center pt-8">
                 <Checkbox
                   checked={formData.isActive}
-                  onChange={checked => setFormData({ ...formData, isActive: checked })}
+                  onChange={checked =>
+                    setFormData({ ...formData, isActive: checked })
+                  }
                   label="활성화"
                 />
               </div>

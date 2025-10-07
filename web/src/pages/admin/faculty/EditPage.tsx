@@ -9,6 +9,7 @@ import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function AdminFacultyEditPage() {
   const params = useParams()
@@ -153,9 +154,7 @@ export default function AdminFacultyEditPage() {
   if (!faculty) {
     return (
       <div className="w-full">
-        <div className="text-center py-8 text-caption-14 text-gray-600">
-          교원을 찾을 수 없습니다.
-        </div>
+        <EmptyState message="교원을 찾을 수 없습니다." />
       </div>
     )
   }

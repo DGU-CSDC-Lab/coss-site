@@ -46,7 +46,7 @@ export default function Information({
           height={16}
         />
       </div>
-      <div className={`text-caption-14 leading-relaxed ${styles.text}`}>
+      <div className={`text-caption-14 leading-relaxed ${styles.text} select-none`}>
         {children}
       </div>
     </div>

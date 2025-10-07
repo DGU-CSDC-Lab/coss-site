@@ -9,6 +9,7 @@ import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '../common/LoadingSpinner'
+import EmptyState from '../common/EmptyState'
 
 interface NewsListProps {
   posts: PaginatedResponse<Post> | null
@@ -112,9 +113,7 @@ export default function NewsList({
       {/* 게시글 목록 (리스트 형태) */}
       <div className="space-y-1">
         {posts?.items.length === 0 ? (
-          <div className="text-center py-8 text-text-light">
-            게시글이 없습니다.
-          </div>
+          <EmptyState message="검색 결과가 없습니다." />
         ) : (
           posts?.items.map((post, index) => (
             <Link

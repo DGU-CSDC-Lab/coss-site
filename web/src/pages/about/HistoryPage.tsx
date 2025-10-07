@@ -3,6 +3,7 @@ import Tabs from '@/components/tabs/Tabs'
 import { useQuery } from '@tanstack/react-query'
 import { historyApi } from '@/lib/api/history'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function HistoryPage() {
   const { data: histories, isLoading } = useQuery({
@@ -30,9 +31,7 @@ export default function HistoryPage() {
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500 text-body-14-medium">
-              등록된 연혁이 없습니다.
-            </div>
+            <EmptyState message="등록된 연혁이 없습니다." />
           )}
         </div>
       )}

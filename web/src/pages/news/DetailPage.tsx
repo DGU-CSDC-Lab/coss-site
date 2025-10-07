@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query'
 import { postsApi } from '@/lib/api/posts'
 import NewsDetail from '@/components/news/NewsDetail'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function DetailPage() {
   const { id, category } = useParams()
-  
+
   const { data: post, isLoading } = useQuery({
     queryKey: ['post', id],
     queryFn: () => postsApi.getPost(id!),
@@ -31,7 +32,7 @@ export default function DetailPage() {
   if (!post) {
     return (
       <div className="text-center py-8">
-        <p className="text-gray-600">게시글을 찾을 수 없습니다.</p>
+        <EmptyState message="게시글을 찾을 수 없습니다." />
       </div>
     )
   }

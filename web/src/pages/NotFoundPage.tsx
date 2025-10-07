@@ -1,12 +1,12 @@
-import { useLocation, useParams, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import NewsDetail from '@/components/news/NewsDetail'
 import { PostDetail, postsApi } from '@/lib/api/posts'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function NotFoundPage() {
   const location = useLocation()
-  const params = useParams()
   const navigate = useNavigate()
   const [mounted, setMounted] = useState(false)
 
@@ -55,9 +55,7 @@ export default function NotFoundPage() {
 
       if (!post) {
         return (
-          <div className="text-gray-400 text-body-14-regular">
-            게시글을 찾을 수 없습니다.
-          </div>
+          <EmptyState message="존재하지 않는 게시글입니다." />
         )
       }
 

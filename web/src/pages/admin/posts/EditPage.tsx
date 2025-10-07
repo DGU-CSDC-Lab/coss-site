@@ -46,9 +46,9 @@ export default function AdminPostsEditPage() {
     uploading: thumbnailUploading,
     handleImageChange: handleThumbnailChange,
   } = useImageUpload({
-    onError: (error) => {
+    onError: error => {
       alert.error('썸네일 업로드 중 오류가 발생했습니다.')
-    }
+    },
   })
 
   useEffect(() => {
@@ -63,7 +63,9 @@ export default function AdminPostsEditPage() {
       const post = await postsApi.getPost(params.id as string)
       setFormData({
         title: post.title,
-        categoryId: CATEGORIES.find(cat => cat.label === post.categoryName)?.value || 'news',
+        categoryId:
+          CATEGORIES.find(cat => cat.label === post.categoryName)?.value ||
+          'news',
         contentHtml: post.contentHtml,
       })
       setIsPublic(post.status === 'public')
@@ -83,7 +85,9 @@ export default function AdminPostsEditPage() {
       const postData: UpdatePostRequest = {
         title: formData.title,
         contentHtml: formData.contentHtml,
-        categoryName: CATEGORIES.find(cat => cat.value === formData.categoryId)?.label || '뉴스',
+        categoryName:
+          CATEGORIES.find(cat => cat.value === formData.categoryId)?.label ||
+          '뉴스',
         status: isDraft ? 'draft' : isPublic ? 'public' : 'private',
         thumbnailUrl: thumbnailUrl || null,
         files: files.map(file => ({
@@ -95,7 +99,9 @@ export default function AdminPostsEditPage() {
       }
 
       await postsApi.updatePost(params.id as string, postData)
-      alert.success(isDraft ? '임시저장 되었습니다.' : '게시글이 수정되었습니다.')
+      alert.success(
+        isDraft ? '임시저장 되었습니다.' : '게시글이 수정되었습니다.'
+      )
       navigate('/admin/posts')
     } catch (error) {
       console.error('Failed to update post:', error)
@@ -135,7 +141,12 @@ export default function AdminPostsEditPage() {
           >
             임시저장
           </Button>
-          <Button size="md" variant="info" radius="md" onClick={() => setShowPublishModal(true)}>
+          <Button
+            size="md"
+            variant="info"
+            radius="md"
+            onClick={() => setShowPublishModal(true)}
+          >
             수정하기
           </Button>
         </div>
@@ -151,7 +162,9 @@ export default function AdminPostsEditPage() {
               size="lg"
               type="text"
               value={formData.title}
-              onChange={value => setFormData(prev => ({ ...prev, title: value }))}
+              onChange={value =>
+                setFormData(prev => ({ ...prev, title: value }))
+              }
               placeholder="제목을 입력하세요"
             />
           </div>

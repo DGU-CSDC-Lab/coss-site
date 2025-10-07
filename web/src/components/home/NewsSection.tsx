@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 
 import { postsApi, Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
+import EmptyState from '../common/EmptyState'
 
 export default function NewsSection() {
   const [news, setNews] = useState<Post[]>([])
@@ -71,9 +72,7 @@ export default function NewsSection() {
             </Link>
           ))
         ) : (
-          <div className="text-gray-400 text-body-14-regular">
-            소식이 없습니다.
-          </div>
+          <EmptyState message="소식이 없습니다." />
         )}
       </div>
     </div>

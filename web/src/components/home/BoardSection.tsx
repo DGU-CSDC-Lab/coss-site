@@ -1,10 +1,9 @@
-
-
 import { useState, useEffect } from 'react'
 import { PaperClipIcon } from '@heroicons/react/24/outline'
 import { Link } from 'react-router-dom'
 import { postsApi, Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
+import EmptyState from '../common/EmptyState'
 
 export default function BoardSection() {
   const [posts, setPosts] = useState<Post[]>([])
@@ -68,9 +67,7 @@ export default function BoardSection() {
             </div>
           ))
         ) : (
-          <div className="text-left text-gray-400 text-body-14-regular">
-            게시글이 없습니다.
-          </div>
+          <EmptyState message="게시물이 없습니다." />
         )}
       </div>
     </div>

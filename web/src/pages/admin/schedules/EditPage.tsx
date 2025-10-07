@@ -11,6 +11,7 @@ import DateInput from '@/components/common/DateInput'
 import Textarea from '@/components/common/Textarea'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function AdminSchedulesEditPage() {
   const params = useParams()
@@ -106,9 +107,7 @@ export default function AdminSchedulesEditPage() {
 
   if (!schedule) {
     return (
-      <div className="text-center py-8 text-gray-600">
-        일정을 찾을 수 없습니다.
-      </div>
+      <EmptyState message="일정을 찾을 수 없습니다." />
     )
   }
 

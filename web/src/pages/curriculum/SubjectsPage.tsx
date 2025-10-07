@@ -7,6 +7,7 @@ import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import Title from '@/components/common/Title'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function SubjectsPage() {
   const [courses, setCourses] = useState<PagedResponse<Course> | null>(null)
@@ -139,37 +140,37 @@ export default function SubjectsPage() {
       {/* 결과 테이블 */}
       <div className="rounded-lg border border-info-100 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full border-collapse table-fixed">
+          <table className="w-full border-collapse min-w-[1000px]">
             <thead>
               <tr className="bg-info-50 border-b border-info-100">
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[8%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
                   개설년도
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[7%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[60px]">
                   학기
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[10%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
                   학과
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[10%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
                   학수번호
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[15%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[160px]">
                   과목명
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[8%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
                   수강학년
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[7%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[60px]">
                   학점
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[15%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[140px]">
                   강의시간
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[8%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
                   담당교수
                 </th>
-                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[12%]">
+                <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
                   강의계획서
                 </th>
               </tr>
@@ -224,8 +225,8 @@ export default function SubjectsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={11} className="text-center py-10 text-gray-500">
-                    검색 결과가 없습니다.
+                  <td colSpan={10} className="p-0">
+                    <EmptyState />
                   </td>
                 </tr>
               )}

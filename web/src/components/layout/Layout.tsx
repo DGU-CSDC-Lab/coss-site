@@ -37,7 +37,7 @@ const Layout = ({ children }: LayoutProps) => {
           'flex-1 flex flex-col px-4 py-6 sm:px-5 sm:py-7 md:px-12 md:py-18',
           isAdminPage
             ? 'w-full' // admin 페이지만 전체폭
-            : 'w-full max-w-6xl mx-auto', // 일반 페이지는 중앙 정렬 + 전체 너비
+            : 'w-full max-w-7xl mx-auto', // 일반 페이지는 중앙 정렬 + 전체 너비
           isLoginPage ? 'items-center justify-center' : 'items-start'
         )}
       >
