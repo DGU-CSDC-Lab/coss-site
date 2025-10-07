@@ -1,11 +1,17 @@
+import Title from '@/components/common/Title'
 import Tabs from '@/components/tabs/Tabs'
 
 export default function IotPage() {
   return (
     <div className="w-full">
       <Tabs />
-      <div className="text-center py-8">
-        <p className="text-gray-600">IoT 교과과정 페이지입니다.</p>
+      <Title className="mb-4">이수체계도</Title>
+      <div className="flex flex-col gap-8">
+        <img
+          src="/assets/images/pages/waiting.png"
+          alt="학과 소개 이미지"
+          className="w-full h-auto"
+        />
       </div>
     </div>
   )

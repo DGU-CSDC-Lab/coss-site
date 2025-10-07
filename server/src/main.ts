@@ -25,7 +25,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const swaggerServerUrl = process.env.SWAGGER_SERVER_URL || 'http://localhost:3001';
+  const swaggerServerUrl = process.env.SWAGGER_SERVER_URL;
   
   const config = new DocumentBuilder()
     .setTitle('COSS Backend API')
