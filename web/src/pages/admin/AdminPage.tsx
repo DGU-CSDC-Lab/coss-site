@@ -178,11 +178,11 @@ export default function AdminPage() {
             >
               <div className="flex items-center gap-3 mb-3">
                 <action.icon className="w-6 h-6 text-gray-600" />
-                <h3 className="font-body-14-medium text-gray-900">
+                <h3 className="text-body-14-medium text-gray-900">
                   {action.title}
                 </h3>
               </div>
-              <p className="font-caption-14 text-gray-600 leading-snug">
+              <p className="text-caption-14 text-gray-600 leading-snug">
                 {action.description}
               </p>
             </Link>
@@ -199,7 +199,7 @@ export default function AdminPage() {
               key={section.title}
               className="bg-white border border-gray-100 rounded-md p-4"
             >
-              <div className="font-body-18-medium">{section.title}</div>
+              <div className="text-body-18-medium">{section.title}</div>
               <div className="h-4"></div>
               <hr className="border-t border-gray-200 mb-4" />
               <ul className="space-y-3">
@@ -211,7 +211,7 @@ export default function AdminPage() {
                     >
                       <div className="flex items-center gap-3">
                         <item.icon className="w-5 h-5 text-gray-400" />
-                        <span className="font-body-14-medium text-gray-700">
+                        <span className="text-body-14-medium text-gray-700">
                           {item.name}
                         </span>
                       </div>
@@ -219,7 +219,7 @@ export default function AdminPage() {
                         {loading ? (
                           <LoadingSpinner size="sm" />
                         ) : (
-                          <span className="font-caption-14 text-pri-800 p-2">
+                          <span className="text-caption-14 text-pri-800 p-2">
                             {item.count}
                           </span>
                         )}

@@ -6,7 +6,7 @@ export default function AdminCoursesPage() {
   return (
     <div className="w-full">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">개설과목 관리</h1>
+        <h1 className="text-2xl text-bold">개설과목 관리</h1>
         <div className="flex gap-2">
           <button
             onClick={() => navigate('/admin/courses/create')}
