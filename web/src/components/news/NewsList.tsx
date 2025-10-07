@@ -8,7 +8,7 @@ import { Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
-import LoadingSpinner from '../common/LoadingSpinner'
+import LoadingSpinner from '../common/loading/LoadingSpinner'
 import EmptyState from '../common/EmptyState'
 
 interface NewsListProps {

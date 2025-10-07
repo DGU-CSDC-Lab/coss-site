@@ -1,12 +1,16 @@
-import Tabs from '@/components/tabs/Tabs'
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function ProgramsPage() {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    navigate('/support/programs/co-week', { replace: true })
+  }, [navigate])
+
   return (
-    <div className="w-full">
-      <Tabs />
-      <div className="text-center py-8">
-        <p className="text-gray-600">프로그램 페이지입니다.</p>
-      </div>
+    <div>
+      <div>리다이렉트 중...</div>
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { postsApi } from '@/lib/api/posts'
 import NewsDetail from '@/components/news/NewsDetail'
-import LoadingSpinner from '@/components/common/LoadingSpinner'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
 
 export default function DetailPage() {

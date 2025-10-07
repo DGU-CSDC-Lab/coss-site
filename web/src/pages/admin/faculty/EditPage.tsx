@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import { facultyApi, Faculty, UpdateFacultyRequest } from '@/lib/api/faculty'
 import { uploadImage } from '@/utils/fileUpload'
-import Title from '@/components/common/Title'
+import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
-import LoadingSpinner from '@/components/common/LoadingSpinner'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
 
 export default function AdminFacultyEditPage() {

@@ -5,8 +5,8 @@ import Tabs from '@/components/tabs/Tabs'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
-import Title from '@/components/common/Title'
-import LoadingSpinner from '@/components/common/LoadingSpinner'
+import Title from '@/components/common/title/Title'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
 
 export default function SubjectsPage() {

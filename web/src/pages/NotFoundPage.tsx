@@ -1,6 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import LoadingSpinner from '@/components/common/LoadingSpinner'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import NewsDetail from '@/components/news/NewsDetail'
 import { PostDetail, postsApi } from '@/lib/api/posts'
 import EmptyState from '@/components/common/EmptyState'

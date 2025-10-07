@@ -1,8 +1,8 @@
-import Title from '@/components/common/Title'
+import Title from '@/components/common/title/Title'
 import Tabs from '@/components/tabs/Tabs'
 import { useQuery } from '@tanstack/react-query'
 import { historyApi } from '@/lib/api/history'
-import LoadingSpinner from '@/components/common/LoadingSpinner'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
 
 export default function HistoryPage() {

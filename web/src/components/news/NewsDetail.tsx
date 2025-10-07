@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { PostDetail } from '@/lib/api/posts'
-import LoadingSpinner from '../common/LoadingSpinner'
+import LoadingSpinner from '../common/loading/LoadingSpinner'
 import EmptyState from '../common/EmptyState'
 
 interface NewsDetailProps {

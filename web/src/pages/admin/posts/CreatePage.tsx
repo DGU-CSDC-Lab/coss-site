@@ -11,8 +11,8 @@ import Button from '@/components/common/Button'
 import Dropdown from '@/components/common/Dropdown'
 import Input from '@/components/common/Input'
 import Label from '@/components/common/Label'
-import LoadingSpinner from '@/components/common/LoadingSpinner'
-import SubTitle from '@/components/common/SubTitle'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import SubTitle from '@/components/common/title/SubTitle'
 import { useAlert } from '@/hooks/useAlert'
 
 const CATEGORIES = [

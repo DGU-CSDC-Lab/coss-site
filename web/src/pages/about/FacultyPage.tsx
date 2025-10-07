@@ -1,9 +1,9 @@
-import Title from '@/components/common/Title'
+import Title from '@/components/common/title/Title'
 import Tabs from '@/components/tabs/Tabs'
 import FacultyCard from '@/components/faculty/FacultyCard'
 import { useQuery } from '@tanstack/react-query'
 import { facultyApi } from '@/lib/api/faculty'
-import LoadingSpinner from '@/components/common/LoadingSpinner'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 
 export default function FacultyPage() {
   const { data: faculties, isLoading } = useQuery({

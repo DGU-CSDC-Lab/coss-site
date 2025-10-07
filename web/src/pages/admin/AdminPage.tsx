@@ -16,8 +16,8 @@ import { coursesApi } from '@/lib/api/courses'
 import { headerAssetsApi } from '@/lib/api/headerAssets'
 import { popupsApi } from '@/lib/api/popups'
 import Information from '@/components/common/Information'
-import Title from '@/components/common/Title'
-import LoadingSpinner from '@/components/common/LoadingSpinner'
+import Title from '@/components/common/title/Title'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 
 interface DashboardStats {
   posts: number

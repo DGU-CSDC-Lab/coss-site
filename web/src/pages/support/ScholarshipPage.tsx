@@ -1,35 +1,47 @@
-import Title from '@/components/common/Title'
+import Title from '@/components/common/title/Title'
 import Tabs from '@/components/tabs/Tabs'
+import SubTitle from '@/components/common/title/SubTitle'
 
 export default function ScholarshipPage() {
   return (
     <div className="w-full">
       <Tabs />
-      <Title className="mb-12">장학제도</Title>
-      <div className="space-y-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl text-semibold mb-4">성적우수장학금</h3>
-          <p className="text-gray-700 mb-4">
-            학업성취도가 우수한 학생에게 지급되는 장학금입니다.
-          </p>
-          <ul className="list-disc list-inside text-gray-600 space-y-2">
-            <li>직전학기 평점평균 3.5 이상</li>
-            <li>수혜횟수 제한 없음</li>
-            <li>등록금의 50% 지원</li>
-          </ul>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl text-semibold mb-4">연구참여장학금</h3>
-          <p className="text-gray-700 mb-4">
-            연구 프로젝트에 참여하는 학생에게 지급되는 장학금입니다.
-          </p>
-          <ul className="list-disc list-inside text-gray-600 space-y-2">
-            <li>교수 추천 필요</li>
-            <li>연구 참여 기간 동안 지급</li>
-            <li>월 50만원 지원</li>
-          </ul>
-        </div>
+      <Title className="mb-4">장학금</Title>
+      <SubTitle className="mb-4">1) 성적 우수자</SubTitle>
+      <div className="flex flex-col gap-8">
+        <img
+          src="/assets/images/pages/support/scholarship/1-1.png"
+          alt="학과 소개 이미지"
+          className="w-full h-auto"
+        />
+      </div>
+      <SubTitle className="my-4">2) 경진대회 우수자</SubTitle>
+      <div className="flex flex-col gap-8">
+        <img
+          src="/assets/images/pages/support/scholarship/1-2.png"
+          alt="학과 소개 이미지"
+          className="w-full h-auto"
+        />
+      </div>
+
+      <div className="h-12" />
+
+      <Title className="mb-4">인턴십 연계</Title>
+      <SubTitle className="mb-4">1) 국내 인턴십</SubTitle>
+      <div className="flex flex-col gap-8">
+        <img
+          src="/assets/images/pages/waiting.png"
+          alt="학과 소개 이미지"
+          className="w-full h-auto"
+        />
+      </div>
+      <SubTitle className="my-4">2) 해외 인턴십</SubTitle>
+      <div className="flex flex-col gap-8">
+        <img
+          src="/assets/images/pages/waiting.png"
+          alt="학과 소개 이미지"
+          className="w-full h-auto"
+        />
       </div>
     </div>
   )
