@@ -22,13 +22,13 @@ export default function Checkbox({
   }
 
   const labelSizeClasses = {
-    sm: 'font-body-14-medium',
-    md: 'font-body-16-medium',
-    lg: 'font-body-18-medium',
+    sm: 'text-caption-12',
+    md: 'text-caption-14',
+    lg: 'text-body-16-medium',
   }
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-2 ${className}`}>
       <input
         type="checkbox"
         id={id}
@@ -36,14 +36,14 @@ export default function Checkbox({
         onChange={e => onChange(e.target.checked)}
         className={`
           ${sizeClasses[size]}
-          text-blue-600 bg-gray-100 border-gray-300 rounded
-          focus:ring-blue-500 focus:ring-2
+          text-info-600 bg-gray-100 border-gray-100 rounded
+          focus:ring-info-500 focus:ring-1 cursor-pointer
         `}
       />
       {label && (
         <label
           htmlFor={id}
-          className={`text-gray-900 cursor-pointer ${labelSizeClasses[size]}`}
+          className={`text-gray-600 ${labelSizeClasses[size]}`}
         >
           {label}
         </label>

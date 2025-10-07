@@ -1,8 +1,8 @@
 import { RouterProvider } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { router } from './router'
-import PopupProvider from './components/common/PopupProvider'
-import Alert from './components/common/Alert'
+import { router } from '@/router'
+import PopupProvider from '@/components/popup/PopupProvider'
+import Alert from '@/components/common/Alert'
 
 const queryClient = new QueryClient({
   defaultOptions: {

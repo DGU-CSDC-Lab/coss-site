@@ -1,7 +1,7 @@
 'use client'
 
 import { usePopups } from '@/hooks/usePopups'
-import PopupModal from './PopupModal'
+import PopupModal from '@/components/popup/PopupModal'
 
 export default function PopupProvider() {
   const { visiblePopups, showModal, setShowModal, hidePopup } = usePopups()
