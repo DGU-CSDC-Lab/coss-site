@@ -29,17 +29,17 @@ export default function NewsDetail({
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
           <span
-            className={`px-3 py-1 font-caption-14 text-white rounded-full bg-info-600`}
+            className={`px-3 py-1 text-caption-14 text-white rounded-full bg-info-600`}
           >
             {post.categoryName}
           </span>
-          <h1 className="font-heading-28 text-text flex-1">{post.title}</h1>
+          <h1 className="text-heading-28 text-text flex-1">{post.title}</h1>
         </div>
 
         <div className="py-4">
           <hr className="border-surface border-1 border-gray-700" />
         </div>
-        <div className="flex items-center gap-4 font-caption-14">
+        <div className="flex items-center gap-4 text-caption-14">
           <span className="inline-flex items-center gap-2">
             <span className="text-gray-500">작성자</span>{' '}
             <span className="text-gray-900">{post.author}</span>
@@ -61,7 +61,7 @@ export default function NewsDetail({
       </div>
       {/* 본문 영역 */}
       <div
-        className="py-8 prose max-w-none font-body-14-regular leading-relaxed"
+        className="py-8 prose max-w-none text-body-14-regular leading-relaxed"
         dangerouslySetInnerHTML={{ __html: post.contentHtml }}
       />
 
@@ -81,7 +81,7 @@ export default function NewsDetail({
                   clipRule="evenodd"
                 />
               </svg>
-              <span className="font-body-14-medium text-gray-800">
+              <span className="text-body-14-medium text-gray-800">
                 첨부파일
               </span>
             </div>
@@ -104,10 +104,10 @@ export default function NewsDetail({
                       clipRule="evenodd"
                     />
                   </svg>
-                  <span className="font-body-14-regular text-gray-700 flex-1">
+                  <span className="text-body-14-regular text-gray-700 flex-1">
                     {file.originalName}
                   </span>
-                  <span className="font-caption-12 text-gray-500">
+                  <span className="text-caption-12 text-gray-500">
                     {(file.fileSize / 1024).toFixed(1)}KB
                   </span>
                 </a>
@@ -126,10 +126,10 @@ export default function NewsDetail({
               to={`${backPath}/${post.prevPost.id}`}
               className="flex items-center gap-3 px-2 py-4 hover:bg-gray-100 rounded-md transition-colors"
             >
-              <span className="px-2 py-1 font-caption-12 text-white rounded-full bg-info-600">
+              <span className="px-2 py-1 text-caption-12 text-white rounded-full bg-info-600">
                 이전글
               </span>
-              <span className="font-body-14-medium font-gray-900 flex-1">
+              <span className="text-body-14-medium text-gray-900 flex-1">
                 {post.prevPost.title}
               </span>
             </Link>
@@ -142,10 +142,10 @@ export default function NewsDetail({
               to={`${backPath}/${post.nextPost.id}`}
               className="flex items-center gap-3 px-2 py-4 hover:bg-gray-100 rounded-md transition-colors"
             >
-              <span className="px-2 py-1 font-caption-12 text-white rounded-full bg-info-600">
+              <span className="px-2 py-1 text-caption-12 text-white rounded-full bg-info-600">
                 다음글
               </span>
-              <span className="font-body-14-medium font-gray-900 flex-1">
+              <span className="text-body-14-medium text-gray-900 flex-1">
                 {post.nextPost.title}
               </span>
             </Link>
@@ -158,7 +158,7 @@ export default function NewsDetail({
       <div className="text-center">
         <Link
           to={backPath}
-          className="inline-block px-8 py-3 bg-info-600 text-white rounded-md font-body-14-medium hover:bg-info-800 transition-colors"
+          className="inline-block px-8 py-3 bg-info-600 text-white rounded-md text-body-14-medium hover:bg-info-800 transition-colors"
         >
           목록보기
         </Link>

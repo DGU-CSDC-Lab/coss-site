@@ -70,7 +70,7 @@ export default function NewsList({
     <div>
       {/* 검색 영역 */}
       <div className="flex justify-between items-start md:items-center gap-4">
-        <div className="font-body-18-regular font-gray-700">
+        <div className="text-body-18-regular text-gray-700">
           전체{' '}
           <span className="text-pri-500">{posts?.meta.totalElements || 0}</span>{' '}
           건
@@ -122,16 +122,16 @@ export default function NewsList({
               to={`${basePath}/${post.categoryName}/${post.id}`}
             >
               <div className="flex items-center gap-4 p-4 hover:bg-gray-100 transition-colors">
-                <div className="w-8 font-caption-14 text-point-1 text-center">
+                <div className="w-8 text-caption-14 text-point-1 text-center">
                   {(currentPage - 1) * 10 + index + 1}
                 </div>
 
                 <div className="flex-1">
-                  <h3 className="font-body-18-regular text-text">
+                  <h3 className="text-body-18-regular text-text">
                     {post.title}
                   </h3>
                   <div className="h-2" />
-                  <div className="flex items-center gap-4 font-caption-12 text-gray-500">
+                  <div className="flex items-center gap-4 text-caption-12 text-gray-500">
                     <span className="flex items-center gap-1">
                       <CalendarIcon className="w-4 h-4" />
                       {new Date(post.createdAt).toLocaleDateString('ko-KR')}
@@ -178,9 +178,9 @@ export default function NewsList({
                 <button
                   key={pageNum}
                   onClick={() => onPageChange(pageNum)}
-                  className={`px-3 py-2 font-caption-14 ${
+                  className={`px-3 py-2 text-caption-14 ${
                     currentPage === pageNum
-                      ? 'text-pri-500 font-semibold'
+                      ? 'text-pri-500 text-semibold'
                       : 'text-gray-900 hover-primary'
                   }`}
                 >
@@ -195,7 +195,7 @@ export default function NewsList({
             <span className="px-2 text-gray-900">...</span>
             <button
               onClick={() => onPageChange(posts.meta.totalPages)}
-              className="px-3 py-2 font-caption-14 text-text hover-primary"
+              className="px-3 py-2 text-caption-14 text-text hover-primary"
             >
               {posts.meta.totalPages}
             </button>

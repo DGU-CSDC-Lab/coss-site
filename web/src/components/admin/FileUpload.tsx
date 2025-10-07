@@ -143,10 +143,10 @@ export default function FileUpload({
         />
 
         <div className="space-y-2">
-          <div className="font-body-16-medium text-text">
+          <div className="text-body-16-medium text-text">
             파일을 드래그하거나 클릭하여 업로드
           </div>
-          <div className="font-caption-14 text-text-light">
+          <div className="text-caption-14 text-text-light">
             최대 {maxFiles}개, {formatFileSize(maxSize)} 이하
           </div>
           <Button
@@ -165,7 +165,7 @@ export default function FileUpload({
       {/* 업로드 진행률 */}
       {uploading && (
         <div className="space-y-2">
-          <div className="flex justify-between font-caption-14 text-text">
+          <div className="flex justify-between text-caption-14 text-text">
             <span>{progress}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
@@ -180,7 +180,7 @@ export default function FileUpload({
       {/* 업로드된 파일 목록 */}
       {files.length > 0 && (
         <div className="space-y-2">
-          <div className="font-body-16-medium text-text">
+          <div className="text-body-16-medium text-text">
             업로드된 파일 ({files.length})
           </div>
           <div className="space-y-2">
@@ -190,17 +190,17 @@ export default function FileUpload({
                 className="flex items-center justify-between p-3 bg-surface rounded"
               >
                 <div className="flex-1">
-                  <div className="font-caption-14 text-text">
+                  <div className="text-caption-14 text-text">
                     {file.originalName}
                   </div>
-                  <div className="font-caption-12 text-text-light">
+                  <div className="text-caption-12 text-text-light">
                     {formatFileSize(file.fileSize)}
                   </div>
                 </div>
                 <button
                   type="button"
                   onClick={() => handleRemoveFile(index)}
-                  className="px-2 py-1 text-red-600 hover:bg-red-50 rounded font-caption-12"
+                  className="px-2 py-1 text-red-600 hover:bg-red-50 rounded text-caption-12"
                 >
                   삭제
                 </button>

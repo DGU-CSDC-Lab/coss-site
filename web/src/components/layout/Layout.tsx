@@ -1,3 +1,9 @@
+/**
+ * Layout 컴포넌트
+ * - 실제 레이아웃 구조와 스타일링을 담당
+ * - TopNav, Sidebar, Footer, PageHeader 등의 공통 UI 요소들을 포함
+ * - 페이지별 조건에 따라 레이아웃 스타일을 동적으로 조정
+ */
 import { useLocation } from 'react-router-dom'
 import TopNav from './TopNav'
 import Sidebar from './Sidebar'
@@ -28,13 +34,11 @@ const Layout = ({ children }: LayoutProps) => {
       {/* 메인 콘텐츠 영역 : login인 경우에만 중앙 정렬*/}
       <main
         className={clsx(
-          'flex-1 flex flex-col px-12 py-18 mobile:px-4 mobile:py-6 tablet:px-5 tablet:py-7',
+          'flex-1 flex flex-col px-4 py-6 sm:px-5 sm:py-7 md:px-12 md:py-18',
           isAdminPage
-            ? 'w-full' // admin 페이지: 전체 너비 사용
-            : 'w-full max-w-6xl mx-auto', // 일반 페이지: 가운데 정렬된 최대 너비
-          isLoginPage
-            ? 'items-center justify-center' // 로그인 페이지: 중앙 정렬
-            : 'items-start' // 일반/관리자 페이지: 위에서 시작
+            ? 'w-full' // admin 페이지만 전체폭
+            : 'w-full max-w-6xl mx-auto', // 일반 페이지는 중앙 정렬 + 전체 너비
+          isLoginPage ? 'items-center justify-center' : 'items-start'
         )}
       >
         {/* 페이지 헤더 (있을 때만) */}
@@ -44,7 +48,7 @@ const Layout = ({ children }: LayoutProps) => {
         {children}
       </main>
 
-      <div className="h-30 mobile:h-24 tablet:h-20" />
+      <div className="h-12 md:h-20 sm:h-16" />
       <Footer />
       <Sidebar />
     </div>

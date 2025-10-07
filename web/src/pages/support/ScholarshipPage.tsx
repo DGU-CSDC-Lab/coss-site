@@ -8,7 +8,7 @@ export default function ScholarshipPage() {
       <Title className="mb-12">장학제도</Title>
       <div className="space-y-8">
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-semibold mb-4">성적우수장학금</h3>
+          <h3 className="text-xl text-semibold mb-4">성적우수장학금</h3>
           <p className="text-gray-700 mb-4">
             학업성취도가 우수한 학생에게 지급되는 장학금입니다.
           </p>
@@ -20,7 +20,7 @@ export default function ScholarshipPage() {
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-semibold mb-4">연구참여장학금</h3>
+          <h3 className="text-xl text-semibold mb-4">연구참여장학금</h3>
           <p className="text-gray-700 mb-4">
             연구 프로젝트에 참여하는 학생에게 지급되는 장학금입니다.
           </p>

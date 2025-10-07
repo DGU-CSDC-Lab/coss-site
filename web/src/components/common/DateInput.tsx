@@ -16,9 +16,9 @@ export default function DateInput({
   size = 'md',
 }: DateInputProps) {
   const sizeClasses = {
-    sm: 'px-3 py-1.5 font-body-14-medium',
-    md: 'px-4 py-2 font-body-16-medium',
-    lg: 'px-5 py-3 font-body-18-medium',
+    sm: 'px-3 py-1.5 text-body-14-medium',
+    md: 'px-4 py-2 text-body-16-medium',
+    lg: 'px-5 py-3 text-body-18-medium',
   }
 
   return (

@@ -19,30 +19,30 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
           />
         ) : (
           <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-            <span className="font-caption-12 text-gray-400">사진 없음</span>
+            <span className="text-caption-12 text-gray-400">사진 없음</span>
           </div>
         )}
       </div>
 
       {/* 정보 영역 */}
       <div className="flex-1 flex flex-col justify-start">
-        <h3 className="font-body-20-medium text-gray-900">{faculty.name}</h3>
+        <h3 className="text-body-20-medium text-gray-900">{faculty.name}</h3>
         <div className="h-4" />
         <div className="space-y-1 text-gray-600">
-          <p className="font-body-18-regular text-gray-500">
+          <p className="text-body-18-regular text-gray-500">
             {faculty.jobTitle}
           </p>
-          <p className="font-body-18-regular text-gray-500">{faculty.email}</p>
-          <p className="font-body-18-regular text-gray-500">
+          <p className="text-body-18-regular text-gray-500">{faculty.email}</p>
+          <p className="text-body-18-regular text-gray-500">
             {faculty.phoneNumber}
           </p>
-          <p className="font-body-18-regular text-gray-500">{faculty.office}</p>
+          <p className="text-body-18-regular text-gray-500">{faculty.office}</p>
         </div>
         {/** 
         <div className="h-4" />
         <Link
           to={`/about/faculty/${faculty.id}`}
-          className="inline-flex items-center gap-2 text-info-500 hover:text-info-600 font-caption-14 underline underline-offset-2 transition-colors"
+          className="inline-flex items-center gap-2 text-info-500 hover:text-info-600 text-caption-14 underline underline-offset-2 transition-colors"
         >
           more information
         </Link>

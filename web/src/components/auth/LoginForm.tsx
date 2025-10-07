@@ -61,7 +61,7 @@ export default function LoginForm() {
   return (
     <div className="w-full max-w-md">
       <div className="text-center">
-        <h1 className="font-heading-24 text-text">로그인</h1>
+        <h1 className="text-heading-24 text-text">로그인</h1>
 
         <div className="h-8" />
 
@@ -106,7 +106,7 @@ export default function LoginForm() {
           </button>
         </div>
 
-        {error && <p className="font-caption-14 text-error-500">{error}</p>}
+        {error && <p className="text-caption-14 text-error-500">{error}</p>}
 
         <div className="h-6" />
 

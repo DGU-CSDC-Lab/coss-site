@@ -18,9 +18,9 @@ export default function Textarea({
   size = 'md',
 }: TextareaProps) {
   const sizeClasses = {
-    sm: 'px-3 py-1.5 font-caption-12',
-    md: 'px-4 py-2 font-caption-14',
-    lg: 'px-5 py-3 font-body-14-medium',
+    sm: 'px-3 py-1.5 text-caption-12',
+    md: 'px-4 py-2 text-caption-14',
+    lg: 'px-5 py-3 text-body-14-medium',
   }
 
   return (

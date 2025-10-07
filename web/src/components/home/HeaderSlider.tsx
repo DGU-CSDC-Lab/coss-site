@@ -57,7 +57,7 @@ export default function HeaderSlider() {
   }
   if (loading) {
     return (
-      <div className="h-96 bg-gray-200 rounded-lg overflow-hidden animate-pulse flex items-center justify-center">
+      <div className="relative aspect-[3/1] bg-gray-200 rounded-lg overflow-hidden animate-pulse flex items-center justify-center">
         <div className="w-full h-full bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300" />
       </div>
     )
@@ -65,14 +65,14 @@ export default function HeaderSlider() {
 
   if (banners?.items.length === 0) {
     return (
-      <div className="h-96 bg-gray-200 flex items-center justify-center rounded-lg">
+      <div className="relative aspect-[3/1] bg-gray-200 flex items-center justify-center rounded-lg">
         <div className="text-gray-00">표시할 배너가 없습니다.</div>
       </div>
     )
   }
 
   return (
-    <div className="relative h-96 bg-gray-200 overflow-hidden rounded-lg">
+    <div className="relative aspect-[3/1] bg-gray-200 overflow-hidden rounded-lg">
       <div
         className="flex transition-transform duration-500 ease-in-out h-full"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -90,7 +90,7 @@ export default function HeaderSlider() {
                 ) : (
                   <div className="w-full h-full bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center">
                     <div className="text-center text-white">
-                      <h2 className="text-2xl font-bold mb-2">
+                      <h2 className="text-2xl text-bold mb-2">
                         {banner.title}
                       </h2>
                     </div>
@@ -108,7 +108,7 @@ export default function HeaderSlider() {
                 ) : (
                   <div className="w-full h-full bg-gradient-to-r from-gray-300 to-gray-400 flex items-center justify-center">
                     <div className="text-center text-white">
-                      <h2 className="text-2xl font-bold mb-2">
+                      <h2 className="text-2xl text-bold mb-2">
                         {banner.title}
                       </h2>
                     </div>

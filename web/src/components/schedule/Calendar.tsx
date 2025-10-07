@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import {
   ChevronLeftIcon,
@@ -7,6 +5,7 @@ import {
   PlayIcon,
 } from '@heroicons/react/24/solid'
 import { schedulesApi, Schedule } from '@/lib/api/schedules'
+import Button from '@/components/common/Button'
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -81,6 +80,7 @@ export default function Calendar() {
     return days
   }
 
+  // 해당 날짜의 일정들 반환
   const getSchedulesForDate = (date: number) => {
     return schedules.filter(schedule => {
       const scheduleDate = new Date(schedule.startDate)
@@ -92,19 +92,23 @@ export default function Calendar() {
     })
   }
 
+  // 년 변경
   const changeYear = (direction: number) => {
     setCurrentDate(new Date(year + direction, month, 1))
   }
 
+  // 월 선택
   const selectMonth = (selectedMonth: number) => {
     setCurrentDate(new Date(year, selectedMonth, 1))
   }
 
+  // 호버 이벤트
   const handleMouseEnter = (date: number, event: React.MouseEvent) => {
     setHoveredDate(date)
     setMousePosition({ x: event.clientX, y: event.clientY })
   }
 
+  // 호버 해제
   const handleMouseLeave = () => {
     setHoveredDate(null)
   }
@@ -127,42 +131,46 @@ export default function Calendar() {
   const weekdays = ['일', '월', '화', '수', '목', '금', '토']
 
   return (
-    <div className="">
+    <div>
       {/* 헤더 */}
       <div className="flex items-center justify-between mb-6">
-        <button
+        <Button
           onClick={() => changeYear(-1)}
+          variant="custom"
+          iconOnly
+          icon={<ChevronLeftIcon className="w-6 h-6" />}
           className="p-2 hover:bg-gray-100 rounded-full"
-        >
-          <ChevronLeftIcon className="w-6 h-6" />
-        </button>
+        />
 
-        <h2 className="font-heading-24 text-text">
+        <h2 className="text-heading-24 text-text select-none">
           {year}년 <span className="text-pri-500">{month + 1}월</span>
         </h2>
 
-        <button
+        <Button
           onClick={() => changeYear(1)}
+          variant="custom"
+          iconOnly
+          icon={<ChevronRightIcon className="w-6 h-6" />}
           className="p-2 hover:bg-gray-100 rounded-full"
-        >
-          <ChevronRightIcon className="w-6 h-6" />
-        </button>
+        />
       </div>
 
       {/* 월 선택 탭 */}
       <div className="grid grid-cols-12">
         {months.map((monthName, index) => (
-          <button
+          <Button
             key={index}
             onClick={() => selectMonth(index)}
-            className={`w-full py-2 font-body-16-medium ${
+            radius="none"
+            variant="custom"
+            className={`w-full py-2 text-body-16-medium ${
               index === month
                 ? 'bg-point-2 text-white'
                 : 'bg-white text-text hover:bg-gray-100'
             }`}
           >
             {monthName}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -173,7 +181,7 @@ export default function Calendar() {
         {weekdays.map(day => (
           <div
             key={day}
-            className="p-2 text-center font-body-16-medium text-white"
+            className="p-2 text-center text-body-16-medium text-white select-none"
           >
             {day}
           </div>
@@ -181,7 +189,7 @@ export default function Calendar() {
       </div>
 
       {/* 캘린더 그리드 */}
-      <div className="grid grid-cols-7 border-l border-t border-surface">
+      <div className="grid grid-cols-7 border-l border-t border-surface select-none">
         {days.map((day, index) => {
           const daySchedules = day.isCurrentMonth
             ? getSchedulesForDate(day.date)
@@ -193,7 +201,7 @@ export default function Calendar() {
               className="min-h-[120px] border-r border-b border-surface p-2 relative"
             >
               <div
-                className={`font-caption-14 mb-2 ${
+                className={`text-caption-14 mb-2 ${
                   day.isCurrentMonth
                     ? day.isToday
                       ? 'w-6 h-6 bg-pri-500 text-white rounded-full flex items-center justify-center'
@@ -210,7 +218,7 @@ export default function Calendar() {
                   <div key={idx} className="flex items-center gap-1">
                     <PlayIcon className="w-2 h-2 text-point-1 flex-shrink-0" />
                     <span
-                      className="font-caption-12 text-gray-600 truncate cursor-pointer hover:text-gray-900 px-1 rounded"
+                      className="text-caption-12 text-gray-600 truncate cursor-pointer hover:text-gray-900 px-1 rounded"
                       onMouseEnter={e => handleMouseEnter(day.date, e)}
                       onMouseLeave={handleMouseLeave}
                     >
@@ -219,7 +227,7 @@ export default function Calendar() {
                   </div>
                 ))}
                 {daySchedules.length > 3 && (
-                  <div className="font-caption-12 text-text-light">
+                  <div className="text-caption-12 text-text-light">
                     +{daySchedules.length - 3}개 더
                   </div>
                 )}
@@ -243,19 +251,19 @@ export default function Calendar() {
             {getSchedulesForDate(hoveredDate).map((schedule, index) => (
               <div key={index}>
                 <div className="flex flex-col items-start gap-2 mb-1">
-                  <span className="font-caption-12 text-point-1">
+                  <span className="text-caption-12 text-point-1">
                     {new Date(schedule.startDate).toLocaleDateString('ko-KR')}
                   </span>
                   <div className="flex items-center gap-1">
                     <PlayIcon className="w-2 h-2 text-point-1 flex-shrink-0" />
-                    <span className="font-caption-14">{schedule.title}</span>
+                    <span className="text-caption-14">{schedule.title}</span>
                   </div>
                 </div>
-                <div className="font-caption-14 text-point-1 ml-2">
+                <div className="text-caption-14 text-point-1 ml-2">
                   {schedule.description || ''}
                 </div>
                 {schedule.location && (
-                  <div className="font-caption-12 text-point-1 ml-2">
+                  <div className="text-caption-12 text-point-1 ml-2">
                     {schedule.location}
                   </div>
                 )}

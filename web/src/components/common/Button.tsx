@@ -1,5 +1,3 @@
-
-
 interface ButtonProps {
   children?: React.ReactNode
   onClick?: () => void
@@ -51,7 +49,7 @@ export default function Button({
   }
 
   const baseClasses =
-    'font-medium transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed'
+    'flex items-center justify-center text-medium transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed'
 
   if (iconOnly) {
     return (
@@ -81,7 +79,7 @@ export default function Button({
       disabled={disabled}
       className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${radiusClasses[radius]} ${className}`}
     >
-      <div className="flex items-center gap-2">
+      <div className="gap-2">
         <span>{children}</span>
         {iconUrl && (
           <img

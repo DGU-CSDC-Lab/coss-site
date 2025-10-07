@@ -36,7 +36,7 @@ export default function Alert() {
             {type === 'warning' && <span className="text-white text-lg">⚠</span>}
             {type === 'info' && <span className="text-white text-lg">ℹ</span>}
           </div>
-          <p className="text-white font-18-body-medium">{message}</p>
+          <p className="text-white text-18-body-medium">{message}</p>
         </div>
       </div>
     </div>

@@ -21,7 +21,7 @@ export default function GreetingPage() {
             <p className="mb-2">산학 협력 파트너와 학생 여러분,</p>
             <p className="mb-6">
               그리고{' '}
-              <span className="text-orange-500 font-semibold">
+              <span className="text-orange-500 text-semibold">
                 사물인터넷 혁신융합대학사업단
               </span>
               을 사랑해주시는 모든 분들께 따뜻한 인사를 올립니다.
@@ -42,7 +42,7 @@ export default function GreetingPage() {
               패러다임을 혁신하고 있습니다. 이에 발맞춰 우리 대학사업단은 학제
               간 경계를 허무는 융합 교육과 연구, 그리고 현장중심의 산학협력
               프로젝트를 통해{' '}
-              <span className="text-orange-500 font-semibold">
+              <span className="text-orange-500 text-semibold">
                 실질적 문제 해결 능력을 갖춘 인재를 양성하고, 국가·지역사회
                 발전에 기여하는 것을 핵심 과제로 삼고 있습니다.
               </span>
@@ -50,12 +50,12 @@ export default function GreetingPage() {
 
             <p>
               지난 해부터 저희는{' '}
-              <span className="text-orange-500 font-semibold">
+              <span className="text-orange-500 text-semibold">
                 스마트 팩토리 예측정비 플랫폼 개발 △ 실감 의료 모니터링 시스템 △
                 스마트 시티 교통관제 시뮬레이션
               </span>{' '}
               등 다수의 혁신 과제를 성공적으로 수행하며, 학내·외에서{' '}
-              <span className="text-orange-500 font-semibold">
+              <span className="text-orange-500 text-semibold">
                 의미 있는 성과를
               </span>{' '}
               이뤄냈습니다.
@@ -72,7 +72,7 @@ export default function GreetingPage() {
 
             <p>
               올해에도 저희 사업단은{' '}
-              <span className="text-orange-500 font-semibold">
+              <span className="text-orange-500 text-semibold">
                 &apos;지속 가능한 스마트 솔루션&apos;
               </span>
               이라는 가치를 중심에 두고, AI·빅데이터·블록체인 등 첨단 기술을
@@ -94,7 +94,7 @@ export default function GreetingPage() {
           </div>
 
           <div className="h-12" />
-          <p className="w-full font-subheading-24 text-right">
+          <p className="w-full text-subheading-24 text-right">
             동국대학교 사물인터넷 혁신융합대학사업단장 정준호
           </p>
         </div>

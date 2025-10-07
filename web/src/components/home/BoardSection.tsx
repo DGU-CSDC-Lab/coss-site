@@ -25,7 +25,7 @@ export default function BoardSection() {
   return (
     <div className="bg-white flex flex-col gap-3 rounded-lg p-4">
       <div className="flex justify-between items-center">
-        <h2 className="font-body-20-medium text-gray-900">게시판</h2>
+        <h2 className="text-body-20-medium text-gray-900">게시판</h2>
         <Link to="/news/news">
           <Button radius="md" size="sm" variant="point_2">
             더보기
@@ -43,17 +43,17 @@ export default function BoardSection() {
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center space-x-2 flex-1">
                     <span
-                      className={`px-2 py-1 font-caption-12 text-white rounded-full bg-info-600`}
+                      className={`px-2 py-1 text-caption-12 text-white rounded-full bg-info-600`}
                     >
                       {post.categoryName}
                     </span>
-                    <span className="text-point-1 font-caption-14">
+                    <span className="text-point-1 text-caption-14">
                       {new Date(post.createdAt).toLocaleDateString('ko-KR')}
                     </span>
                   </div>
                   <Link
                     to={`/board/${post.id}`}
-                    className="pl-2 font-body-14-regular text-gray-900 hover:text-point-1 flex-1 truncate"
+                    className="pl-2 text-body-14-regular text-gray-900 hover:text-point-1 flex-1 truncate"
                   >
                     {post.title}
                   </Link>
@@ -68,7 +68,7 @@ export default function BoardSection() {
             </div>
           ))
         ) : (
-          <div className="text-left text-gray-400 font-body-14-regular">
+          <div className="text-left text-gray-400 text-body-14-regular">
             게시글이 없습니다.
           </div>
         )}

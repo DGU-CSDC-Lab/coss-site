@@ -104,7 +104,7 @@ export default function SideNav() {
                 onClick={() =>
                   setOpenMenu(openMenu === menu.path ? null : menu.path)
                 }
-                className="w-full flex justify-between items-center p-4 font-body-18-medium text-gray-50 hover:bg-gray-600 transition"
+                className="w-full flex justify-between items-center p-4 text-body-18-medium text-gray-50 hover:bg-gray-600 transition"
               >
                 {menu.name}
                 <span className="pr-4">

@@ -557,7 +557,7 @@ export default function HtmlEditor({
                 }))
               }, 50)
             }}
-            className={`px-3 py-1 rounded font-caption-14 font-bold text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-bold text-gray-700 ${
               activeFormats.bold ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="굵게"
@@ -579,7 +579,7 @@ export default function HtmlEditor({
                 }))
               }, 50)
             }}
-            className={`px-3 py-1 rounded font-caption-14 italic text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 italic text-gray-700 ${
               activeFormats.italic ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="기울임"
@@ -600,7 +600,7 @@ export default function HtmlEditor({
                 }))
               }, 50)
             }}
-            className={`px-3 py-1 rounded font-caption-14 underline text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 underline text-gray-700 ${
               activeFormats.underline ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="밑줄"
@@ -613,7 +613,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('formatBlock', 'h1')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               currentFormat === 'h1' ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="제목 1"
@@ -623,7 +623,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('formatBlock', 'h2')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               currentFormat === 'h2' ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="제목 2"
@@ -633,7 +633,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('formatBlock', 'h3')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               currentFormat === 'h3' ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="제목 3"
@@ -643,7 +643,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('formatBlock', 'h4')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               currentFormat === 'h4' ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="제목 4"
@@ -653,7 +653,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('formatBlock', 'h5')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               currentFormat === 'h5' ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="제목 5"
@@ -663,7 +663,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('formatBlock', 'h6')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               currentFormat === 'h6' ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="제목 6"
@@ -673,7 +673,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('formatBlock', 'p')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               currentFormat === 'p' ? 'bg-gray-100' : 'hover:bg-gray-100'
             }`}
             title="본문"
@@ -686,7 +686,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('insertUnorderedList')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               activeFormats.insertUnorderedList
                 ? 'bg-gray-100'
                 : 'hover:bg-gray-100'
@@ -698,7 +698,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('insertOrderedList')}
-            className={`px-3 py-1 rounded font-caption-14 text-gray-700 ${
+            className={`px-3 py-1 rounded text-caption-14 text-gray-700 ${
               activeFormats.insertOrderedList
                 ? 'bg-gray-100'
                 : 'hover:bg-gray-100'
@@ -712,7 +712,7 @@ export default function HtmlEditor({
 
           {/* 색상 */}
           <label
-            className="px-3 py-1 rounded font-caption-14 text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center"
+            className="px-3 py-1 rounded text-caption-14 text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center"
             title="글자 색상"
           >
             A
@@ -724,7 +724,7 @@ export default function HtmlEditor({
           </label>
 
           <label
-            className="px-3 py-1 rounded font-caption-14 text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center"
+            className="px-3 py-1 rounded text-caption-14 text-gray-700 hover:bg-gray-100 cursor-pointer flex items-center"
             title="배경 색상"
           >
             <PaintBrushIcon className="w-4 h-4" />
@@ -740,7 +740,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={handleLinkButtonClick}
-            className="px-3 py-1 hover:bg-gray-100 rounded font-caption-14 text-gray-700 flex items-center"
+            className="px-3 py-1 hover:bg-gray-100 rounded text-caption-14 text-gray-700 flex items-center"
             title="링크"
           >
             <LinkIcon className="w-4 h-4" />
@@ -748,7 +748,7 @@ export default function HtmlEditor({
 
           <button
             type="button"
-            className="px-3 py-1 hover:bg-gray-100 rounded font-caption-14 text-gray-700 cursor-pointer flex items-center"
+            className="px-3 py-1 hover:bg-gray-100 rounded text-caption-14 text-gray-700 cursor-pointer flex items-center"
             title="이미지"
             onClick={handleImageButtonClick}
           >
@@ -767,7 +767,7 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => execCommand('removeFormat')}
-            className="px-3 py-1 hover:bg-gray-100 rounded font-caption-14 text-gray-700"
+            className="px-3 py-1 hover:bg-gray-100 rounded text-caption-14 text-gray-700"
             title="서식 제거"
           >
             <ScissorsIcon className="w-4 h-4" />
@@ -793,7 +793,7 @@ export default function HtmlEditor({
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">링크 추가</h3>
+              <h3 className="text-lg text-semibold">링크 추가</h3>
               <button
                 onClick={() => setShowLinkModal(false)}
                 className="text-gray-500 hover:text-gray-700"
@@ -804,7 +804,7 @@ export default function HtmlEditor({
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">
+                <label className="block text-sm text-medium mb-2">
                   링크 이름
                 </label>
                 <input
@@ -819,7 +819,7 @@ export default function HtmlEditor({
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">URL</label>
+                <label className="block text-sm text-medium mb-2">URL</label>
                 <input
                   type="url"
                   value={linkData.url}

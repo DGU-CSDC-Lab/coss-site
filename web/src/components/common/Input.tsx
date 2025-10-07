@@ -44,9 +44,9 @@ export default function Input({
   onBlur,
 }: InputProps) {
   const sizeClasses = {
-    sm: 'px-3 py-1.5 font-caption-12',
-    md: 'px-4 py-2 font-caption-14',
-    lg: 'px-5 py-3 font-body-14-regular',
+    sm: 'px-3 py-1.5 text-caption-12',
+    md: 'px-4 py-2 text-caption-14',
+    lg: 'px-5 py-3 text-body-14-regular',
   }
 
   const baseClasses =
@@ -80,7 +80,7 @@ export default function Input({
             파일 선택
           </button>
         </div>
-        <span className="font-body-14-regular text-gray-600">
+        <span className="text-body-14-regular text-gray-600">
           {value ? (
             <a
               href={value.startsWith('http') ? value : `#`}

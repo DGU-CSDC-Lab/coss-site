@@ -26,8 +26,8 @@ const PageHeader = () => {
 
       {/* 텍스트 영역 */}
       <div className="relative z-10 px-6 py-12">
-        <h1 className="text-white font-heading-24">{main.name}</h1>
-        <p className="text-white font-body-20-regular">{sub?.name}</p>
+        <h1 className="text-white text-heading-24">{main.name}</h1>
+        <p className="text-white text-body-20-regular">{sub?.name}</p>
       </div>
     </div>
   )

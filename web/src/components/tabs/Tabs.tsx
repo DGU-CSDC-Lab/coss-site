@@ -77,7 +77,7 @@ export default function Tabs() {
               <Link
                 to={getTabHref(tab)}
                 className={clsx(
-                  'p-2 font-body-14-medium transition-colors block',
+                  'p-2 text-body-14-medium transition-colors block',
                   isActive
                     ? 'border-b-2 border-gray-900 text-gray-900'
                     : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
@@ -109,7 +109,7 @@ export default function Tabs() {
                   key={subTab.path}
                   to={subTab.path}
                   className={clsx(
-                    'p-2 font-body-14-medium transition-colors block',
+                    'p-2 text-body-14-medium transition-colors block',
                     isActiveSubTab
                       ? 'bg-gray-100 text-gray-900'
                       : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'

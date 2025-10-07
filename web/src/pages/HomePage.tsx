@@ -5,12 +5,12 @@ import NewsSection from '@/components/home/NewsSection'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
+    <div>
       <HeaderSlider />
 
-      <div className="h-20 mobile:h-16 tablet:h-12" />
+      <div className="h-8 md:h-16 sm:h-12" />
 
-      <div className="max-w-7xl mx-auto">
+      <div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 mb-8">
           <BoardSection />
           <CalendarSection />

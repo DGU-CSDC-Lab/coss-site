@@ -55,7 +55,7 @@ export default function NotFoundPage() {
 
       if (!post) {
         return (
-          <div className="text-gray-400 font-body-14-regular">
+          <div className="text-gray-400 text-body-14-regular">
             게시글을 찾을 수 없습니다.
           </div>
         )
@@ -91,7 +91,7 @@ export default function NotFoundPage() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
+        <h1 className="text-6xl text-bold text-gray-900 mb-4">404</h1>
         <p className="text-xl text-gray-600 mb-8">페이지를 찾을 수 없습니다.</p>
         <button
           onClick={() => navigate('/')}

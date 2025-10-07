@@ -56,7 +56,7 @@ export default function TopNav() {
                   }}
                   className={`w-[160px] h-full text-body-18-regular transition-colors flex flex-col items-center justify-center ${
                     hoveredMenu === item.path
-                      ? 'bg-pri-800 text-white font-semibold'
+                      ? 'bg-pri-800 text-white text-semibold'
                       : 'text-text hover:bg-pri-200 hover:text-pri-800'
                   }`}
                 >
@@ -100,7 +100,7 @@ export default function TopNav() {
                             }}
                             className={`transition-colors text-gray-900 px-4 py-4 cursor-pointer ${
                               hoveredSub === sub.path
-                                ? 'bg-pri-200 font-semibold'
+                                ? 'bg-pri-200 text-semibold'
                                 : 'hover:bg-pri-200'
                             }`}
                           >
@@ -131,7 +131,7 @@ export default function TopNav() {
                   to="/admin"
                   className="flex items-center gap-2 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"
                 >
-                  <span className="text-caption-14 text-gray-700 font-medium">
+                  <span className="text-caption-14 text-gray-700 text-medium">
                     {userName}
                   </span>
                   <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">

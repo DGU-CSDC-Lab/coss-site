@@ -99,7 +99,7 @@ export default function PopupModal({
 
         {/* Minimal Text Area */}
         <div className="bg-white p-4">
-          <div className="font-caption-14 text-gray-600">
+          <div className="text-caption-14 text-gray-600">
             <p className="whitespace-pre-wrap">
               {currentPopup.content}
             </p>

@@ -32,9 +32,9 @@ export default function Dropdown({
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   const sizeClasses = {
-    sm: 'px-2 py-1.5 font-caption-12',
-    md: 'px-3 py-2 font-caption-14',
-    lg: 'px-4 py-3 font-body-14-regular',
+    sm: 'px-2 py-1.5 text-caption-12',
+    md: 'px-3 py-2 text-caption-14',
+    lg: 'px-4 py-3 text-body-14-regular',
   }
 
   const baseClasses =
