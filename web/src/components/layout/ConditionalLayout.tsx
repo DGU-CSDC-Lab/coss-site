@@ -9,10 +9,13 @@ import Layout from '@/components/layout/Layout'
 
 export default function ConditionalLayout() {
   const location = useLocation()
-  const isAdminCreatePage = location.pathname.startsWith('/admin/') && 
-    (location.pathname.endsWith('/create') || location.pathname.includes('/bulk-upload'))
+  const isAdminCreateOrEditPage = location.pathname.startsWith('/admin/') && 
+    (location.pathname.endsWith('/create') || 
+     location.pathname.includes('/bulk-upload') ||
+     /\/admin\/[^/]+\/\d+/.test(location.pathname) || // /admin/module/id 패턴
+     /\/admin\/[^/]+\/[^/]+\/\d+/.test(location.pathname)) // /admin/module/submodule/id 패턴
 
-  if (isAdminCreatePage) {
+  if (isAdminCreateOrEditPage) {
     return <Outlet />
   }
 

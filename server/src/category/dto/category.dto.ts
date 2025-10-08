@@ -32,6 +32,7 @@ export class CategoryUpdate {
 export class CategoryResponse {
   id: string;
   name: string;
+  slug: string;
   parentId?: string;
   order: number;
   createdAt: Date;

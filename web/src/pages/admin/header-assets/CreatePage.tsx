@@ -1,25 +1,66 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import {
   headerAssetsApi,
   CreateHeaderAssetRequest,
+  UpdateHeaderAssetRequest,
+  HeaderAsset,
 } from '@/lib/api/headerAssets'
 import { useImageUpload } from '@/hooks/useImageUpload'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Label from '@/components/common/Label'
 import Checkbox from '@/components/common/Checkbox'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import ExitWarningModal from '@/components/common/ExitWarningModal'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function AdminHeaderAssetsCreatePage() {
   const navigate = useNavigate()
+  const params = useParams()
+  const isEdit = !!params.id
+  const alert = useAlert()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(false)
+  const [headerAsset, setHeaderAsset] = useState<HeaderAsset | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     linkUrl: '',
     isActive: true,
   })
+
+  const [originalData, setOriginalData] = useState(formData)
+  const { hasChanges, showExitWarning, setShowExitWarning } = useUnsavedChanges(formData, originalData)
+
+  useEffect(() => {
+    if (isEdit && params.id) {
+      fetchHeaderAsset(params.id)
+    }
+  }, [isEdit, params.id])
+
+  const fetchHeaderAsset = async (id: string) => {
+    try {
+      setInitialLoading(true)
+      const headerAssetData = await headerAssetsApi.getHeaderAsset(id)
+      setHeaderAsset(headerAssetData)
+      const data = {
+        title: headerAssetData.title,
+        linkUrl: headerAssetData.linkUrl || '',
+        isActive: headerAssetData.isActive,
+      }
+      setFormData(data)
+      setOriginalData(data)
+    } catch (error) {
+      console.error('Failed to fetch header asset:', error)
+      alert.error('헤더 자산 정보를 불러올 수 없습니다.')
+      navigate('/admin/header-assets')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
 
   const {
     imageUrl,
@@ -27,7 +68,7 @@ export default function AdminHeaderAssetsCreatePage() {
     handleImageChange,
   } = useImageUpload({
     onError: (error) => {
-      alert('이미지 업로드 중 오류가 발생했습니다.')
+      alert.error('이미지 업로드 중 오류가 발생했습니다.')
     }
   })
 
@@ -35,46 +76,67 @@ export default function AdminHeaderAssetsCreatePage() {
     e.preventDefault()
 
     if (!formData.title.trim()) {
-      alert('제목을 입력해주세요.')
+      alert.error('제목을 입력해주세요.')
       return
     }
 
-    if (!imageUrl.trim()) {
-      alert('이미지를 업로드해주세요.')
+    if (!imageUrl && !headerAsset?.imageUrl) {
+      alert.error('이미지를 업로드해주세요.')
       return
     }
 
     if (!formData.linkUrl.trim()) {
-      alert('링크 URL을 입력해주세요.')
+      alert.error('링크 URL을 입력해주세요.')
       return
     }
 
     setLoading(true)
 
     try {
-      const assetData: CreateHeaderAssetRequest = {
-        title: formData.title,
-        imageUrl: imageUrl,
-        linkUrl: formData.linkUrl,
-        isActive: formData.isActive,
-      }
+      if (isEdit && params.id) {
+        const assetData: UpdateHeaderAssetRequest = {
+          title: formData.title,
+          imageUrl: imageUrl || headerAsset?.imageUrl || '',
+          linkUrl: formData.linkUrl,
+          isActive: formData.isActive,
+        }
 
-      await headerAssetsApi.createHeaderAsset(assetData)
-      alert('헤더 에셋이 생성되었습니다.')
+        await headerAssetsApi.updateHeaderAsset(params.id, assetData)
+        alert.success('헤더 에셋이 수정되었습니다.')
+      } else {
+        const assetData: CreateHeaderAssetRequest = {
+          title: formData.title,
+          imageUrl: imageUrl,
+          linkUrl: formData.linkUrl,
+          isActive: formData.isActive,
+        }
+
+        await headerAssetsApi.createHeaderAsset(assetData)
+        alert.success('헤더 에셋이 생성되었습니다.')
+      }
       navigate('/admin/header-assets')
     } catch (error) {
-      console.error('Failed to create header asset:', error)
-      alert('헤더 에셋 생성 중 오류가 발생했습니다.')
+      console.error(`Failed to ${isEdit ? 'update' : 'create'} header asset:`, error)
+      alert.error(`헤더 에셋 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다.`)
     } finally {
       setLoading(false)
     }
   }
 
+  if (initialLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
   return (
-    <div className="w-full h-screen flex flex-col">
-      <div className="flex items-center justify-between gap-4 p-6">
-        <Title>새 헤더 에셋 추가</Title>
-        <Link to="/admin/header-assets">
+    <>
+      <div className="w-full h-screen flex flex-col">
+        <div className="flex items-center justify-between gap-4 p-6">
+          <Title>{isEdit ? '헤더 에셋 수정' : '새 헤더 에셋 추가'}</Title>
+          <Link to="/admin/header-assets">
           <Button variant="delete" size="md" radius="md">
             나가기
           </Button>
@@ -168,11 +230,19 @@ export default function AdminHeaderAssetsCreatePage() {
               <Button variant="cancel" radius="md" size="md">취소</Button>
             </Link>
             <Button type="submit" variant="info" radius="md" size="md" disabled={loading}>
-              {loading ? '생성 중...' : '에셋 생성'}
+              {loading ? (isEdit ? '수정 중...' : '생성 중...') : (isEdit ? '에셋 수정' : '에셋 생성')}
             </Button>
           </div>
         </form>
       </div>
     </div>
+
+    <ExitWarningModal
+      isOpen={showExitWarning}
+      onClose={() => setShowExitWarning(false)}
+      onConfirm={() => navigate('/admin/header-assets')}
+      hasChanges={hasChanges}
+    />
+    </>
   )
 }

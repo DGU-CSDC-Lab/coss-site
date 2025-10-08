@@ -44,7 +44,7 @@ describe('BoardController', () => {
 
   describe('getPosts', () => {
     it('should return paginated posts', async () => {
-      const query = { page: 1, size: 10, categoryName: '공지사항' };
+      const query = { page: 1, size: 10, categorySlug: 'notices' };
       const expectedResult = {
         items: [
           {
@@ -71,7 +71,7 @@ describe('BoardController', () => {
       const result = await controller.getPosts(query);
 
       expect(boardService.findAll).toHaveBeenCalledWith({
-        categoryName: '공지사항',
+        categorySlug: 'notices',
         page: 1,
         size: 10,
         keyword: undefined,
@@ -112,7 +112,7 @@ describe('BoardController', () => {
       const createDto: PostCreateRequest = {
         title: '새 게시글',
         contentHtml: '<p>새 게시글 내용</p>',
-        categoryName: '공지사항',
+        categorySlug: 'notices',
         thumbnailUrl: null,
       };
 
@@ -121,7 +121,7 @@ describe('BoardController', () => {
         id: 'new-post-id',
         title: createDto.title,
         contentHtml: createDto.contentHtml,
-        categoryId: createDto.categoryName,
+        categoryId: createDto.categorySlug,
         author: 'admin',
         viewCount: 0,
         thumbnailUrl: createDto.thumbnailUrl,

@@ -1,5 +1,5 @@
 import { api } from '../apiClient'
-import { PaginatedResponse } from '../apiClient'
+import { PagedResponse } from '../apiClient'
 import { filesApi } from './files'
 import { cleanHtml, isHtmlTooLarge } from '../../utils/htmlUtils'
 
@@ -15,6 +15,7 @@ export interface Post {
   title: string
   categoryId: string
   categoryName: string
+  categorySlug: string
   author: string
   viewCount: number
   status: 'draft' | 'private' | 'public'
@@ -41,7 +42,7 @@ export interface PostDetail extends Omit<Post, 'hasFiles' | 'fileCount'> {
 }
 
 export interface PostsQuery {
-  categoryName?: string
+  categorySlug?: string
   keyword?: string
   searchType?: 'title' | 'author'
   page?: number
@@ -60,7 +61,7 @@ export interface CreatePostFile {
 export interface CreatePostRequest {
   title: string
   contentHtml: string
-  categoryName: string // categoryId 대신 categoryName 사용
+  categorySlug: string // categoryName 대신 categorySlug 사용
   status: 'draft' | 'private' | 'public'
   thumbnailUrl?: string | null
   files?: CreatePostFile[]
@@ -69,7 +70,7 @@ export interface CreatePostRequest {
 export interface UpdatePostRequest {
   title?: string
   contentHtml?: string
-  categoryName?: string
+  categorySlug?: string
   status?: 'draft' | 'private' | 'public'
   thumbnailUrl?: string
   files?: CreatePostFile[]
@@ -78,7 +79,7 @@ export interface UpdatePostRequest {
 // 게시글 API 함수들
 export const postsApi = {
   // 공개 게시글 목록 조회
-  getPosts: (params: PostsQuery = {}): Promise<PaginatedResponse<Post>> => {
+  getPosts: (params: PostsQuery = {}): Promise<PagedResponse<Post>> => {
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -92,7 +93,7 @@ export const postsApi = {
   // 관리자 게시글 목록 조회 (모든 상태)
   getAdminPosts: (
     params: PostsQuery = {}
-  ): Promise<PaginatedResponse<Post>> => {
+  ): Promise<PagedResponse<Post>> => {
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined) {
@@ -120,28 +121,10 @@ export const postsApi = {
       throw new Error('게시글 내용이 너무 큽니다. 내용을 줄여주세요.')
     }
 
-    // 1. 파일 업로드 완료 처리
-    const completedFiles = []
-    if (data.files) {
-      for (const file of data.files) {
-        try {
-          await filesApi.completeUpload({
-            fileKey: file.fileKey,
-            ownerType: 'POST',
-            ownerId: 'temp',
-          })
-          completedFiles.push(file)
-        } catch (error) {
-          console.error('File completion failed:', error)
-        }
-      }
-    }
-
-    // 2. 게시글 생성
+    // 게시글 생성 (파일은 이미 업로드됨)
     const postData = {
       ...data,
       contentHtml: cleanedContentHtml,
-      files: completedFiles,
     }
 
     return api.auth.post('/admin/posts', postData)

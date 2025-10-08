@@ -7,11 +7,11 @@ import Tabs from '@/components/tabs/Tabs'
 
 const categoryMap: Record<string, { id: string; title: string }> = {
   'scholarship-info': { id: 'scholarship-info', title: '장학정보' },
-  news: { id: 'news', title: '뉴스' },
-  resources: { id: 'resources', title: '자료실' },
-  notices: { id: 'notices', title: '공지사항' },
-  contest: { id: 'contest', title: '공모전 정보' },
-  activities: { id: 'activities', title: '교육/활동/취업 정보' },
+  'news': { id: 'news', title: '뉴스' },
+  'resources': { id: 'resources', title: '자료실' },
+  'notices': { id: 'notices', title: '공지사항' },
+  'contest': { id: 'contest', title: '공모전 정보' },
+  'activities': { id: 'activities', title: '교육/활동/취업 정보' },
 }
 
 export default function NewsPage() {
@@ -36,7 +36,7 @@ export default function NewsPage() {
     try {
       setLoading(true)
       const response = await postsApi.getPosts({
-        categoryName: categoryInfo.title,
+        categorySlug: categoryInfo.id,
         keyword: keyword || undefined,
         page: currentPage,
         size: 5,

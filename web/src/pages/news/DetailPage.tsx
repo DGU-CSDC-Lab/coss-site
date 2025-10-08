@@ -15,8 +15,12 @@ export default function DetailPage() {
   })
 
   const getBackPath = () => {
+    if (category && post?.categorySlug) {
+      return `/news?category=${post.categorySlug}`
+    }
     if (category) {
-      return `/news/${category}`
+      // categorySlug가 없는 경우 URL의 category 파라미터 사용
+      return `/news?category=${category}`
     }
     return '/news'
   }

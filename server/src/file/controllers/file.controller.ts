@@ -23,7 +23,6 @@ import { AdminGuard } from '../../auth/guards/admin.guard';
 import {
   PresignRequest,
   PresignResponse,
-  FileCompleteRequest,
 } from '../dto/file.dto';
 
 @ApiTags('Files')
@@ -49,17 +48,6 @@ export class FileController {
     @Request() req,
   ): Promise<PresignResponse> {
     return this.fileService.generatePresignedUrl(request, req.user.id);
-  }
-
-  @ApiOperation({
-    summary: '파일 업로드 완료',
-    description: '파일 업로드 완료 후 메타데이터를 업데이트합니다.',
-  })
-  @ApiResponse({ status: 200, description: '파일 업로드 완료' })
-  @Post('complete')
-  @UseGuards(AdminGuard)
-  async completeUpload(@Body() request: FileCompleteRequest) {
-    return this.fileService.completeUpload(request);
   }
 
   @ApiOperation({

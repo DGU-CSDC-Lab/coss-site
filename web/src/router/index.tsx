@@ -25,9 +25,6 @@ import CurriculumCoursesMicrodegreePage from '@/pages/curriculum/courses/Microde
 
 // News pages
 import NewsPage from '@/pages/news/NewsPage'
-import NewsUpdatesPage from '@/pages/news/UpdatesPage'
-import NewsJobsPage from '@/pages/news/JobsPage'
-import NewsCategoryPage from '@/pages/news/CategoryPage'
 import NewsDetailPage from '@/pages/news/DetailPage'
 
 // Support pages
@@ -44,23 +41,17 @@ import SupportProgramsCoWeekPage from '@/pages/support/programs/CoWeekPage'
 import AdminPage from '@/pages/admin/AdminPage'
 import AdminFacultyPage from '@/pages/admin/FacultyPage'
 import AdminFacultyCreatePage from '@/pages/admin/faculty/CreatePage'
-import AdminFacultyEditPage from '@/pages/admin/faculty/EditPage'
 import AdminPostsPage from '@/pages/admin/PostsPage'
 import AdminPostsCreatePage from '@/pages/admin/posts/CreatePage'
-import AdminPostsEditPage from '@/pages/admin/posts/EditPage'
 import AdminSchedulesPage from '@/pages/admin/SchedulesPage'
 import AdminSchedulesCreatePage from '@/pages/admin/schedules/CreatePage'
-import AdminSchedulesEditPage from '@/pages/admin/schedules/EditPage'
 import AdminCoursesPage from '@/pages/admin/CoursesPage'
 import AdminCoursesCreatePage from '@/pages/admin/courses/CreatePage'
-import AdminCoursesEditPage from '@/pages/admin/courses/EditPage'
 import AdminCoursesBulkUploadPage from '@/pages/admin/courses/BulkUploadPage'
 import AdminPopupsPage from '@/pages/admin/PopupsPage'
 import AdminPopupsCreatePage from '@/pages/admin/popups/CreatePage'
-import AdminPopupsEditPage from '@/pages/admin/popups/EditPage'
 import AdminHeaderAssetsPage from '@/pages/admin/HeaderAssetsPage'
 import AdminHeaderAssetsCreatePage from '@/pages/admin/header-assets/CreatePage'
-import AdminHeaderAssetsEditPage from '@/pages/admin/header-assets/EditPage'
 
 export const router = createBrowserRouter([
   {
@@ -182,7 +173,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin/faculty/:id',
-        element: <AdminFacultyEditPage />,
+        element: <AdminFacultyCreatePage />,
       },
       {
         path: 'admin/posts',
@@ -193,8 +184,8 @@ export const router = createBrowserRouter([
         element: <AdminPostsCreatePage />,
       },
       {
-        path: 'admin/posts/:id',
-        element: <AdminPostsEditPage />,
+        path: 'admin/posts/edit/:id',
+        element: <AdminPostsCreatePage />,
       },
       {
         path: 'admin/schedules',
@@ -206,7 +197,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin/schedules/:id',
-        element: <AdminSchedulesEditPage />,
+        element: <AdminSchedulesCreatePage />,
       },
       {
         path: 'admin/courses',
@@ -218,7 +209,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin/courses/:id',
-        element: <AdminCoursesEditPage />,
+        element: <AdminCoursesCreatePage />,
       },
       {
         path: 'admin/courses/bulk-upload',
@@ -234,7 +225,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin/popups/:id',
-        element: <AdminPopupsEditPage />,
+        element: <AdminPopupsCreatePage />,
       },
       {
         path: 'admin/header-assets',
@@ -246,7 +237,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'admin/header-assets/:id',
-        element: <AdminHeaderAssetsEditPage />,
+        element: <AdminHeaderAssetsCreatePage />,
       },
     ],
   },

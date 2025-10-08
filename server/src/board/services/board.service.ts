@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { BoardPost, PostFile, PostStatus } from '../entities';
 import { User } from '../../auth/entities';
 import { Category } from '../../category/entities';
+import { S3Service } from '../../file/services/s3.service';
 import {
   PostCreateRequest,
   PostUpdateRequest,
@@ -26,12 +27,13 @@ export class BoardService {
     private userRepository: Repository<User>,
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    private s3Service: S3Service,
   ) {}
 
   // 공개 게시글 조회 (기본)
   async findAll(query: PostListQuery): Promise<PagedResponse<PostResponse>> {
     const {
-      categoryName,
+      categorySlug,
       keyword,
       page = 1,
       size = 10,
@@ -49,8 +51,8 @@ export class BoardService {
       .addGroupBy('author.id')
       .addGroupBy('category.id');
 
-    if (categoryName) {
-      queryBuilder.andWhere('category.name = :categoryName', { categoryName });
+    if (categorySlug) {
+      queryBuilder.andWhere('category.slug = :categorySlug', { categorySlug });
     }
 
     if (keyword) {
@@ -86,7 +88,7 @@ export class BoardService {
       this.toResponseWithFileCount(
         post,
         post.author?.username || 'Unknown',
-        post.category?.name || 'Unknown',
+        post.category?.name || 'Unknown', post.category?.slug || 'unknown',
         fileCount,
       ),
     );
@@ -96,7 +98,7 @@ export class BoardService {
   // 관리자 전용 게시글 조회 (상태별 필터링 가능)
   async findAllForAdmin(query: AdminPostListQuery): Promise<PagedResponse<PostResponse>> {
     const {
-      categoryName,
+      categorySlug,
       keyword,
       status,
       page = 1,
@@ -118,8 +120,8 @@ export class BoardService {
       queryBuilder.andWhere('post.status = :status', { status });
     }
 
-    if (categoryName) {
-      queryBuilder.andWhere('category.name = :categoryName', { categoryName });
+    if (categorySlug) {
+      queryBuilder.andWhere('category.slug = :categorySlug', { categorySlug });
     }
 
     if (keyword) {
@@ -155,7 +157,7 @@ export class BoardService {
       this.toResponseWithFileCount(
         post,
         post.author?.username || 'Unknown',
-        post.category?.name || 'Unknown',
+        post.category?.name || 'Unknown', post.category?.slug || 'unknown',
         fileCount,
       ),
     );
@@ -231,12 +233,12 @@ export class BoardService {
     authorId: string,
   ): Promise<PostDetailResponse> {
     const category = await this.categoryRepository.findOne({
-      where: { name: createDto.categoryName },
+      where: { slug: createDto.categorySlug },
     });
 
     if (!category) {
       throw new NotFoundException(
-        `Category with name '${createDto.categoryName}' not found`,
+        `Category with slug '${createDto.categorySlug}' not found`,
       );
     }
 
@@ -280,21 +282,16 @@ export class BoardService {
       throw new NotFoundException('Post not found');
     }
 
-    // 임시저장 상태에서는 수정할 수 없음 (임시저장은 생성 시에만 가능)
-    if (post.status === PostStatus.DRAFT && updateDto.status) {
-      throw new ForbiddenException('Draft posts cannot be updated to other status');
-    }
-
     let category = post.category;
 
-    if (updateDto.categoryName) {
+    if (updateDto.categorySlug) {
       const newCategory = await this.categoryRepository.findOne({
-        where: { name: updateDto.categoryName },
+        where: { slug: updateDto.categorySlug },
       });
 
       if (!newCategory) {
         throw new NotFoundException(
-          `Category with name '${updateDto.categoryName}' not found`,
+          `Category with slug '${updateDto.categorySlug}' not found`,
         );
       }
 
@@ -327,12 +324,14 @@ export class BoardService {
     post: BoardPost,
     authorName: string,
     categoryName: string,
+    categorySlug: string,
   ): PostResponse {
     return {
       id: post.id,
       title: post.title,
       categoryId: post.category?.id || '',
       categoryName: categoryName,
+      categorySlug: categorySlug,
       author: authorName,
       viewCount: post.viewCount,
       status: post.status,
@@ -348,6 +347,7 @@ export class BoardService {
     post: BoardPost,
     authorName: string,
     categoryName: string,
+    categorySlug: string,
     fileCount: number,
   ): PostResponse {
     return {
@@ -355,6 +355,7 @@ export class BoardService {
       title: post.title,
       categoryId: post.category?.id || '',
       categoryName: categoryName,
+      categorySlug: categorySlug,
       author: authorName,
       viewCount: post.viewCount,
       status: post.status,
@@ -380,6 +381,7 @@ export class BoardService {
         post,
         post.author?.username || 'Unknown',
         post.category?.name || 'Unknown',
+        post.category?.slug || 'unknown',
       ),
       contentHtml: post.content,
       files,
@@ -387,8 +389,6 @@ export class BoardService {
   }
 
   private generateDownloadUrl(fileKey: string): string {
-    const bucket = process.env.BUCKET_NAME;
-    const region = process.env.REGION;
-    return `https://${bucket}.s3.${region}.amazonaws.com/${fileKey}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Expires=3600`;
+    return this.s3Service.getFileUrl(fileKey);
   }
 }

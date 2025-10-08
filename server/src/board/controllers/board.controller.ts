@@ -45,9 +45,10 @@ export class BoardController {
     description: '공개 상태의 게시글 목록을 페이징하여 조회합니다.',
   })
   @ApiQuery({
-    name: 'categoryName',
+    name: 'categorySlug',
     required: false,
-    description: '카테고리명 필터',
+    description: '카테고리 슬러그 필터 (영어)',
+    example: 'notices'
   })
   @ApiQuery({
     name: 'keyword',
@@ -73,7 +74,7 @@ export class BoardController {
   @ApiResponse({ status: 200, description: '공개 게시글 목록', type: PagedResponse })
   async getPosts(@Query() rawQuery: any): Promise<PagedResponse<PostResponse>> {
     const query: PostListQuery = {
-      categoryName: rawQuery.categoryName,
+      categorySlug: rawQuery.categorySlug,
       keyword: rawQuery.keyword,
       page: rawQuery.page ? parseInt(rawQuery.page) : 1,
       size: rawQuery.size ? parseInt(rawQuery.size) : 10,
@@ -112,9 +113,10 @@ export class BoardController {
     description: '게시글 상태 필터 (draft: 임시저장, private: 비공개, public: 공개). 생략 시 전체 상태 조회',
   })
   @ApiQuery({
-    name: 'categoryName',
+    name: 'categorySlug',
     required: false,
-    description: '카테고리명 필터',
+    description: '카테고리 슬러그 필터 (영어)',
+    example: 'notices'
   })
   @ApiQuery({
     name: 'keyword',
@@ -143,7 +145,7 @@ export class BoardController {
   async getAdminPosts(@Query() rawQuery: any): Promise<PagedResponse<PostResponse>> {
     const query: AdminPostListQuery = {
       status: rawQuery.status,
-      categoryName: rawQuery.categoryName,
+      categorySlug: rawQuery.categorySlug,
       keyword: rawQuery.keyword,
       page: rawQuery.page ? parseInt(rawQuery.page) : 1,
       size: rawQuery.size ? parseInt(rawQuery.size) : 10,

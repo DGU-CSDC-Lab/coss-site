@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import {
-  uploadFileOnly,
+  uploadFile,
   UploadResult,
   FileUploadError,
   formatFileSize,
@@ -30,10 +30,12 @@ export default function FileUpload({
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // initialFiles가 변경되면 files 상태 업데이트
+  // initialFiles가 변경되면 files 상태 업데이트 (깊은 비교로 무한 루프 방지)
   useEffect(() => {
-    setFiles(initialFiles)
-  }, [initialFiles])
+    if (JSON.stringify(files) !== JSON.stringify(initialFiles)) {
+      setFiles(initialFiles)
+    }
+  }, [initialFiles, files])
 
   const handleFileSelect = async (selectedFiles: FileList) => {
     if (files.length + selectedFiles.length > maxFiles) {
@@ -51,7 +53,8 @@ export default function FileUpload({
         const file = selectedFiles[i]
 
         try {
-          const result = await uploadFileOnly(file, {
+          console.log('Uploading file:', file.name, file.type, file.size)
+          const result = await uploadFile(file, {
             maxSize,
             onProgress: fileProgress => {
               const totalProgress =
@@ -60,8 +63,10 @@ export default function FileUpload({
             },
           })
 
+          console.log('Upload result:', result)
           newFiles.push(result)
         } catch (error) {
+          console.error('Upload error:', error)
           if (error instanceof FileUploadError) {
             alert(`${file.name}: ${error.message}`)
           } else {
@@ -71,6 +76,7 @@ export default function FileUpload({
       }
 
       const updatedFiles = [...files, ...newFiles]
+      console.log('Updated files:', updatedFiles)
       setFiles(updatedFiles)
       onFilesChange(updatedFiles)
     } finally {

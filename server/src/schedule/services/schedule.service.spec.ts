@@ -141,6 +141,7 @@ describe('ScheduleService', () => {
         startDate: '2024-01-01',
         endDate: '2024-01-02',
         description: 'Test description',
+        location: 'Test location',
         category: ScheduleCategory.ACADEMIC,
       };
 
@@ -160,6 +161,7 @@ describe('ScheduleService', () => {
       const result = await service.create(createDto, 'user1');
 
       expect(result.title).toBe('New Schedule');
+      expect(result.location).toBe('Test location');
     });
   });
 
@@ -168,12 +170,14 @@ describe('ScheduleService', () => {
       const updateDto = {
         title: 'Updated Schedule',
         description: 'Updated description',
+        location: 'Updated location',
       };
 
       const mockSchedule = {
         id: '1',
         title: 'Old Schedule',
         startDate: new Date('2024-01-01'),
+        location: 'Old location',
         category: ScheduleCategory.ACADEMIC,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -185,6 +189,7 @@ describe('ScheduleService', () => {
       const result = await service.update('1', updateDto);
 
       expect(result.title).toBe('Updated Schedule');
+      expect(result.location).toBe('Updated location');
     });
 
     it('should throw NotFoundException when updating non-existent schedule', async () => {

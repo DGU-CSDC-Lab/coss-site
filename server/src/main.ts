@@ -52,7 +52,7 @@ async function bootstrap() {
     },
   });
 
-  await app.listen(3001, '0.0.0.0');
+  await app.listen(process.env.PORT || 3001, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
   console.log(`Swagger docs available at: ${await app.getUrl()}/api-docs`);
   console.log(`CORS origins: ${JSON.stringify([...allowedOrigins, /^https:\/\/.*\.cloudfront\.net$/])}`);

@@ -71,9 +71,9 @@ export default function HeaderSlider() {
   }
 
   return (
-    <div className="relative aspect-[3/1] bg-gray-200 overflow-hidden rounded-lg">
+    <div className="relative aspect-[3/1] bg-gray-200 overflow-visible rounded-lg">
       <div
-        className="flex transition-transform duration-500 ease-in-out h-full"
+        className="flex transition-transform duration-500 ease-in-out h-full overflow-hidden rounded-lg"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {banners?.items.map((banner, index) => (
@@ -125,14 +125,14 @@ export default function HeaderSlider() {
             onClick={goToPrevious}
             className="absolute -left-8 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-4"
           >
-            <ChevronLeftIcon className="w-8 h-8" />
+            <ChevronLeftIcon className="w-8 h-8 text-gray-600" />
           </button>
 
           <button
             onClick={goToNext}
             className="absolute -right-8 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-4"
           >
-            <ChevronRightIcon className="w-8 h-8" />
+            <ChevronRightIcon className="w-8 h-8 text-gray-600" />
           </button>
 
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">

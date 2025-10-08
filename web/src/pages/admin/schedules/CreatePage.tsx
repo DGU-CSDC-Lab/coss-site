@@ -1,7 +1,7 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { schedulesApi, CreateScheduleRequest } from '@/lib/api/schedules'
+import { schedulesApi, CreateScheduleRequest, UpdateScheduleRequest, Schedule } from '@/lib/api/schedules'
 import Input from '@/components/common/Input'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
@@ -11,11 +11,17 @@ import DateInput from '@/components/common/DateInput'
 import Textarea from '@/components/common/Textarea'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import ExitWarningModal from '@/components/common/ExitWarningModal'
 
 export default function AdminSchedulesCreatePage() {
   const navigate = useNavigate()
+  const params = useParams()
+  const isEdit = !!params.id
   const alert = useAlert()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(false)
+  const [schedule, setSchedule] = useState<Schedule | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -25,13 +31,52 @@ export default function AdminSchedulesCreatePage() {
     category: '',
   })
 
+  const [originalData, setOriginalData] = useState(formData)
+  const { hasChanges, showExitWarning, setShowExitWarning } = useUnsavedChanges(formData, originalData)
+
+  useEffect(() => {
+    if (isEdit && params.id) {
+      fetchSchedule(params.id)
+    }
+  }, [isEdit, params.id])
+
+  const fetchSchedule = async (id: string) => {
+    try {
+      setInitialLoading(true)
+      const scheduleData = await schedulesApi.getSchedule(id)
+      setSchedule(scheduleData)
+      
+      // 날짜를 datetime-local 형식으로 변환
+      const formatDateForInput = (dateString: string) => {
+        if (!dateString) return ''
+        const date = new Date(dateString)
+        return date.toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm 형식
+      }
+      
+      const data = {
+        title: scheduleData.title,
+        description: scheduleData.description || '',
+        startDate: formatDateForInput(scheduleData.startDate),
+        endDate: formatDateForInput(scheduleData.endDate),
+        location: scheduleData.location || '', // location이 없을 수 있으므로 빈 문자열로 처리
+        category: scheduleData.category || '',
+      }
+      setFormData(data)
+      setOriginalData(data)
+    } catch (error) {
+      console.error('Failed to fetch schedule:', error)
+      alert.error('일정 정보를 불러올 수 없습니다.')
+      navigate('/admin/schedules')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
   const categoryOptions = [
     { value: '카테고리 선택', label: '카테고리 선택' },
     { value: 'academic', label: '학사' },
-    { value: 'exam', label: '시험' },
+    { value: 'admission', label: '입학' },
     { value: 'event', label: '행사' },
-    { value: 'holiday', label: '휴일' },
-    { value: 'other', label: '기타' },
   ]
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -55,22 +100,36 @@ export default function AdminSchedulesCreatePage() {
     setLoading(true)
 
     try {
-      const scheduleData: CreateScheduleRequest = {
-        title: formData.title,
-        description: formData.description || undefined,
-        startDate: formData.startDate,
-        endDate: formData.endDate || undefined,
-        location: formData.location || undefined,
-        category: formData.category || undefined,
-      }
+      if (isEdit && params.id) {
+        const scheduleData: UpdateScheduleRequest = {
+          title: formData.title,
+          description: formData.description || undefined,
+          startDate: formData.startDate,
+          endDate: formData.endDate || undefined,
+          location: formData.location || undefined,
+          category: formData.category || undefined,
+        }
 
-      await schedulesApi.createSchedule(scheduleData)
-      alert.success('일정이 생성되었습니다.')
+        await schedulesApi.updateSchedule(params.id, scheduleData)
+        alert.success('일정이 수정되었습니다.')
+      } else {
+        const scheduleData: CreateScheduleRequest = {
+          title: formData.title,
+          description: formData.description || undefined,
+          startDate: formData.startDate,
+          endDate: formData.endDate || undefined,
+          location: formData.location || undefined,
+          category: formData.category || undefined,
+        }
+
+        await schedulesApi.createSchedule(scheduleData)
+        alert.success('일정이 생성되었습니다.')
+      }
       navigate('/admin/schedules')
     } catch (error) {
-      console.error('Failed to create schedule:', error)
+      console.error(`Failed to ${isEdit ? 'update' : 'create'} schedule:`, error)
       alert.error(
-        `일정 생성 중 오류가 발생했습니다. \n${(error as Error).message}`
+        `일정 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다. \n${(error as Error).message}`
       )
     } finally {
       setLoading(false)
@@ -81,16 +140,25 @@ export default function AdminSchedulesCreatePage() {
     handleSubmit({ preventDefault: () => {} } as React.FormEvent)
   }
 
-  return (
-    <div className="w-full h-screen flex flex-col">
-      <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
-        <Title>새 일정 추가</Title>
-        <Link to="/admin/schedules">
-          <Button variant="info" size="md" radius="md">
-            목록으로
-          </Button>
-        </Link>
+  if (initialLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
       </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="w-full h-screen flex flex-col">
+        <div className="flex items-center justify-between p-6 border-b flex-shrink-0">
+          <Title>{isEdit ? '일정 수정' : '새 일정 추가'}</Title>
+          <Link to="/admin/schedules">
+            <Button variant="info" size="md" radius="md">
+              목록으로
+            </Button>
+          </Link>
+        </div>
 
       <div className="flex-1 overflow-auto p-6">
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -198,7 +266,7 @@ export default function AdminSchedulesCreatePage() {
         </form>
       </div>
 
-      <div className="flex gap-4 justify-end p-6 border-t bg-white flex-shrink-0">
+      <div className="flex gap-4 justify-end p-6 bg-white flex-shrink-0">
         <Link to="/admin/schedules">
           <Button variant="cancel" radius="md" size="lg">
             취소
@@ -211,9 +279,17 @@ export default function AdminSchedulesCreatePage() {
           size="lg"
           disabled={loading}
         >
-          {loading ? <LoadingSpinner size="md" /> : '일정 생성'}
+          {loading ? <LoadingSpinner size="md" /> : isEdit ? '일정 수정' : '일정 생성'}
         </Button>
       </div>
     </div>
+
+    <ExitWarningModal
+      isOpen={showExitWarning}
+      onClose={() => setShowExitWarning(false)}
+      onConfirm={() => navigate('/admin/schedules')}
+      hasChanges={hasChanges}
+    />
+    </>
   )
 }

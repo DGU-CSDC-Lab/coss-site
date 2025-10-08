@@ -38,7 +38,7 @@ const Layout = ({ children }: LayoutProps) => {
           isAdminPage
             ? 'w-full' // admin 페이지만 전체폭
             : 'w-full max-w-7xl mx-auto', // 일반 페이지는 중앙 정렬 + 전체 너비
-          isLoginPage ? 'items-center justify-center' : 'items-start'
+          isLoginPage ? 'items-center justify-center' : 'items-center justify-start'
         )}
       >
         {/* 페이지 헤더 (있을 때만) */}

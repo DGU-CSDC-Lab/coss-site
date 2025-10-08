@@ -6,6 +6,7 @@ import { BoardService } from './board.service';
 import { BoardPost } from '../entities';
 import { User } from '../../auth/entities';
 import { Category } from '../../category/entities';
+import { S3Service } from '../../file/services/s3.service';
 
 describe('BoardService', () => {
   let service: BoardService;
@@ -64,6 +65,12 @@ describe('BoardService', () => {
             findOne: jest.fn(),
           },
         },
+        {
+          provide: S3Service,
+          useValue: {
+            getFileUrl: jest.fn().mockReturnValue('https://test-file-url'),
+          },
+        },
       ],
     }).compile();
 
@@ -111,11 +118,11 @@ describe('BoardService', () => {
     it('should filter by category', async () => {
       mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
 
-      await service.findAll({ categoryName: '뉴스', page: 1, size: 10 });
+      await service.findAll({ categorySlug: 'news', page: 1, size: 10 });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'category.name = :categoryName',
-        { categoryName: '뉴스' },
+        'category.slug = :categorySlug',
+        { categorySlug: 'news' },
       );
     });
 
@@ -196,7 +203,7 @@ describe('BoardService', () => {
       const createDto = {
         title: 'New Post',
         contentHtml: 'New content',
-        categoryName: '공지사항',
+        categorySlug: 'notices',
         thumbnailUrl: 'thumb.jpg',
       };
 

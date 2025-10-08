@@ -1,20 +1,31 @@
 'use client'
 
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useUIStore } from '@/store/ui.store'
 import { useAuthStore } from '@/store/auth.store'
 import menuConfig from '@/config/menuConfig'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function TopNav() {
   const { toggleSidebar } = useUIStore()
+  const alert = useAlert()
   const { isLoggedIn, user, logout } = useAuthStore()
+  const location = useLocation()
+  const navigate = useNavigate()
   const userName = user?.email || 'Anonymous'
   const [hoveredMenu, setHoveredMenu] = useState<string | null>(null)
   const [hoveredSub, setHoveredSub] = useState<string | null>(null)
 
-  const buildPath = (...parts: string[]) =>
-    '/' + parts.map(p => p.replace(/^\/+/, '').replace(/\/+$/, '')).join('/')
+  const handleLogout = () => {
+    logout()
+    alert.success('로그아웃 되었습니다.')
+
+    // admin 페이지에서 로그아웃 시 메인 페이지로 이동
+    if (location.pathname.startsWith('/admin')) {
+      navigate('/')
+    }
+  }
 
   return (
     <nav
@@ -118,11 +129,11 @@ export default function TopNav() {
           {/* 로그인 영역 */}
           <div className="flex items-center space-x-4">
             {isLoggedIn ? (
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 whitespace-nowrap">
                 {/* 프로필 + 이름 클릭 시 마이페이지 이동 */}
                 {/* 로그아웃 버튼 */}
                 <button
-                  onClick={logout}
+                  onClick={handleLogout}
                   className="text-caption-12 text-gray-400 rounded-full hover:text-gray-600 transition-colors"
                 >
                   로그아웃

@@ -2,9 +2,7 @@ import { useState } from 'react'
 import { uploadImage, UploadResult } from '@/utils/fileUpload'
 
 interface UseImageUploadOptions {
-  ownerType?: string
-  ownerId?: string
-  onSuccess?: (result: UploadResult) => void
+  onSuccess?: (result: UploadResult, file: File) => void
   onError?: (error: Error) => void
 }
 
@@ -24,16 +22,13 @@ export const useImageUpload = (options: UseImageUploadOptions = {}) => {
     setUploading(true)
 
     try {
-      const result = await uploadImage(file, {
-        ownerType: options.ownerType,
-        ownerId: options.ownerId,
-      })
+      const result = await uploadImage(file)
 
       setImageUrl(result.fileUrl)
       setFileKey(result.fileKey)
       URL.revokeObjectURL(previewUrl)
       
-      options.onSuccess?.(result)
+      options.onSuccess?.(result, file)
     } catch (error) {
       console.error('Image upload failed:', error)
       const uploadError = error instanceof Error ? error : new Error('업로드 실패')
@@ -56,6 +51,7 @@ export const useImageUpload = (options: UseImageUploadOptions = {}) => {
     fileName,
     fileKey,
     handleImageChange,
+    setImageUrl,
     reset,
   }
 }

@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline'
-import { postsApi, CreatePostRequest } from '@/lib/api/posts'
+import { postsApi, CreatePostRequest, UpdatePostRequest, Post } from '@/lib/api/posts'
 import { UploadResult } from '@/utils/fileUpload'
 import { useImageUpload } from '@/hooks/useImageUpload'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import FileUpload from '@/components/admin/FileUpload'
 import HtmlEditor from '@/components/admin/HtmlEditor'
 import Button from '@/components/common/Button'
@@ -13,27 +13,33 @@ import Input from '@/components/common/Input'
 import Label from '@/components/common/Label'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import SubTitle from '@/components/common/title/SubTitle'
+import ExitWarningModal from '@/components/common/ExitWarningModal'
 import { useAlert } from '@/hooks/useAlert'
 
 const CATEGORIES = [
-  { value: 'news', label: '뉴스' },
-  { value: 'updates', label: '소식' },
-  { value: 'scholarship-infos', label: '장학정보' },
+  { value: 'news-articles', label: '뉴스' },
+  { value: 'news', label: '소식' },
+  { value: 'scholarship', label: '장학정보' },
   { value: 'resources', label: '자료실' },
-  { value: 'notices', label: '공지사항' },
-  { value: 'contests', label: '공모전 정보' },
-  { value: 'activities', label: '교육/활동/취업 정보' },
+  { value: 'notice', label: '공지사항' },
+  { value: 'contest-info', label: '공모전 정보' },
+  { value: 'education-job', label: '교육/활동/취업 정보' },
 ]
 
 export default function AdminPostsCreatePage() {
   const navigate = useNavigate()
+  const params = useParams()
+  const isEdit = !!params.id
   const alert = useAlert()
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(false)
+  const [post, setPost] = useState<Post | null>(null)
   const [showPublishModal, setShowPublishModal] = useState(false)
   const [isPublic, setIsPublic] = useState(true)
   const [showTitle, setShowTitle] = useState(true)
+  const [thumbnailFileName, setThumbnailFileName] = useState('')
   const [formData, setFormData] = useState({
     title: '',
     categoryId: 'news',
@@ -44,6 +50,35 @@ export default function AdminPostsCreatePage() {
     (() => string[]) | null
   >(null)
 
+  useEffect(() => {
+    if (isEdit && params.id) {
+      fetchPost(params.id)
+    }
+  }, [isEdit, params.id])
+
+  const fetchPost = async (id: string) => {
+    try {
+      setInitialLoading(true)
+      const postData = await postsApi.getPostById(id)
+      setPost(postData)
+      setFormData({
+        title: postData.title,
+        categoryId: postData.categorySlug,
+        contentHtml: postData.contentHtml,
+      })
+      setIsPublic(postData.status === 'public')
+      if (postData.thumbnailUrl) {
+        setThumbnailFileName('기존 썸네일')
+      }
+    } catch (error) {
+      console.error('Failed to fetch post:', error)
+      alert.error('게시글 정보를 불러올 수 없습니다.')
+      navigate('/admin/posts')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
   const {
     imageUrl: thumbnailUrl,
     uploading: thumbnailUploading,
@@ -51,41 +86,34 @@ export default function AdminPostsCreatePage() {
   } = useImageUpload({
     onError: (error) => {
       alert.error('썸네일 업로드 중 오류가 발생했습니다.')
+    },
+    onSuccess: (result, file) => {
+      setThumbnailFileName(file.name)
+    }
+  })
+
+  // Check if there are unsaved changes
+  const hasChanges = !!(formData.title.trim() || formData.contentHtml.trim() || files.length > 0 || thumbnailUrl)
+
+  const {
+    showExitModal,
+    handleExit,
+    confirmExit,
+    cancelExit,
+    saveDraftAndExit,
+  } = useUnsavedChanges({
+    hasChanges,
+    onSaveDraft: async () => {
+      if (formData.title.trim()) {
+        await handleSubmit(true)
+      }
     }
   })
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const scrollTop = e.currentTarget.scrollTop
-    setShowTitle(scrollTop < 100)
+    setShowTitle(scrollTop < 50)
   }
-
-  useEffect(() => {
-    const savedData = localStorage.getItem('draft-post')
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData)
-        if (parsed.formData) setFormData(parsed.formData)
-        if (parsed.files) setFiles(parsed.files)
-        if (parsed.isPublic !== undefined) setIsPublic(parsed.isPublic)
-      } catch (error) {
-        console.error('Failed to restore draft:', error)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const draftData = {
-        formData,
-        files,
-        thumbnailUrl,
-        isPublic,
-        lastSaved: new Date().toISOString(),
-      }
-      localStorage.setItem('draft-post', JSON.stringify(draftData))
-    }, 500)
-    return () => clearTimeout(timer)
-  }, [formData, files, thumbnailUrl, isPublic])
 
   const handlePublish = () => {
     if (!formData.title.trim()) {
@@ -104,6 +132,11 @@ export default function AdminPostsCreatePage() {
   }
 
   const handleSubmit = async (isDraft = false) => {
+    if (formData.categoryId === 'news' && !thumbnailUrl && !post?.thumbnailUrl) {
+      alert.error('뉴스 카테고리는 썸네일 이미지가 필수입니다.')
+      return
+    }
+    
     setLoading(true)
 
     try {
@@ -125,26 +158,47 @@ export default function AdminPostsCreatePage() {
         })),
       ]
 
-      const postData: CreatePostRequest = {
-        title: formData.title,
-        contentHtml: formData.contentHtml,
-        categoryName: CATEGORIES.find(cat => cat.value === formData.categoryId)?.label || '뉴스',
-        status: isDraft ? 'draft' : isPublic ? 'public' : 'private',
-        thumbnailUrl: thumbnailUrl || null,
-        files: allFiles,
-      }
+      if (isEdit && params.id) {
+        const postData: UpdatePostRequest = {
+          title: formData.title,
+          contentHtml: formData.contentHtml,
+          categorySlug: formData.categoryId,
+          status: isDraft ? 'draft' : isPublic ? 'public' : 'private',
+          thumbnailUrl: thumbnailUrl || post?.thumbnailUrl || null,
+          files: allFiles,
+        }
 
-      await postsApi.createPost(postData)
-      localStorage.removeItem('draft-post')
-      alert.success(isDraft ? '임시저장 되었습니다.' : '게시글이 생성되었습니다.')
+        await postsApi.updatePost(params.id, postData)
+        alert.success(isDraft ? '임시저장 되었습니다.' : '게시글이 수정되었습니다.')
+      } else {
+        const postData: CreatePostRequest = {
+          title: formData.title,
+          contentHtml: formData.contentHtml,
+          categorySlug: formData.categoryId,
+          status: isDraft ? 'draft' : isPublic ? 'public' : 'private',
+          thumbnailUrl: thumbnailUrl || null,
+          files: allFiles,
+        }
+
+        await postsApi.createPost(postData)
+        alert.success(isDraft ? '임시저장 되었습니다.' : '게시글이 생성되었습니다.')
+      }
       navigate('/admin/posts')
     } catch (error) {
-      console.error('Failed to create post:', error)
-      alert.error('게시글 생성 중 오류가 발생했습니다.')
+      console.error(`Failed to ${isEdit ? 'update' : 'create'} post:`, error)
+      alert.error(`게시글 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다.`)
     } finally {
       setLoading(false)
       setShowPublishModal(false)
     }
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   return (
@@ -152,11 +206,14 @@ export default function AdminPostsCreatePage() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
         <div className="flex items-center gap-4">
-          <Link to="/admin/posts">
-            <Button variant="delete" size="md" radius="md">
-              나가기
-            </Button>
-          </Link>
+          <Button 
+            variant="delete" 
+            size="md" 
+            radius="md"
+            onClick={() => handleExit(() => navigate('/admin/posts'))}
+          >
+            나가기
+          </Button>
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -182,8 +239,12 @@ export default function AdminPostsCreatePage() {
             className={`border-b flex-shrink-0 transition-all duration-300 ${
               showTitle
                 ? 'opacity-100 translate-y-0'
-                : 'opacity-0 -translate-y-full absolute z-10 pointer-events-none'
+                : 'opacity-0 -translate-y-full pointer-events-none'
             }`}
+            style={{
+              height: showTitle ? 'auto' : '0px',
+              overflow: showTitle ? 'visible' : 'hidden'
+            }}
           >
             <Input
               className="w-full"
@@ -238,33 +299,38 @@ export default function AdminPostsCreatePage() {
             </div>
 
             <div className="flex gap-8">
-              <div className="flex-1">
-                <div className="mb-4">
-                  <div className="border rounded-lg overflow-hidden">
-                    {thumbnailUrl ? (
-                      <img
-                        src={thumbnailUrl}
-                        alt="썸네일"
-                        className="w-full aspect-[4/3] object-cover"
-                      />
-                    ) : (
-                      <div className="w-full aspect-[4/3] bg-gray-200 flex items-center justify-center">
-                        <PhotoIcon className="w-12 h-12 text-gray-400" />
-                      </div>
-                    )}
+              {/* 썸네일 영역 - 뉴스 카테고리인 경우에만 표시 */}
+              {formData.categoryId === 'news' && (
+                <div className="flex-1">
+                  <div className="mb-4">
+                    <div className="border rounded-lg overflow-hidden">
+                      {thumbnailUrl || post?.thumbnailUrl ? (
+                        <img
+                          src={thumbnailUrl || post?.thumbnailUrl}
+                          alt="썸네일"
+                          className="w-full aspect-[4/3] object-cover"
+                        />
+                      ) : (
+                        <div className="w-full aspect-[4/3] bg-gray-200 flex items-center justify-center">
+                          <PhotoIcon className="w-12 h-12 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <Label className="mb-2" required={true}>
-                  썸네일 이미지
-                </Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onFileChange={handleThumbnailChange}
-                />
-                {thumbnailUploading && <LoadingSpinner size="sm" />}
-              </div>
+                  <Label className="mb-2" required={true}>
+                    썸네일 이미지
+                  </Label>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    value={thumbnailFileName}
+                    onChange={() => {}}
+                    onFileChange={handleThumbnailChange}
+                  />
+                  {thumbnailUploading && <LoadingSpinner size="sm" />}
+                </div>
+              )}
 
               <div className="flex-1 space-y-4">
                 <div>
@@ -333,7 +399,7 @@ export default function AdminPostsCreatePage() {
                 size="md"
                 variant="info"
                 radius="md"
-                onClick={handleSubmit}
+                onClick={() => handleSubmit(false)}
                 disabled={loading}
               >
                 {loading ? <LoadingSpinner size="md" /> : '출간하기'}
@@ -342,6 +408,14 @@ export default function AdminPostsCreatePage() {
           </div>
         </div>
       )}
+
+      <ExitWarningModal
+        isOpen={showExitModal}
+        onClose={cancelExit}
+        onConfirmExit={confirmExit}
+        onSaveDraft={saveDraftAndExit}
+        showDraftOption={true}
+      />
     </div>
   )
 }

@@ -9,7 +9,6 @@ import { File, OwnerType, FileStatus } from '../entities';
 import {
   PresignRequest,
   PresignResponse,
-  FileCompleteRequest,
 } from '../dto/file.dto';
 import { S3Service } from './s3.service';
 import { randomUUID } from 'crypto';
@@ -52,21 +51,6 @@ export class FileService {
     const fileExtension = this.getFileExtension(request.fileName);
     const fileKey = `uploads/${Date.now()}-${randomUUID()}${fileExtension}`;
 
-    // Create file record
-    const file = this.fileRepository.create({
-      ownerType: (request.ownerType as OwnerType) || OwnerType.POST,
-      ownerId: request.ownerId || 'temp',
-      fileKey,
-      originalName: request.fileName,
-      mimeType: request.contentType,
-      fileSize: request.fileSize || 0,
-      status: FileStatus.PENDING,
-      createdById: userId,
-      expiresAt: new Date(Date.now() + 60 * 60 * 1000), // 1 hour
-    });
-
-    await this.fileRepository.save(file);
-
     // Generate real presigned URL
     const uploadUrl = await this.s3Service.generatePresignedUploadUrl(
       fileKey,
@@ -82,34 +66,6 @@ export class FileService {
       fileKey,
       expiresIn: 3600,
       expiresAt: expiresAt.toISOString(),
-    };
-  }
-
-  async completeUpload(
-    request: FileCompleteRequest,
-  ): Promise<{ fileKey: string; fileUrl: string }> {
-    const file = await this.fileRepository.findOne({
-      where: { fileKey: request.fileKey },
-    });
-
-    if (!file) {
-      throw new NotFoundException('File not found');
-    }
-
-    if (file.status !== FileStatus.PENDING) {
-      throw new BadRequestException('File is not in pending status');
-    }
-
-    // Mark file as active
-    file.status = FileStatus.ACTIVE;
-    file.ownerType = (request.ownerType as OwnerType) || file.ownerType;
-    file.ownerId = request.ownerId || file.ownerId;
-
-    await this.fileRepository.save(file);
-
-    return {
-      fileKey: file.fileKey,
-      fileUrl: this.s3Service.getFileUrl(file.fileKey),
     };
   }
 

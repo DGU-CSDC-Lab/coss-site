@@ -111,48 +111,6 @@ describe('FileService', () => {
     });
   });
 
-  describe('completeUpload', () => {
-    it('should complete upload successfully', async () => {
-      const request = {
-        fileKey: 'uploads/test-key.jpg',
-        ownerType: 'POST',
-        ownerId: 'post1',
-      };
-
-      const mockFile = {
-        fileKey: 'uploads/test-key.jpg',
-        status: FileStatus.PENDING,
-        ownerType: OwnerType.POST,
-        ownerId: 'temp',
-      };
-
-      mockFileRepository.findOne.mockResolvedValue(mockFile);
-      mockFileRepository.save.mockResolvedValue({
-        ...mockFile,
-        status: FileStatus.ACTIVE,
-      });
-      mockS3Service.getFileUrl.mockReturnValue('https://file-url');
-
-      const result = await service.completeUpload(request);
-
-      expect(result).toHaveProperty('fileKey');
-      expect(result).toHaveProperty('fileUrl');
-      expect(mockFileRepository.save).toHaveBeenCalled();
-    });
-
-    it('should throw error if file not found', async () => {
-      const request = {
-        fileKey: 'nonexistent',
-      };
-
-      mockFileRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.completeUpload(request)).rejects.toThrow(
-        NotFoundException,
-      );
-    });
-  });
-
   describe('deleteFile', () => {
     it('should delete file successfully', async () => {
       const mockFile = {

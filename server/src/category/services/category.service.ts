@@ -23,6 +23,7 @@ export class CategoryService {
     const categories = await this.categoryRepository.find({
       where: parentId ? { parentId } : { parentId: null },
       order: { displayOrder: 'ASC', createdAt: 'ASC' },
+      select: ['id', 'name', 'slug', 'parentId', 'displayOrder', 'createdAt', 'updatedAt'],
     });
 
     return categories.map(this.toResponse);
@@ -97,6 +98,7 @@ export class CategoryService {
     return {
       id: category.id,
       name: category.name,
+      slug: category.slug,
       parentId: category.parentId,
       order: category.displayOrder,
       createdAt: category.createdAt,

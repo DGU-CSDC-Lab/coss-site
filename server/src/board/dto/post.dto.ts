@@ -87,11 +87,11 @@ export class PostCreateRequest {
   contentHtml: string;
 
   @ApiProperty({
-    description: '카테고리명',
-    example: '공지사항',
+    description: '카테고리 슬러그 (영어)',
+    example: 'notices',
   })
   @IsString()
-  categoryName: string;
+  categorySlug: string;
 
   @ApiProperty({
     description: '게시글 상태',
@@ -146,13 +146,13 @@ export class PostUpdateRequest {
   contentHtml?: string;
 
   @ApiProperty({
-    description: '카테고리명',
-    example: '공지사항',
+    description: '카테고리 슬러그 (영어)',
+    example: 'notices',
     required: false,
   })
   @IsOptional()
   @IsString()
-  categoryName?: string;
+  categorySlug?: string;
 
   @ApiProperty({
     description: '게시글 상태 (임시저장은 생성 시에만 가능)',
@@ -188,13 +188,13 @@ export class PostUpdateRequest {
 
 export class PostListQuery {
   @ApiProperty({
-    description: '카테고리명으로 필터링',
-    example: '공지사항',
+    description: '카테고리 슬러그로 필터링 (영어)',
+    example: 'notices',
     required: false,
   })
   @IsOptional()
   @IsString()
-  categoryName?: string;
+  categorySlug?: string;
 
   @ApiProperty({
     description: '제목 또는 내용 검색 키워드',
@@ -274,6 +274,12 @@ export class PostResponse {
     example: '공지사항',
   })
   categoryName: string;
+
+  @ApiProperty({
+    description: '카테고리 슬러그 (영어)',
+    example: 'notices',
+  })
+  categorySlug: string;
 
   @ApiProperty({
     description: '작성자명',

@@ -4,8 +4,6 @@ export interface UploadOptions {
   onProgress?: (progress: number) => void
   maxSize?: number // bytes
   allowedTypes?: string[]
-  ownerType?: string
-  ownerId?: string
 }
 
 export interface UploadResult {
@@ -50,12 +48,12 @@ export const validateFile = (file: File, options: UploadOptions = {}): void => {
   }
 }
 
-// 단일 파일 업로드 (complete 없이)
-export const uploadFileOnly = async (
+// 단일 파일 업로드 (단순 presigned URL 방식)
+export const uploadFile = async (
   file: File,
   options: UploadOptions = {}
 ): Promise<UploadResult> => {
-  const { onProgress, ownerType, ownerId } = options
+  const { onProgress } = options
 
   try {
     // 파일 검증
@@ -70,9 +68,9 @@ export const uploadFileOnly = async (
       fileType: file.type,
       contentType: file.type,
       fileSize: file.size,
-      ownerType,
-      ownerId,
     })
+
+    onProgress?.(30)
 
     // 2. S3에 파일 업로드
     await filesApi.uploadFile(file, presignData.uploadUrl)
@@ -92,42 +90,6 @@ export const uploadFileOnly = async (
       throw error
     }
 
-    const errorMessage =
-      error instanceof Error
-        ? error.message
-        : '파일 업로드 중 오류가 발생했습니다.'
-
-    throw new FileUploadError(errorMessage, 'UPLOAD_FAILED')
-  }
-}
-
-// 단일 파일 업로드
-export const uploadFile = async (
-  file: File,
-  options: UploadOptions = {}
-): Promise<UploadResult> => {
-  const { onProgress, ownerType, ownerId } = options
-
-  try {
-    // 파일 검증
-    validateFile(file, options)
-
-    // 진행률 시작
-    onProgress?.(0)
-
-    // 파일 업로드 (새로운 API 사용)
-    const result = await filesApi.uploadFileComplete(file, ownerType, ownerId)
-
-    // 진행률 완료
-    onProgress?.(100)
-
-    return result
-  } catch (error) {
-    if (error instanceof FileUploadError) {
-      throw error
-    }
-
-    // 서버 오류 메시지 파싱
     const errorMessage =
       error instanceof Error
         ? error.message

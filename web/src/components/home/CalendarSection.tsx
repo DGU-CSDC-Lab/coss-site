@@ -100,27 +100,27 @@ export default function CalendarSection() {
         dayDate.getFullYear() === today.getFullYear()
 
       days.push(
-        <div key={day} className="p-2 text-center relative">
-          {hasEvent && (
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2">
-              <div
-                className={`rounded-full ${isToday ? 'w-2 h-2 bg-pri-800' : 'w-1 h-1 bg-point-1'}`}
-              ></div>
-            </div>
-          )}
-          <button
-            onClick={() => setSelectedDate(dayDate)}
-            className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200
-          ${
-            isSelected
-              ? 'bg-pri-800 text-white scale-105'
-              : isToday
-                ? 'text-pri-800' // 오늘 날짜 스타일
-                : 'hover:bg-gray-100 hover:scale-105'
-          }`}
-          >
-            {day}
-          </button>
+        <div key={day} className="text-center relative">
+          <div className="p-2 flex flex-col items-center h-12 justify-center">
+            <button
+              onClick={() => setSelectedDate(dayDate)}
+              className={`w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 relative
+            ${
+              isSelected
+                ? 'bg-pri-800 text-white scale-105'
+                : isToday
+                  ? 'text-pri-800' // 오늘 날짜 스타일
+                  : 'hover:bg-gray-100 hover:scale-105'
+            }`}
+            >
+              {day}
+              {hasEvent && (
+                <div
+                  className={`absolute -top-2 rounded-full ${isToday ? 'w-2 h-2 bg-pri-800' : 'w-1 h-1 bg-point-1'}`}
+                ></div>
+              )}
+            </button>
+          </div>
         </div>
       )
     }

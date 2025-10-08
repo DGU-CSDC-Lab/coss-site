@@ -1,8 +1,11 @@
-
-
 import { Link } from 'react-router-dom'
 
-import { CalendarIcon, UserIcon, EyeIcon } from '@heroicons/react/24/outline'
+import {
+  CalendarIcon,
+  UserIcon,
+  EyeIcon,
+  PaperClipIcon,
+} from '@heroicons/react/24/outline'
 import { PaginatedResponse } from '@/lib/apiClient'
 import { Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
@@ -118,32 +121,54 @@ export default function NewsList({
           posts?.items.map((post, index) => (
             <Link
               key={post.id}
-              to={`${basePath}/${post.categoryName}/${post.id}`}
+              to={`${basePath}/${post.categorySlug || post.categoryName}/${post.id}`}
             >
-              <div className="flex items-center gap-4 p-4 hover:bg-gray-100 transition-colors">
+              <div className={`flex gap-4 p-4 hover:bg-gray-100 transition-colors ${
+                post.categoryName === '뉴스' && post.thumbnailUrl ? 'items-start' : 'items-center'
+              }`}>
                 <div className="w-8 text-caption-14 text-point-1 text-center">
                   {(currentPage - 1) * 10 + index + 1}
                 </div>
 
-                <div className="flex-1">
-                  <h3 className="text-body-18-regular text-text">
-                    {post.title}
-                  </h3>
-                  <div className="h-2" />
-                  <div className="flex items-center gap-4 text-caption-12 text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <CalendarIcon className="w-4 h-4" />
-                      {new Date(post.createdAt).toLocaleDateString('ko-KR')}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <UserIcon className="w-4 h-4" />
-                      {post.author}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <EyeIcon className="w-4 h-4" />
-                      {post.viewCount}
-                    </span>
+                {/* 썸네일 (뉴스 카테고리인 경우) */}
+                {post.categoryName === '뉴스' && post.thumbnailUrl && (
+                  <div className="w-32 h-32 flex-shrink-0">
+                    <img
+                      src={post.thumbnailUrl}
+                      alt={post.title}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
+                )}
+
+                <div className="flex-1 flex items-center justify-between">
+                  <div className="flex-1">
+                    <h3 className="text-body-18-regular text-text">
+                      {post.title}
+                    </h3>
+                    <div className="h-2" />
+                    <div className="flex items-center gap-4 text-caption-12 text-gray-500">
+                      <span className="flex items-center gap-1">
+                        <CalendarIcon className="w-4 h-4" />
+                        {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <UserIcon className="w-4 h-4" />
+                        {post.author}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <EyeIcon className="w-4 h-4" />
+                        {post.viewCount}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* 파일 아이콘 (파일이 있는 경우) */}
+                  {post.hasFiles && (
+                    <div className="flex-shrink-0 bg-gray-100 p-2 rounded-full self-center">
+                      <PaperClipIcon className="w-4 h-4 text-gray-400" />
+                    </div>
+                  )}
                 </div>
               </div>
               <hr className="border-surface" />

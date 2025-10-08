@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PhotoIcon } from '@heroicons/react/24/outline'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { facultyApi, CreateFacultyRequest } from '@/lib/api/faculty'
+import { facultyApi, CreateFacultyRequest, UpdateFacultyRequest, Faculty } from '@/lib/api/faculty'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import Button from '@/components/common/Button'
 import Title from '@/components/common/title/Title'
@@ -12,11 +12,18 @@ import Dropdown from '@/components/common/Dropdown'
 import Label from '@/components/common/Label'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import ExitWarningModal from '@/components/common/ExitWarningModal'
 
 export default function AdminFacultyCreatePage() {
   const navigate = useNavigate()
+  const params = useParams()
   const alert = useAlert()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(false)
+  const [faculty, setFaculty] = useState<Faculty | null>(null)
+  const isEdit = !!params.id
+
   const [formData, setFormData] = useState({
     name: '',
     jobTitle: '',
@@ -28,6 +35,43 @@ export default function AdminFacultyCreatePage() {
     researchAreas: '',
   })
 
+  const [originalData, setOriginalData] = useState(formData)
+  const { hasChanges, showExitWarning, setShowExitWarning } = useUnsavedChanges(formData, originalData)
+
+  useEffect(() => {
+    if (isEdit && params.id) {
+      fetchFaculty(params.id)
+    }
+  }, [isEdit, params.id])
+
+  const fetchFaculty = async (id: string) => {
+    try {
+      setInitialLoading(true)
+      const facultyData = await facultyApi.getFacultyById(id)
+      setFaculty(facultyData)
+      const data = {
+        name: facultyData.name,
+        jobTitle: facultyData.jobTitle,
+        department: facultyData.department || '',
+        email: facultyData.email || '',
+        phoneNumber: facultyData.phoneNumber || '',
+        office: facultyData.office || '',
+        biography: facultyData.biography || '',
+        researchAreas: Array.isArray(facultyData.researchAreas)
+          ? facultyData.researchAreas.join(', ')
+          : facultyData.researchAreas || '',
+      }
+      setFormData(data)
+      setOriginalData(data)
+    } catch (error) {
+      console.error('Failed to fetch faculty:', error)
+      alert.error('교원 정보를 불러올 수 없습니다.')
+      navigate('/admin/faculty')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
   const {
     imageUrl: profileImageUrl,
     uploading: imageUploading,
@@ -35,8 +79,6 @@ export default function AdminFacultyCreatePage() {
     fileKey: imageFileKey,
     handleImageChange,
   } = useImageUpload({
-    ownerType: 'FACULTY',
-    ownerId: 'temp',
     onError: (error) => {
       console.error('Image upload failed:', error)
     }
@@ -81,27 +123,46 @@ export default function AdminFacultyCreatePage() {
     setLoading(true)
 
     try {
-      const facultyData: CreateFacultyRequest = {
-        name: formData.name,
-        jobTitle: formData.jobTitle,
-        department: formData.department,
-        email: formData.email || undefined,
-        phoneNumber: formData.phoneNumber || undefined,
-        office: formData.office || undefined,
-        profileImageUrl: profileImageUrl || undefined,
-        biography: formData.biography || undefined,
-        researchAreas: formData.researchAreas
-          ? formData.researchAreas.split(',').map(area => area.trim())
-          : undefined,
-      }
+      if (isEdit && params.id) {
+        const facultyData: UpdateFacultyRequest = {
+          name: formData.name,
+          jobTitle: formData.jobTitle,
+          department: formData.department,
+          email: formData.email || undefined,
+          phoneNumber: formData.phoneNumber || undefined,
+          office: formData.office || undefined,
+          profileImageUrl: profileImageUrl || undefined,
+          biography: formData.biography || undefined,
+          researchAreas: formData.researchAreas
+            ? formData.researchAreas.split(',').map(area => area.trim())
+            : undefined,
+        }
 
-      await facultyApi.createFaculty(facultyData)
-      alert.success('교원이 생성되었습니다.')
+        await facultyApi.updateFaculty(params.id, facultyData)
+        alert.success('교원 정보가 수정되었습니다.')
+      } else {
+        const facultyData: CreateFacultyRequest = {
+          name: formData.name,
+          jobTitle: formData.jobTitle,
+          department: formData.department,
+          email: formData.email || undefined,
+          phoneNumber: formData.phoneNumber || undefined,
+          office: formData.office || undefined,
+          profileImageUrl: profileImageUrl || undefined,
+          biography: formData.biography || undefined,
+          researchAreas: formData.researchAreas
+            ? formData.researchAreas.split(',').map(area => area.trim())
+            : undefined,
+        }
+
+        await facultyApi.createFaculty(facultyData)
+        alert.success('교원이 생성되었습니다.')
+      }
       navigate('/admin/faculty')
     } catch (error) {
-      console.error('Failed to create faculty:', error)
+      console.error(`Failed to ${isEdit ? 'update' : 'create'} faculty:`, error)
       alert.error(
-        `교원 생성 중 오류가 발생했습니다. \n ${error instanceof Error ? error.message : ''}`
+        `교원 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다. \n ${error instanceof Error ? error.message : ''}`
       )
     } finally {
       setLoading(false)
@@ -112,16 +173,25 @@ export default function AdminFacultyCreatePage() {
     handleSubmit({ preventDefault: () => {} } as React.FormEvent)
   }
 
-  return (
-    <div className="w-full h-screen flex flex-col">
-      <div className="flex items-center justify-between gap-4 p-6">
-        <Title>새 교원 추가</Title>
-        <Link to="/admin/faculty">
-          <Button variant="delete" size="md" radius="md">
-            나가기
-          </Button>
-        </Link>
+  if (initialLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
       </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="w-full h-screen flex flex-col">
+        <div className="flex items-center justify-between gap-4 p-6">
+          <Title>{isEdit ? '교원 수정' : '새 교원 추가'}</Title>
+          <Link to="/admin/faculty">
+            <Button variant="delete" size="md" radius="md">
+              나가기
+            </Button>
+          </Link>
+        </div>
 
       <div className="flex-1 overflow-auto p-6 bg-gray-50">
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -248,7 +318,7 @@ export default function AdminFacultyCreatePage() {
                 />
                 {imageUploading && <LoadingSpinner size="md" />}
                 <div className="mt-4">
-                  <div className="w-48 aspect-[4/3] rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                  <div className="w-48 aspect-[3/4] overflow-hidden bg-gray-100 flex items-center justify-center">
                     {profileImageUrl ? (
                       <img
                         src={profileImageUrl}
@@ -293,9 +363,17 @@ export default function AdminFacultyCreatePage() {
           radius="md"
           disabled={loading}
         >
-          {loading ? <LoadingSpinner size="md" /> : '교원 생성'}
+          {loading ? <LoadingSpinner size="md" /> : isEdit ? '교원 수정' : '교원 생성'}
         </Button>
       </div>
     </div>
+
+    <ExitWarningModal
+      isOpen={showExitWarning}
+      onClose={() => setShowExitWarning(false)}
+      onConfirm={() => navigate('/admin/faculty')}
+      hasChanges={hasChanges}
+    />
+    </>
   )
 }

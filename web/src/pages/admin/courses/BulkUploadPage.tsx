@@ -9,6 +9,9 @@ import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import Label from '@/components/common/Label'
 import * as XLSX from 'xlsx'
+import ConfirmModal from '@/components/common/ConfirmModal'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import { useAlert } from '@/hooks/useAlert'
 
 interface CourseData {
   year: number
@@ -28,6 +31,8 @@ interface CourseData {
 
 export default function AdminCoursesBulkUploadPage() {
   const navigate = useNavigate()
+  const alert = useAlert()
+
   const [loading, setLoading] = useState(false)
   const [year, setYear] = useState(new Date().getFullYear())
   const [semester, setSemester] = useState('1학기')
@@ -64,46 +69,56 @@ export default function AdminCoursesBulkUploadPage() {
         .filter(row => row.some(cell => cell !== undefined && cell !== ''))
 
       // 정확한 Excel 컬럼 매핑:
-      const courses: CourseData[] = rows.map(row => ({
-        year: year,
-        semester: semester,
-        department: (row[22] && String(row[22]).trim()) || '', // 개설학과
-        courseCode: (row[4] && String(row[4]).trim()) || '', // 학수강좌번호
-        subjectName: (row[5] && String(row[5]).trim()) || '', // 교과목명
-        englishName: row[26] ? String(row[26]).trim() : undefined, // 교과목영문명
-        grade: row[3] ? String(row[3]).trim() : undefined, // 대상학년
-        credit: row[9] !== undefined && row[9] !== null && !isNaN(parseFloat(row[9])) ? parseFloat(row[9]) : undefined, // 학점 (0 포함)
-        classTime: row[7] ? String(row[7]).trim() : undefined, // 요일/교시
-        instructor: row[6] ? String(row[6]).trim() : undefined, // 담당교원
-        classroom: row[8] ? String(row[8]).trim() : undefined, // 강의실
-        courseType: row[1] ? String(row[1]).trim() : undefined, // 교과과정
-        syllabusUrl: undefined,
-      })).filter(course => 
-        // 필수 필드가 있는 과목만 포함
-        course.department && course.courseCode && course.subjectName
-      )
+      const courses: CourseData[] = rows
+        .map(row => ({
+          year: year,
+          semester: semester,
+          department: (row[22] && String(row[22]).trim()) || '', // 개설학과
+          courseCode: (row[4] && String(row[4]).trim()) || '', // 학수강좌번호
+          subjectName: (row[5] && String(row[5]).trim()) || '', // 교과목명
+          englishName: row[26] ? String(row[26]).trim() : undefined, // 교과목영문명
+          grade: row[3] ? String(row[3]).trim() : undefined, // 대상학년
+          credit:
+            row[9] !== undefined &&
+            row[9] !== null &&
+            !isNaN(parseFloat(row[9]))
+              ? parseFloat(row[9])
+              : undefined, // 학점 (0 포함)
+          classTime: row[7] ? String(row[7]).trim() : undefined, // 요일/교시
+          instructor: row[6] ? String(row[6]).trim() : undefined, // 담당교원
+          classroom: row[8] ? String(row[8]).trim() : undefined, // 강의실
+          courseType: row[1] ? String(row[1]).trim() : undefined, // 교과과정
+          syllabusUrl: undefined,
+        }))
+        .filter(
+          course =>
+            // 필수 필드가 있는 과목만 포함
+            course.department && course.courseCode && course.subjectName
+        )
 
       setPreviewData(courses)
       setShowPreview(true)
     } catch (error) {
       console.error('Excel 파일 읽기 실패:', error)
-      alert('Excel 파일을 읽는 중 오류가 발생했습니다.')
+      alert.error('Excel 파일을 읽는 중 오류가 발생했습니다.')
     }
   }
 
   const handleSubmit = async () => {
     if (!file || previewData.length === 0) {
-      alert('파일을 선택하고 미리보기를 확인해주세요.')
+      alert.error('파일을 선택하고 미리보기를 확인해주세요.')
       return
     }
 
     // 데이터 검증
-    const invalidCourses = previewData.filter(course => 
-      !course.department || !course.courseCode || !course.subjectName
+    const invalidCourses = previewData.filter(
+      course => !course.department || !course.courseCode || !course.subjectName
     )
-    
+
     if (invalidCourses.length > 0) {
-      alert(`필수 필드가 누락된 과목이 ${invalidCourses.length}개 있습니다. (학과, 교과목코드, 교과목명은 필수입니다)`)
+      alert.error(
+        `필수 필드가 누락된 과목이 ${invalidCourses.length}개 있습니다. (학과, 교과목코드, 교과목명은 필수입니다)`
+      )
       console.log('Invalid courses:', invalidCourses)
       return
     }
@@ -130,22 +145,22 @@ export default function AdminCoursesBulkUploadPage() {
       console.log('API 요청 데이터:', JSON.stringify(requestData, null, 2))
       console.log('첫 번째 course 샘플:', previewData[0])
       console.log('courses 배열 길이:', previewData.length)
-      
+
       const result = await coursesApi.bulkInit(requestData)
       console.log('API 응답:', result)
 
       if (result.failureCount > 0) {
-        alert(
+        alert.error(
           `등록 완료!\n성공: ${result.successCount}건\n실패: ${result.failureCount}건\n\n오류:\n${result.errors.join('\n')}`
         )
       } else {
-        alert(`${result.successCount}건의 과목이 성공적으로 등록되었습니다.`)
+        alert.success(`${result.successCount}건의 과목이 성공적으로 등록되었습니다.`)
       }
 
       navigate('/admin/courses')
     } catch (error) {
       console.error('과목 등록 실패:', error)
-      alert('과목 등록 중 오류가 발생했습니다.')
+      alert.error('과목 등록 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)
     }
@@ -242,79 +257,81 @@ export default function AdminCoursesBulkUploadPage() {
               <h3 className="text-body-18-medium text-gray-900 mb-4">
                 미리보기 ({previewData.length}건)
               </h3>
-              <div className="max-h-96 overflow-auto border border-gray-300 rounded-lg">
-                <table className="w-full min-w-[1200px]">
-                  <thead className="bg-gray-50 sticky top-0">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        개설학과
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        학수강좌번호
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        교과목명
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        교과목영문명
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        대상학년
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        학점
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        요일/교시
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        담당교원
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        강의실
-                      </th>
-                      <th className="px-3 py-2 text-left text-body-18-medium text-gray-900 border-b">
-                        교과과정
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {previewData.map((course, index) => (
-                      <tr key={index} className="hover:bg-gray-50">
-                        <td className="px-3 py-2 text-caption-14 text-gray-900 border-b">
-                          {course.department}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-900 border-b">
-                          {course.courseCode}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-900 border-b">
-                          {course.subjectName}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-600 border-b">
-                          {course.englishName || '-'}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-600 border-b">
-                          {course.grade || '-'}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-600 border-b">
-                          {course.credit || '-'}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-600 border-b">
-                          {course.classTime || '-'}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-600 border-b">
-                          {course.instructor || '-'}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-600 border-b">
-                          {course.classroom || '-'}
-                        </td>
-                        <td className="px-3 py-2 text-caption-14 text-gray-600 border-b">
-                          {course.courseType || '-'}
-                        </td>
+              <div className="rounded-lg border border-info-100 overflow-hidden">
+                <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                  <table className="w-full border-collapse min-w-[1200px]">
+                    <thead>
+                      <tr className="bg-info-50 border-b border-info-100">
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
+                          개설학과
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[120px]">
+                          학수강좌번호
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[160px]">
+                          교과목명
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[140px]">
+                          교과목영문명
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
+                          대상학년
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[60px]">
+                          학점
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[140px]">
+                          요일/교시
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
+                          담당교원
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
+                          강의실
+                        </th>
+                        <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
+                          교과과정
+                        </th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="bg-white">
+                      {previewData.map((course, index) => (
+                        <tr key={index} className="border-t border-info-100">
+                          <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
+                            {course.department}
+                          </td>
+                          <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
+                            {course.courseCode}
+                          </td>
+                          <td className="px-3 py-1 text-caption-14 text-gray-700 text-center truncate">
+                            {course.subjectName}
+                          </td>
+                          <td className="px-2 py-1 text-caption-14 text-gray-600 text-center">
+                            {course.englishName || '-'}
+                          </td>
+                          <td className="px-1 py-1 text-caption-14 text-gray-600 text-center">
+                            {course.grade || '-'}
+                          </td>
+                          <td className="px-1 py-1 text-caption-14 text-gray-600 text-center">
+                            {course.credit || '-'}
+                          </td>
+                          <td className="px-4 py-1 text-caption-14 text-gray-600 text-center whitespace-pre-line">
+                            {course.classTime || '-'}
+                          </td>
+                          <td className="px-2 py-2.5 text-sm text-gray-700 text-center">
+                            {course.instructor || '-'}
+                          </td>
+                          <td className="px-2 py-2.5 text-sm text-gray-600 text-center">
+                            {course.classroom || '-'}
+                          </td>
+                          <td className="px-2 py-2.5 text-sm text-gray-600 text-center">
+                            {course.courseType || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           )}
@@ -323,7 +340,9 @@ export default function AdminCoursesBulkUploadPage() {
 
       <div className="flex gap-4 justify-end p-6 border-t bg-white flex-shrink-0">
         <Link to="/admin/courses">
-          <Button variant="cancel" radius="md" size="md">취소</Button>
+          <Button variant="cancel" radius="md" size="md">
+            취소
+          </Button>
         </Link>
         <Button
           variant="info"
@@ -332,55 +351,27 @@ export default function AdminCoursesBulkUploadPage() {
           onClick={handleSubmit}
           disabled={loading || !showPreview || previewData.length === 0}
         >
-          {loading ? '등록 중...' : `${previewData.length}건 등록`}
+          {loading ? (
+            <LoadingSpinner size="md" />
+          ) : (
+            `${previewData.length}건 등록`
+          )}
         </Button>
       </div>
 
       {/* 확인 모달 */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-body-18-medium text-gray-900">등록 확인</h3>
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                <XMarkIcon className="w-6 h-6" />
-              </button>
-            </div>
-            
-            <div className="mb-6">
-              <p className="text-body-14-medium text-gray-900 mb-2">
-                <strong>{year}년 {semester}</strong>의 모든 과목이 덮어씌워집니다.
-              </p>
-              <p className="text-caption-14 text-red-600">
-                기존 과목 데이터는 복구할 수 없습니다. 정말 진행하시겠습니까?
-              </p>
-            </div>
-
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="cancel"
-                radius="md"
-                size="md"
-                onClick={() => setShowConfirmModal(false)}
-              >
-                취소
-              </Button>
-              <Button
-                variant="delete"
-                radius="md"
-                size="md"
-                onClick={handleConfirmSubmit}
-                disabled={loading}
-              >
-                확인
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmSubmit}
+        title="등록 확인"
+        message={`${year}년 ${semester}의 모든 과목이 덮어씌워집니다.`}
+        warningMessage="기존 과목 데이터는 복구할 수 없습니다. 정말 진행하시겠습니까?"
+        confirmText="확인"
+        cancelText="취소"
+        confirmVariant="delete"
+        loading={loading}
+      />
     </div>
   )
 }

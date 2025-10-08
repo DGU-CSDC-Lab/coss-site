@@ -274,7 +274,7 @@ export default function HtmlEditor({
   useEffect(() => {
     // value가 변경될 때 에디터 내용 업데이트
     if (editorRef.current && editorRef.current.innerHTML !== value) {
-      editorRef.current.innerHTML = value || `<p>${placeholder}</p>`
+      editorRef.current.innerHTML = value || ''
     }
   }, [value, placeholder])
 
@@ -356,7 +356,7 @@ export default function HtmlEditor({
     if (!editor) return
 
     // 초기 내용 설정
-    editor.innerHTML = value || `<p">${placeholder}</p>`
+    editor.innerHTML = value || ''
 
     // 이벤트 리스너
     editor.addEventListener('input', handleInput)
@@ -378,35 +378,11 @@ export default function HtmlEditor({
   }
 
   const handleFocus = () => {
-    const editor = editorRef.current
-    if (!editor) return
-
-    if (editor.innerHTML === `<p>${placeholder}</p>`) {
-      editor.innerHTML = '<p><br></p>'
-      // 커서를 p 태그 안으로 이동
-      const range = document.createRange()
-      const sel = window.getSelection()
-      range.setStart(editor.firstChild!, 0)
-      range.collapse(true)
-      sel?.removeAllRanges()
-      sel?.addRange(range)
-    }
+    // CSS placeholder will automatically hide when content is added
   }
 
   const handleBlur = () => {
-    const editor = editorRef.current
-    if (!editor) return
-
-    const hasImages = editor.querySelectorAll('img').length > 0
-    const hasText = editor.textContent?.trim() !== ''
-
-    if (
-      !hasImages &&
-      !hasText &&
-      (editor.innerHTML === '<p><br></p>' || editor.innerHTML === '')
-    ) {
-      editor.innerHTML = `<p>${placeholder}</p>`
-    }
+    // CSS placeholder will automatically show when content is empty
   }
 
   const handlePasteEvent = (e: ClipboardEvent) => {
@@ -425,58 +401,61 @@ export default function HtmlEditor({
         const selection = window.getSelection()
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0)
-
-          // 현재 커서가 있는 블록 요소 찾기
-          let blockElement = range.commonAncestorContainer
-          if (blockElement.nodeType === Node.TEXT_NODE) {
-            blockElement = blockElement.parentNode!
-          }
-
-          // 가장 가까운 블록 요소 찾기
-          while (blockElement && blockElement !== editor) {
-            const tagName = (blockElement as Element).tagName?.toLowerCase()
-            if (
-              ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div'].includes(tagName)
-            ) {
+          
+          // 선택된 범위 내의 모든 블록 요소 찾기
+          const startContainer = range.startContainer
+          const endContainer = range.endContainer
+          
+          // 선택 범위의 모든 블록 요소 수집
+          const blockElements: HTMLElement[] = []
+          
+          // 시작 지점의 블록 요소 찾기
+          let startBlock = startContainer.nodeType === Node.TEXT_NODE 
+            ? startContainer.parentElement 
+            : startContainer as HTMLElement
+            
+          while (startBlock && startBlock !== editor) {
+            const tagName = startBlock.tagName?.toLowerCase()
+            if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div'].includes(tagName)) {
               break
             }
-            blockElement = blockElement.parentNode!
+            startBlock = startBlock.parentElement
           }
-
-          if (blockElement && blockElement !== editor) {
-            const element = blockElement as HTMLElement
-            const content = element.innerHTML
-
-            // 새로운 요소 생성
-            const newElement = document.createElement(value || 'p')
-            newElement.innerHTML = content
-
-            // 기존 요소를 새로운 요소로 교체
-            element.parentNode?.replaceChild(newElement, element)
-
-            // 커서 위치 복원
+          
+          if (startBlock && startBlock !== editor) {
+            blockElements.push(startBlock)
+            
+            // 다중 라인 선택인 경우 중간 블록들도 포함
+            let currentBlock = startBlock.nextElementSibling as HTMLElement
+            while (currentBlock && range.intersectsNode(currentBlock)) {
+              const tagName = currentBlock.tagName?.toLowerCase()
+              if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div'].includes(tagName)) {
+                blockElements.push(currentBlock)
+              }
+              currentBlock = currentBlock.nextElementSibling as HTMLElement
+            }
+          }
+          
+          // 각 블록 요소를 새로운 태그로 변환
+          if (blockElements.length > 0) {
+            blockElements.forEach(element => {
+              const newElement = document.createElement(value || 'p')
+              newElement.innerHTML = element.innerHTML
+              
+              // 기존 클래스나 스타일 유지 (placeholder 제외)
+              if (element.className && !element.className.includes('text-gray-600')) {
+                newElement.className = element.className
+              }
+              
+              element.parentNode?.replaceChild(newElement, element)
+            })
+            
+            // 선택 영역 복원
             const newRange = document.createRange()
-            const newSelection = window.getSelection()
-            newRange.selectNodeContents(newElement)
-            newRange.collapse(false)
-            newSelection?.removeAllRanges()
-            newSelection?.addRange(newRange)
-          } else {
-            // 블록 요소가 없으면 새로 생성
-            const selectedText = selection.toString() || ''
-            const newElement = document.createElement(value || 'p')
-
-            if (selectedText) {
-              newElement.textContent = selectedText
-              range.deleteContents()
-              range.insertNode(newElement)
-            } else {
-              newElement.innerHTML = '<br>'
-              range.insertNode(newElement)
-              // 커서를 새 요소 안으로 이동
-              const newRange = document.createRange()
-              newRange.setStart(newElement, 0)
-              newRange.collapse(true)
+            const firstNewElement = blockElements[0].parentNode?.querySelector(`${value || 'p'}`)
+            if (firstNewElement) {
+              newRange.selectNodeContents(firstNewElement)
+              newRange.collapse(false)
               selection.removeAllRanges()
               selection.addRange(newRange)
             }
@@ -539,6 +518,15 @@ export default function HtmlEditor({
     <div
       className={`bg-white rounded-md overflow-hidden ${showToolbar ? 'h-full flex flex-col' : 'h-full'}`}
     >
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          [contenteditable]:empty:before {
+            content: attr(data-placeholder);
+            color: #6b7280;
+            pointer-events: none;
+          }
+        `
+      }} />
       {/* 툴바 - 조건부 렌더링 */}
       {showToolbar && (
         <div className="bg-gray-50 p-2 flex gap-1 flex-wrap flex-shrink-0">
@@ -780,8 +768,9 @@ export default function HtmlEditor({
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
-        className={`max-w-none focus:outline-none p-4 overflow-auto ${showToolbar ? 'flex-1' : 'h-full'}`}
+        className={`max-w-none focus:outline-none p-4 overflow-auto prose prose-sm max-w-none ${showToolbar ? 'flex-1' : 'h-full'}`}
         onScroll={onScroll}
+        data-placeholder={placeholder}
         style={{
           minHeight: typeof height === 'string' ? height : height,
           height: typeof height === 'string' ? height : height,

@@ -63,7 +63,7 @@ export default function NotFoundPage() {
         const categoryNameToKey: Record<string, string> = {
           뉴스: 'news',
           소식: 'updates',
-          장학정보: 'scholarship-infos',
+          장학정보: 'scholarship',
           자료실: 'resources',
           공지사항: 'notices',
           '공모전 정보': 'contests',

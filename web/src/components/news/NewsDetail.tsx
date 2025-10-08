@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { PaperClipIcon } from '@heroicons/react/24/outline'
 import { PostDetail } from '@/lib/api/posts'
 import LoadingSpinner from '../common/loading/LoadingSpinner'
 import EmptyState from '../common/EmptyState'
@@ -68,53 +69,28 @@ export default function NewsDetail({
 
       {/* 첨부파일 영역 */}
       {post.files && post.files.length > 0 && (
-        <div className="py-4">
-          <div className="bg-gray-50 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <svg
-                className="w-5 h-5 text-gray-600"
-                fill="currentColor"
-                viewBox="0 0 20 20"
+        <div className="bg-gray-100">
+          <hr className="border-gray-800" />
+          {post.files.map((file, index) => (
+            <div key={file.id}>
+              <a
+                href={file.downloadUrl}
+                download={file.originalName}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors group"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span className="text-body-14-medium text-gray-800">
-                첨부파일
-              </span>
+                <div className="flex-shrink-0 bg-point-2 p-2 rounded-full">
+                  <PaperClipIcon className="w-4 h-4 text-white transition-colors" />
+                </div>
+                <span className="text-body-14-regular text-gray-900 truncate group-hover:text-info-600 transition-colors">
+                  {file.originalName}
+                </span>
+              </a>
+              {index < post.files.length - 1 && (
+                <hr className="border-gray-800" />
+              )}
             </div>
-            <div className="space-y-2">
-              {post.files.map(file => (
-                <a
-                  key={file.id}
-                  href={file.downloadUrl}
-                  download={file.originalName}
-                  className="flex items-center gap-3 p-2 hover:bg-gray-100 rounded transition-colors"
-                >
-                  <svg
-                    className="w-4 h-4 text-gray-500"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                  <span className="text-body-14-regular text-gray-700 flex-1">
-                    {file.originalName}
-                  </span>
-                  <span className="text-caption-12 text-gray-500">
-                    {(file.fileSize / 1024).toFixed(1)}KB
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
+          ))}
+          <hr className="border-gray-800" />
         </div>
       )}
 

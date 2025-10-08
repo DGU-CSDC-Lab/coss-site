@@ -14,11 +14,11 @@ export default function NewsSection() {
     fetchNews()
   }, [])
 
-  // 소식 데이터만 조회
+  // 뉴스 카테고리 데이터만 조회
   const fetchNews = async () => {
     try {
       const response = await postsApi.getPosts({
-        categoryName: '소식',
+        categorySlug: 'news',
         size: 4,
       })
       setNews(response.items)
@@ -43,7 +43,7 @@ export default function NewsSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {news.length > 0 ? (
           news.map(item => (
-            <Link key={item.id} to={`/board/${item.id}`} className="group">
+            <Link key={item.id} to={`/news/${item.categorySlug || item.categoryName}/${item.id}`} className="group">
               <div className="bg-white rounded-lg overflow-hidden rounded-lg">
                 <div className="aspect-video bg-gray-200 relative overflow-hidden">
                   {item.thumbnailUrl ? (

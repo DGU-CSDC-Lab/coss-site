@@ -1,8 +1,9 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
 import { Link } from 'react-router-dom'
-import { popupsApi, CreatePopupRequest } from '@/lib/api/popups'
+import { popupsApi, CreatePopupRequest, UpdatePopupRequest, Popup } from '@/lib/api/popups'
 import { useImageUpload } from '@/hooks/useImageUpload'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
@@ -10,11 +11,18 @@ import Textarea from '@/components/common/Textarea'
 import Label from '@/components/common/Label'
 import Checkbox from '@/components/common/Checkbox'
 import { useAlert } from '@/hooks/useAlert'
+import DateInput from '@/components/common/DateInput'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import ExitWarningModal from '@/components/common/ExitWarningModal'
 
 export default function AdminPopupsCreatePage() {
   const navigate = useNavigate()
+  const params = useParams()
+  const isEdit = !!params.id
   const alert = useAlert()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(false)
+  const [popup, setPopup] = useState<Popup | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -24,14 +32,60 @@ export default function AdminPopupsCreatePage() {
     isActive: true,
   })
 
+  const [originalData, setOriginalData] = useState(formData)
+  const { hasChanges, showExitWarning, setShowExitWarning } = useUnsavedChanges(formData, originalData)
+
+  useEffect(() => {
+    if (isEdit && params.id) {
+      fetchPopup(params.id)
+    }
+  }, [isEdit, params.id])
+
+  const fetchPopup = async (id: string) => {
+    try {
+      setInitialLoading(true)
+      const popupData = await popupsApi.getPopup(id)
+      setPopup(popupData)
+      
+      // 날짜를 datetime-local 형식으로 변환
+      const formatDateForInput = (dateString: string) => {
+        const date = new Date(dateString)
+        return date.toISOString().slice(0, 16) // YYYY-MM-DDTHH:mm 형식
+      }
+      
+      const data = {
+        title: popupData.title,
+        content: popupData.content || '',
+        linkUrl: popupData.linkUrl || '',
+        startDate: formatDateForInput(popupData.startDate),
+        endDate: formatDateForInput(popupData.endDate),
+        isActive: popupData.isActive,
+      }
+      setFormData(data)
+      setOriginalData(data)
+      
+      // 기존 이미지 URL 설정
+      if (popupData.imageUrl) {
+        setImageUrl(popupData.imageUrl)
+      }
+    } catch (error) {
+      console.error('Failed to fetch popup:', error)
+      alert.error('팝업 정보를 불러올 수 없습니다.')
+      navigate('/admin/popups')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
   const {
     imageUrl,
     uploading: imageUploading,
     handleImageChange,
+    setImageUrl,
   } = useImageUpload({
-    onError: (error) => {
+    onError: error => {
       alert.error('이미지 업로드 중 오류가 발생했습니다.')
-    }
+    },
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -65,37 +119,61 @@ export default function AdminPopupsCreatePage() {
     setLoading(true)
 
     try {
-      const popupData: CreatePopupRequest = {
-        title: formData.title,
-        content: formData.content,
-        imageUrl: imageUrl || undefined,
-        linkUrl: formData.linkUrl || undefined,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        isActive: formData.isActive,
-      }
+      if (isEdit && params.id) {
+        const popupData: UpdatePopupRequest = {
+          title: formData.title,
+          content: formData.content,
+          imageUrl: imageUrl || popup?.imageUrl || undefined,
+          linkUrl: formData.linkUrl || undefined,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          isActive: formData.isActive,
+        }
 
-      await popupsApi.createPopup(popupData)
-      alert.success('팝업이 생성되었습니다.')
+        await popupsApi.updatePopup(params.id, popupData)
+        alert.success('팝업이 수정되었습니다.')
+      } else {
+        const popupData: CreatePopupRequest = {
+          title: formData.title,
+          content: formData.content,
+          imageUrl: imageUrl || undefined,
+          linkUrl: formData.linkUrl || undefined,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          isActive: formData.isActive,
+        }
+
+        await popupsApi.createPopup(popupData)
+        alert.success('팝업이 생성되었습니다.')
+      }
       navigate('/admin/popups')
     } catch (error) {
-      console.error('Failed to create popup:', error)
-      alert.error('팝업 생성 중 오류가 발생했습니다.')
+      console.error(`Failed to ${isEdit ? 'update' : 'create'} popup:`, error)
+      alert.error(`팝업 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다.`)
     } finally {
       setLoading(false)
     }
   }
 
-  return (
-    <div className="w-full h-screen flex flex-col">
-      <div className="flex items-center justify-between gap-4 p-6">
-        <Title>새 팝업 추가</Title>
-        <Link to="/admin/popups">
-          <Button variant="delete" size="md" radius="md">
-            나가기
-          </Button>
-        </Link>
+  if (initialLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
       </div>
+    )
+  }
+
+  return (
+    <>
+      <div className="w-full h-screen flex flex-col">
+        <div className="flex items-center justify-between gap-4 p-6">
+          <Title>{isEdit ? '팝업 수정' : '새 팝업 추가'}</Title>
+          <Link to="/admin/popups">
+            <Button variant="delete" size="md" radius="md">
+              나가기
+            </Button>
+          </Link>
+        </div>
 
       <div className="flex-1 overflow-auto p-6 bg-gray-50">
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -123,7 +201,9 @@ export default function AdminPopupsCreatePage() {
                 <Input
                   type="url"
                   value={formData.linkUrl}
-                  onChange={value => setFormData({ ...formData, linkUrl: value })}
+                  onChange={value =>
+                    setFormData({ ...formData, linkUrl: value })
+                  }
                   placeholder="https://example.com"
                   className="w-full"
                   size="lg"
@@ -150,10 +230,11 @@ export default function AdminPopupsCreatePage() {
                 <Label required={true} className="mb-2">
                   시작일
                 </Label>
-                <Input
-                  type="date"
+                <DateInput
                   value={formData.startDate}
-                  onChange={value => setFormData({ ...formData, startDate: value })}
+                  onChange={value =>
+                    setFormData({ ...formData, startDate: value })
+                  }
                   className="w-full"
                   size="lg"
                   required
@@ -164,10 +245,11 @@ export default function AdminPopupsCreatePage() {
                 <Label required={true} className="mb-2">
                   종료일
                 </Label>
-                <Input
-                  type="date"
+                <DateInput
                   value={formData.endDate}
-                  onChange={value => setFormData({ ...formData, endDate: value })}
+                  onChange={value =>
+                    setFormData({ ...formData, endDate: value })
+                  }
                   className="w-full"
                   size="lg"
                   required
@@ -208,7 +290,9 @@ export default function AdminPopupsCreatePage() {
               <div className="flex items-center pt-8">
                 <Checkbox
                   checked={formData.isActive}
-                  onChange={checked => setFormData({ ...formData, isActive: checked })}
+                  onChange={checked =>
+                    setFormData({ ...formData, isActive: checked })
+                  }
                   label="활성화"
                 />
               </div>
@@ -217,14 +301,30 @@ export default function AdminPopupsCreatePage() {
 
           <div className="flex gap-4 justify-end pt-4">
             <Link to="/admin/popups">
-              <Button variant="cancel" radius="md" size="md">취소</Button>
+              <Button variant="cancel" radius="md" size="md">
+                취소
+              </Button>
             </Link>
-            <Button type="submit" variant="info" radius="md" size="md" disabled={loading}>
-              {loading ? '생성 중...' : '팝업 생성'}
+            <Button
+              type="submit"
+              variant="info"
+              radius="md"
+              size="md"
+              disabled={loading}
+            >
+              {loading ? <LoadingSpinner size="md" /> : isEdit ? '팝업 수정' : '팝업 생성'}
             </Button>
           </div>
         </form>
       </div>
     </div>
+
+    <ExitWarningModal
+      isOpen={showExitWarning}
+      onClose={() => setShowExitWarning(false)}
+      onConfirm={() => navigate('/admin/popups')}
+      hasChanges={hasChanges}
+    />
+    </>
   )
 }

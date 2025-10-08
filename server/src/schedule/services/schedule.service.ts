@@ -83,6 +83,7 @@ export class ScheduleService {
       startDate: new Date(createDto.startDate),
       endDate: createDto.endDate ? new Date(createDto.endDate) : undefined,
       description: createDto.description,
+      location: createDto.location,
       category: createDto.category || ScheduleCategory.ACADEMIC,
       createdById,
     });
@@ -109,6 +110,7 @@ export class ScheduleService {
         ? new Date(updateDto.endDate)
         : schedule.endDate,
       description: updateDto.description ?? schedule.description,
+      location: updateDto.location ?? schedule.location,
       category: updateDto.category ?? schedule.category,
     });
 
@@ -131,6 +133,7 @@ export class ScheduleService {
       description: schedule.description,
       startDate: schedule.startDate,
       endDate: schedule.endDate,
+      location: schedule.location,
       category: schedule.category,
       createdAt: schedule.createdAt,
       updatedAt: schedule.updatedAt,

@@ -51,33 +51,6 @@ export class PresignRequest {
   fileSize?: number;
 }
 
-export class FileCompleteRequest {
-  @ApiProperty({
-    description: '파일 키',
-    example: 'uploads/1234567890-uuid.pdf',
-  })
-  @IsString()
-  fileKey: string;
-
-  @ApiProperty({
-    description: '소유자 타입',
-    example: 'POST',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  ownerType?: string;
-
-  @ApiProperty({
-    description: '소유자 ID',
-    example: 'uuid-1234-5678-9012',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  ownerId?: string;
-}
-
 export class PresignResponse {
   @ApiProperty({
     description: '파일 업로드용 Presigned URL',

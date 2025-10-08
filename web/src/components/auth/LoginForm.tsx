@@ -8,7 +8,8 @@ import { useAuthStore } from '@/store/auth.store'
 import { getErrorMessage } from '@/lib/utils/errorHandler'
 import Input from '@/components/common/Input'
 import Button from '@/components/common/Button'
-import Information from '../common/Information'
+import Information from '@/components/common/Information'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 
 export default function LoginForm() {
   const navigate = useNavigate()
@@ -93,20 +94,22 @@ export default function LoginForm() {
             size="lg"
             className="w-full pr-12"
           />
-          <button
-            type="button"
+          <Button
             onClick={() => setShowPassword(!showPassword)}
+            variant="custom"
+            iconOnly
+            icon={
+              showPassword ? (
+                <EyeIcon className="h-5 w-5" />
+              ) : (
+                <EyeSlashIcon className="h-5 w-5" />
+              )
+            }
             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-          >
-            {showPassword ? (
-              <EyeIcon className="h-5 w-5" />
-            ) : (
-              <EyeSlashIcon className="h-5 w-5" />
-            )}
-          </button>
+          />
         </div>
 
-        {error && <p className="text-caption-14 text-error-500">{error}</p>}
+        {error && <p className="text-caption-14 text-error-500 ml-2">{error}</p>}
 
         <div className="h-6" />
 
@@ -118,7 +121,7 @@ export default function LoginForm() {
           variant="point_2"
           className="w-full flex items-center justify-center"
         >
-          {loading ? '로그인 중...' : '로그인'}
+          {loading ? <LoadingSpinner size="md" /> : '로그인'}
         </Button>
       </form>
     </div>

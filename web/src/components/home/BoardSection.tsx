@@ -14,8 +14,10 @@ export default function BoardSection() {
 
   const fetchPosts = async () => {
     try {
-      const response = await postsApi.getPosts({ size: 4 })
-      setPosts(response.items)
+      const response = await postsApi.getPosts({ size: 20 })
+      // 뉴스 카테고리를 제외한 게시물만 필터링
+      const filteredPosts = response.items.filter(post => post.categoryName !== '뉴스').slice(0, 4)
+      setPosts(filteredPosts)
     } catch (error) {
       console.error('Failed to fetch posts:', error)
     }
@@ -51,7 +53,7 @@ export default function BoardSection() {
                     </span>
                   </div>
                   <Link
-                    to={`/board/${post.id}`}
+                    to={`/news/${post.categorySlug || post.categoryName}/${post.id}`}
                     className="pl-2 text-body-14-regular text-gray-900 hover:text-point-1 flex-1 truncate"
                   >
                     {post.title}

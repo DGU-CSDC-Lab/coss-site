@@ -21,6 +21,9 @@ export class AcademicSchedule extends SoftDeleteEntity {
   @Column({ type: 'text', nullable: true })
   description?: string;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  location?: string;
+
   @Column({
     type: 'enum',
     enum: ScheduleCategory,

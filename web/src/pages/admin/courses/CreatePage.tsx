@@ -1,16 +1,24 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { Link } from 'react-router-dom'
-import { coursesApi, CreateCourseRequest } from '@/lib/api/courses'
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams, Link } from 'react-router-dom'
+import { coursesApi, CreateCourseRequest, UpdateCourseRequest, Course } from '@/lib/api/courses'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import Label from '@/components/common/Label'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import ExitWarningModal from '@/components/common/ExitWarningModal'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function AdminCoursesCreatePage() {
   const navigate = useNavigate()
+  const params = useParams()
+  const isEdit = !!params.id
+  const alert = useAlert()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(false)
+  const [course, setCourse] = useState<Course | null>(null)
   const [formData, setFormData] = useState({
     subjectName: '',
     englishName: '',
@@ -24,6 +32,58 @@ export default function AdminCoursesCreatePage() {
     courseType: '',
     credit: 3,
   })
+
+  const [originalData, setOriginalData] = useState(formData)
+
+  useEffect(() => {
+    if (isEdit && params.id) {
+      fetchCourse(params.id)
+    }
+  }, [isEdit, params.id])
+
+  const fetchCourse = async (id: string) => {
+    try {
+      setInitialLoading(true)
+      const courseData = await coursesApi.getCourse(id)
+      setCourse(courseData)
+      const data = {
+        subjectName: courseData.subjectName,
+        englishName: courseData.englishName || '',
+        courseCode: courseData.courseCode,
+        department: courseData.department,
+        grade: courseData.grade?.toString() || '',
+        year: courseData.year,
+        semester: courseData.semester,
+        instructor: courseData.instructor || '',
+        classroom: courseData.classroom || '',
+        courseType: courseData.courseType || '',
+        credit: courseData.credit,
+      }
+      setFormData(data)
+      setOriginalData(data)
+    } catch (error) {
+      console.error('Failed to fetch course:', error)
+      alert.error('과목 정보를 불러올 수 없습니다.')
+      navigate('/admin/courses')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
+  // Check if there are unsaved changes
+  const hasChanges = Object.entries(formData).some(([key, value]) => {
+    if (typeof value === 'string') return value.trim() !== ''
+    if (key === 'credit') return value !== 3
+    if (key === 'year') return value !== new Date().getFullYear()
+    return false
+  })
+
+  const {
+    showExitModal,
+    handleExit,
+    confirmExit,
+    cancelExit,
+  } = useUnsavedChanges({ hasChanges })
 
   const semesterOptions = [
     { value: '1학기', label: '1학기' },
@@ -57,52 +117,83 @@ export default function AdminCoursesCreatePage() {
     e.preventDefault()
 
     if (!formData.subjectName.trim()) {
-      alert('과목명을 입력해주세요.')
+      alert.error('과목명을 입력해주세요.')
       return
     }
 
     if (!formData.courseCode.trim()) {
-      alert('학수번호를 입력해주세요.')
+      alert.error('학수번호를 입력해주세요.')
       return
     }
 
     setLoading(true)
 
     try {
-      const courseData: CreateCourseRequest = {
-        subjectName: formData.subjectName,
-        englishName: formData.englishName || undefined,
-        courseCode: formData.courseCode,
-        department: formData.department,
-        grade: formData.grade,
-        year: formData.year,
-        semester: formData.semester,
-        instructor: formData.instructor || undefined,
-        classroom: formData.classroom || undefined,
-        courseType: formData.courseType || undefined,
-        credit: formData.credit,
-      }
+      if (isEdit && params.id) {
+        const courseData: UpdateCourseRequest = {
+          subjectName: formData.subjectName,
+          englishName: formData.englishName || undefined,
+          courseCode: formData.courseCode,
+          department: formData.department,
+          grade: formData.grade,
+          year: formData.year,
+          semester: formData.semester,
+          instructor: formData.instructor || undefined,
+          classroom: formData.classroom || undefined,
+          courseType: formData.courseType || undefined,
+          credit: formData.credit,
+        }
 
-      await coursesApi.createCourse(courseData)
-      alert('과목이 생성되었습니다.')
+        await coursesApi.updateCourse(params.id, courseData)
+        alert.success('과목이 수정되었습니다.')
+      } else {
+        const courseData: CreateCourseRequest = {
+          subjectName: formData.subjectName,
+          englishName: formData.englishName || undefined,
+          courseCode: formData.courseCode,
+          department: formData.department,
+          grade: formData.grade,
+          year: formData.year,
+          semester: formData.semester,
+          instructor: formData.instructor || undefined,
+          classroom: formData.classroom || undefined,
+          courseType: formData.courseType || undefined,
+          credit: formData.credit,
+        }
+
+        await coursesApi.createCourse(courseData)
+        alert.success('과목이 생성되었습니다.')
+      }
       navigate('/admin/courses')
     } catch (error) {
-      console.error('Failed to create course:', error)
-      alert('과목 생성 중 오류가 발생했습니다.')
+      console.error(`Failed to ${isEdit ? 'update' : 'create'} course:`, error)
+      alert.error(`과목 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다.`)
     } finally {
       setLoading(false)
     }
   }
 
+  if (initialLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
+  }
+
   return (
-    <div className="w-full h-screen flex flex-col">
-      <div className="flex items-center justify-between gap-4 p-6">
-        <Title>새 과목 추가</Title>
-        <Link to="/admin/courses">
-          <Button variant="delete" size="md" radius="md">
-            나가기
-          </Button>
-        </Link>
+    <>
+      <div className="w-full h-screen flex flex-col">
+        <div className="flex items-center justify-between gap-4 p-6">
+          <Title>{isEdit ? '과목 수정' : '새 과목 추가'}</Title>
+        <Button 
+          variant="delete" 
+          size="md" 
+          radius="md"
+          onClick={() => handleExit(() => navigate('/admin/courses'))}
+        >
+          나가기
+        </Button>
       </div>
 
       <div className="flex-1 overflow-auto p-6 bg-gray-50">
@@ -291,11 +382,19 @@ export default function AdminCoursesCreatePage() {
               size="md"
               disabled={loading}
             >
-              {loading ? '생성 중...' : '과목 생성'}
+              {loading ? (isEdit ? '수정 중...' : '생성 중...') : (isEdit ? '과목 수정' : '과목 생성')}
             </Button>
           </div>
         </form>
       </div>
     </div>
+
+    <ExitWarningModal
+      isOpen={showExitModal}
+      onClose={cancelExit}
+      onConfirmExit={confirmExit}
+      showDraftOption={false}
+    />
+    </>
   )
 }
