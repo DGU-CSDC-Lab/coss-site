@@ -36,7 +36,8 @@ export default function AdminFacultyCreatePage() {
   })
 
   const [originalData, setOriginalData] = useState(formData)
-  const { hasChanges, showExitWarning, setShowExitWarning } = useUnsavedChanges(formData, originalData)
+  const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData)
+  const exitWarning = useUnsavedChanges({ hasChanges })
 
   useEffect(() => {
     if (isEdit && params.id) {
@@ -56,7 +57,9 @@ export default function AdminFacultyCreatePage() {
         email: facultyData.email || '',
         phoneNumber: facultyData.phoneNumber || '',
         office: facultyData.office || '',
-        biography: facultyData.biography || '',
+        biography: Array.isArray(facultyData.biography)
+          ? facultyData.biography.join('\n')
+          : facultyData.biography || '',
         researchAreas: Array.isArray(facultyData.researchAreas)
           ? facultyData.researchAreas.join(', ')
           : facultyData.researchAreas || '',
@@ -369,10 +372,11 @@ export default function AdminFacultyCreatePage() {
     </div>
 
     <ExitWarningModal
-      isOpen={showExitWarning}
-      onClose={() => setShowExitWarning(false)}
-      onConfirm={() => navigate('/admin/faculty')}
-      hasChanges={hasChanges}
+      isOpen={exitWarning.showExitModal}
+      onClose={exitWarning.cancelExit}
+      onConfirmExit={exitWarning.confirmExit}
+      onSaveDraft={exitWarning.saveDraftAndExit}
+      showDraftOption={true}
     />
     </>
   )

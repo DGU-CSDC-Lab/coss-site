@@ -175,7 +175,7 @@ export default function AdminSchedulesPage() {
             검색
           </Button>
           <Button
-            variant="outline"
+            variant="cancel"
             radius="md"
             size="md"
             onClick={handleReset}

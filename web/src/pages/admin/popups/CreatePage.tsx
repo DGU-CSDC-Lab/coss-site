@@ -33,7 +33,8 @@ export default function AdminPopupsCreatePage() {
   })
 
   const [originalData, setOriginalData] = useState(formData)
-  const { hasChanges, showExitWarning, setShowExitWarning } = useUnsavedChanges(formData, originalData)
+  const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData)
+  const exitWarning = useUnsavedChanges({ hasChanges })
 
   useEffect(() => {
     if (isEdit && params.id) {
@@ -320,10 +321,11 @@ export default function AdminPopupsCreatePage() {
     </div>
 
     <ExitWarningModal
-      isOpen={showExitWarning}
-      onClose={() => setShowExitWarning(false)}
-      onConfirm={() => navigate('/admin/popups')}
-      hasChanges={hasChanges}
+      isOpen={exitWarning.showExitModal}
+      onClose={exitWarning.cancelExit}
+      onConfirmExit={exitWarning.confirmExit}
+      onSaveDraft={exitWarning.saveDraftAndExit}
+      showDraftOption={true}
     />
     </>
   )

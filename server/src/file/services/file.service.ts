@@ -23,7 +23,7 @@ export class FileService {
 
   async generatePresignedUrl(
     request: PresignRequest,
-    userId: string,
+    _userId: string,
   ): Promise<PresignResponse> {
     // Validate file type
     const allowedTypes = [

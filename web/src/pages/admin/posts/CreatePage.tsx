@@ -164,7 +164,7 @@ export default function AdminPostsCreatePage() {
           contentHtml: formData.contentHtml,
           categorySlug: formData.categoryId,
           status: isDraft ? 'draft' : isPublic ? 'public' : 'private',
-          thumbnailUrl: thumbnailUrl || post?.thumbnailUrl || null,
+          thumbnailUrl: thumbnailUrl || post?.thumbnailUrl || undefined,
           files: allFiles,
         }
 

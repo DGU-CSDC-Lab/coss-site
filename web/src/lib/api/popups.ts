@@ -13,6 +13,8 @@ export interface PopupResponse {
   updatedAt: string
 }
 
+export type Popup = PopupResponse
+
 export interface CreatePopupRequest {
   title: string
   content: string

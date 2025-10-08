@@ -32,7 +32,8 @@ export default function AdminSchedulesCreatePage() {
   })
 
   const [originalData, setOriginalData] = useState(formData)
-  const { hasChanges, showExitWarning, setShowExitWarning } = useUnsavedChanges(formData, originalData)
+  const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData)
+  const exitWarning = useUnsavedChanges({ hasChanges })
 
   useEffect(() => {
     if (isEdit && params.id) {
@@ -56,8 +57,8 @@ export default function AdminSchedulesCreatePage() {
       const data = {
         title: scheduleData.title,
         description: scheduleData.description || '',
-        startDate: formatDateForInput(scheduleData.startDate),
-        endDate: formatDateForInput(scheduleData.endDate),
+        startDate: formatDateForInput(scheduleData.startDate || new Date().toISOString()),
+        endDate: formatDateForInput(scheduleData.endDate || new Date().toISOString()),
         location: scheduleData.location || '', // location이 없을 수 있으므로 빈 문자열로 처리
         category: scheduleData.category || '',
       }
@@ -285,10 +286,11 @@ export default function AdminSchedulesCreatePage() {
     </div>
 
     <ExitWarningModal
-      isOpen={showExitWarning}
-      onClose={() => setShowExitWarning(false)}
-      onConfirm={() => navigate('/admin/schedules')}
-      hasChanges={hasChanges}
+      isOpen={exitWarning.showExitModal}
+      onClose={exitWarning.cancelExit}
+      onConfirmExit={exitWarning.confirmExit}
+      onSaveDraft={exitWarning.saveDraftAndExit}
+      showDraftOption={true}
     />
     </>
   )

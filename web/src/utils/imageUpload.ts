@@ -12,8 +12,6 @@ export const uploadImageFile = async (file: File): Promise<ImageUploadResult> =>
     fileType: file.type,
     contentType: file.type,
     fileSize: file.size,
-    ownerType: 'POST',
-    ownerId: 'temp',
   })
 
   // 2. S3에 파일 업로드

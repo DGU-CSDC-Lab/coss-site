@@ -148,8 +148,8 @@ export default function AdminPostsPage() {
                 : '작성자를 입력해주세요.'
             }
             value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+            onChange={setKeyword}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
             className="w-full sm:w-60"
             size="md"
           />

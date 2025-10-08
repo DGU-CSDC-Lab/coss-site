@@ -57,7 +57,7 @@ export default function AdminCoursesCreatePage() {
         instructor: courseData.instructor || '',
         classroom: courseData.classroom || '',
         courseType: courseData.courseType || '',
-        credit: courseData.credit,
+        credit: courseData.credit || 0,
       }
       setFormData(data)
       setOriginalData(data)

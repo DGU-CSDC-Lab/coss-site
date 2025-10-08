@@ -106,6 +106,9 @@ export const postsApi = {
 
   // 게시글 상세 조회
   getPost: (id: string): Promise<PostDetail> => api.get(`/posts/${id}`),
+  
+  // 게시글 상세 조회 (별칭)
+  getPostById: (id: string): Promise<PostDetail> => api.get(`/posts/${id}`),
 
   // 관리자 게시글 상세 조회
   getAdminPost: (id: string): Promise<PostDetail> =>

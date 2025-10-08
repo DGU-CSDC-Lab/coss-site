@@ -62,6 +62,7 @@ describe('CategoryService', () => {
 
       expect(categoryRepository.find).toHaveBeenCalledWith({
         where: { parentId: null },
+        select: ['id', 'name', 'slug', 'parentId', 'displayOrder', 'createdAt', 'updatedAt'],
         order: {
           displayOrder: 'ASC',
           createdAt: 'ASC',
@@ -98,6 +99,7 @@ describe('CategoryService', () => {
 
       expect(categoryRepository.find).toHaveBeenCalledWith({
         where: { parentId: parentId },
+        select: ['id', 'name', 'slug', 'parentId', 'displayOrder', 'createdAt', 'updatedAt'],
         order: {
           displayOrder: 'ASC',
           createdAt: 'ASC',
