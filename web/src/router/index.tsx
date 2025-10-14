@@ -57,6 +57,7 @@ export const router = createBrowserRouter([
   {
     path: '/',
     element: <ConditionalLayout />,
+    errorElement: <NotFoundPage />,
     children: [
       {
         index: true,

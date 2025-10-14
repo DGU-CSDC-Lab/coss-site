@@ -27,14 +27,14 @@ export const CATEGORIES: CategoryConfig[] = [
     slug: 'resources'
   },
   {
-    key: 'contest',
+    key: 'contest-job',
     label: '공모전 정보',
-    slug: 'contest',
+    slug: 'contest-job',
   },
   {
-    key: 'activities',
+    key: 'education-job',
     label: '교육/활동/취업 정보',
-    slug: 'activities',
+    slug: 'education-job',
   },
 ]
 

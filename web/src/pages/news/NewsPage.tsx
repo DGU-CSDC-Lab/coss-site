@@ -7,12 +7,12 @@ import Tabs from '@/components/tabs/Tabs'
 import { useAlert } from '@/hooks/useAlert'
 
 const categoryMap: Record<string, { id: string; title: string }> = {
-  'scholarship-info': { id: 'scholarship-info', title: '장학정보' },
-  news: { id: 'news', title: '뉴스' },
-  resources: { id: 'resources', title: '자료실' },
-  notices: { id: 'notices', title: '공지사항' },
-  contest: { id: 'contest', title: '공모전 정보' },
-  activities: { id: 'activities', title: '교육/활동/취업 정보' },
+  'scholarships': { id: 'scholarships', title: '장학정보' },
+  'department-news': { id: 'department-news', title: '뉴스' },
+  'resources': { id: 'resources', title: '자료실' },
+  'notices': { id: 'notices', title: '공지사항' },
+  'contest-job': { id: 'contest-job', title: '공모전 정보' },
+  'education-job': { id: 'education-job', title: '교육/활동/취업 정보' },
 }
 
 export default function NewsPage() {
@@ -32,8 +32,14 @@ export default function NewsPage() {
   const alert = useAlert()
 
   useEffect(() => {
+    setCurrentPage(1)
+    setKeyword('')
     fetchPosts()
-  }, [currentPage, category])
+  }, [category])
+
+  useEffect(() => {
+    fetchPosts()
+  }, [currentPage])
 
   const fetchPosts = async () => {
     try {
