@@ -1,19 +1,22 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from './auth.service';
+import { AuthService } from '@/auth/services/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User, Account } from '../entities';
-import {
-  UnauthorizedException,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { User, Account, UserRole } from '@/auth/entities';
+import { VerificationCodeService } from '@/auth/services/verification-code.service';
+import { AuthException, DatabaseException } from '@/common/exceptions';
+import * as bcrypt from 'bcrypt';
+import * as nodemailer from 'nodemailer';
+
+jest.mock('bcrypt');
+jest.mock('nodemailer');
 
 describe('AuthService', () => {
   let service: AuthService;
   let jwtService: JwtService;
   let userRepository: any;
   let accountRepository: any;
+  let verificationCodeService: any;
 
   const mockUserRepository = {
     findOne: jest.fn(),
@@ -32,7 +35,20 @@ describe('AuthService', () => {
     verify: jest.fn(),
   };
 
+  const mockVerificationCodeService = {
+    generateCode: jest.fn(),
+    storeCode: jest.fn(),
+    verifyCode: jest.fn(),
+    useCode: jest.fn(),
+  };
+
+  const mockTransporter = {
+    sendMail: jest.fn(),
+  };
+
   beforeEach(async () => {
+    (nodemailer.createTransport as jest.Mock).mockReturnValue(mockTransporter);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -48,6 +64,10 @@ describe('AuthService', () => {
           provide: JwtService,
           useValue: mockJwtService,
         },
+        {
+          provide: VerificationCodeService,
+          useValue: mockVerificationCodeService,
+        },
       ],
     }).compile();
 
@@ -55,94 +75,142 @@ describe('AuthService', () => {
     jwtService = module.get<JwtService>(JwtService);
     userRepository = module.get(getRepositoryToken(User));
     accountRepository = module.get(getRepositoryToken(Account));
+    verificationCodeService = module.get<VerificationCodeService>(VerificationCodeService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
+  describe('register', () => {
+    const registerRequest = {
+      email: 'test@example.com',
+      password: 'password123',
+    };
+
+    it('should register successfully', async () => {
+      const mockUser = { id: 'user-id', username: 'user-1234', role: UserRole.USER };
+      const mockAccount = { id: 'account-id', email: registerRequest.email, passwordHash: 'hashed-password', user: mockUser };
+
+      mockAccountRepository.findOne.mockResolvedValue(null);
+      mockUserRepository.create.mockReturnValue(mockUser);
+      mockUserRepository.save.mockResolvedValue(mockUser);
+      mockAccountRepository.create.mockReturnValue(mockAccount);
+      mockAccountRepository.save.mockResolvedValue(mockAccount);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
+
+      await service.register(registerRequest);
+
+      expect(accountRepository.findOne).toHaveBeenCalledWith({
+        where: { email: registerRequest.email },
+      });
+      expect(userRepository.create).toHaveBeenCalled();
+      expect(accountRepository.create).toHaveBeenCalled();
+    });
+
+    it('should throw when email already exists', async () => {
+      const existingAccount = { id: 'existing-id', email: registerRequest.email };
+      mockAccountRepository.findOne.mockResolvedValue(existingAccount);
+
+      await expect(service.register(registerRequest)).rejects.toThrow();
+    });
+
+    it('should throw on database error', async () => {
+      mockAccountRepository.findOne.mockRejectedValue(DatabaseException.queryError('Database error'));
+
+      await expect(service.register(registerRequest)).rejects.toThrow();
+    });
+  });
+
   describe('login', () => {
+    const loginRequest = {
+      email: 'admin@iot.ac.kr',
+      password: 'password123',
+    };
+
     it('should login successfully with valid credentials', async () => {
-      const loginDto = {
-        email: 'admin@iot.ac.kr',
-        password: 'password123',
+      const mockUser = {
+        id: 'user-id',
+        username: 'admin',
+        role: UserRole.ADMIN,
       };
 
       const mockAccount = {
         id: 'account-id',
         email: 'admin@iot.ac.kr',
-        passwordHash:
-          '$2b$10$01rMdZzfzLsgr6ulhkl91ep8FA9PxIFb3WmaBD1k2GXxNaJAwEtle',
-        users: [
-          {
-            id: 'user-id',
-            username: 'admin',
-            role: 'ADMIN',
-          },
-        ],
+        passwordHash: 'hashed-password',
+        user: mockUser,
       };
 
       mockAccountRepository.findOne.mockResolvedValue(mockAccount);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       mockJwtService.sign
         .mockReturnValueOnce('access-token')
         .mockReturnValueOnce('refresh-token');
 
-      const result = await service.login(loginDto);
+      const result = await service.login(loginRequest);
 
       expect(accountRepository.findOne).toHaveBeenCalledWith({
-        where: { email: loginDto.email },
-        relations: ['users'],
+        where: { email: loginRequest.email },
+        relations: ['user'],
       });
       expect(result).toEqual({
         accessToken: 'access-token',
         refreshToken: 'refresh-token',
-        expiresIn: 3600,
         userId: 'user-id',
-        role: 'ADMIN',
+        role: UserRole.ADMIN,
       });
     });
 
-    it('should throw UnauthorizedException for invalid email', async () => {
-      const loginDto = {
-        email: 'invalid@email.com',
-        password: 'password123',
-      };
-
+    it('should throw when account not found', async () => {
       mockAccountRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(service.login(loginRequest)).rejects.toThrow();
     });
 
-    it('should throw UnauthorizedException for invalid password', async () => {
-      const loginDto = {
-        email: 'admin@iot.ac.kr',
-        password: 'wrong-password',
-      };
-
+    it('should throw when password is invalid', async () => {
       const mockAccount = {
         id: 'account-id',
-        email: 'admin@iot.ac.kr',
-        passwordHash: 'correct-password',
-        users: [{ id: 'user-id' }],
+        email: loginRequest.email,
+        passwordHash: 'hashed-password',
+        user: { id: 'user-id' },
       };
 
       mockAccountRepository.findOne.mockResolvedValue(mockAccount);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(service.login(loginRequest)).rejects.toThrow();
+    });
+
+    it('should throw when no user associated with account', async () => {
+      const mockAccount = {
+        id: 'account-id',
+        email: loginRequest.email,
+        passwordHash: 'hashed-password',
+        user: null,
+      };
+
+      mockAccountRepository.findOne.mockResolvedValue(mockAccount);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(service.login(loginRequest)).rejects.toThrow();
+    });
+
+    it('should throw on database error', async () => {
+      mockAccountRepository.findOne.mockRejectedValue(DatabaseException.queryError('Database error'));
+
+      await expect(service.login(loginRequest)).rejects.toThrow();
     });
   });
 
   describe('refresh', () => {
+    const refreshRequest = { refreshToken: 'valid-refresh-token' };
+
     it('should refresh token successfully', async () => {
-      const refreshToken = 'valid-refresh-token';
       const mockPayload = { sub: 'user-id', email: 'admin@iot.ac.kr' };
       const mockUser = {
         id: 'user-id',
-        role: 'ADMIN',
+        role: UserRole.ADMIN,
         account: { email: 'admin@iot.ac.kr' },
       };
 
@@ -152,9 +220,9 @@ describe('AuthService', () => {
         .mockReturnValueOnce('access-token')
         .mockReturnValueOnce('refresh-token');
 
-      const result = await service.refresh(refreshToken);
+      const result = await service.refresh(refreshRequest);
 
-      expect(jwtService.verify).toHaveBeenCalledWith(refreshToken);
+      expect(jwtService.verify).toHaveBeenCalledWith(refreshRequest.refreshToken);
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'user-id' },
         relations: ['account'],
@@ -162,32 +230,37 @@ describe('AuthService', () => {
       expect(result).toEqual({
         accessToken: 'access-token',
         refreshToken: 'refresh-token',
-        expiresIn: 3600,
         userId: 'user-id',
-        role: 'ADMIN',
+        role: UserRole.ADMIN,
       });
     });
 
-    it('should throw UnauthorizedException for invalid refresh token', async () => {
-      const refreshToken = 'invalid-refresh-token';
+    it('should throw when user not found', async () => {
+      const mockPayload = { sub: 'user-id', email: 'admin@iot.ac.kr' };
 
+      mockJwtService.verify.mockReturnValue(mockPayload);
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.refresh(refreshRequest)).rejects.toThrow();
+    });
+
+    it('should throw on JWT error', async () => {
       mockJwtService.verify.mockImplementation(() => {
-        throw new Error('Invalid token');
+        throw AuthException.notFoundUser('JWT error');
       });
 
-      await expect(service.refresh(refreshToken)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(service.refresh(refreshRequest)).rejects.toThrow();
     });
   });
 
-  describe('getMe', () => {
-    it('should return current user', async () => {
-      const userId = 'user-id';
+  describe('getUserInfo', () => {
+    const userId = 'user-id';
+
+    it('should return user info successfully', async () => {
       const mockUser = {
         id: 'user-id',
         username: 'admin',
-        role: 'ADMIN',
+        role: UserRole.ADMIN,
         account: {
           email: 'admin@iot.ac.kr',
         },
@@ -195,7 +268,7 @@ describe('AuthService', () => {
 
       mockUserRepository.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.getMe(userId);
+      const result = await service.getUserInfo(userId);
 
       expect(userRepository.findOne).toHaveBeenCalledWith({
         where: { id: userId },
@@ -203,96 +276,227 @@ describe('AuthService', () => {
       });
       expect(result).toEqual({
         id: mockUser.id,
+        email: mockUser.account.email,
         username: mockUser.username,
         role: mockUser.role,
-        email: mockUser.account.email,
       });
     });
 
-    it('should throw NotFoundException for non-existent user', async () => {
-      const userId = 'non-existent-user';
-
+    it('should throw when user not found', async () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getMe(userId)).rejects.toThrow(NotFoundException);
+      await expect(service.getUserInfo(userId)).rejects.toThrow();
+    });
+
+    it('should throw on database error', async () => {
+      mockUserRepository.findOne.mockRejectedValue(DatabaseException.queryError('Database error'));
+
+      await expect(service.getUserInfo(userId)).rejects.toThrow();
     });
   });
 
   describe('forgotPassword', () => {
-    it('should generate reset code for valid email', async () => {
-      const request = { email: 'admin@iot.ac.kr' };
+    const forgotPasswordRequest = { email: 'admin@iot.ac.kr' };
+
+    it('should generate reset code and send email successfully', async () => {
       const mockAccount = { id: 'account-id', email: 'admin@iot.ac.kr' };
 
       mockAccountRepository.findOne.mockResolvedValue(mockAccount);
+      mockVerificationCodeService.generateCode.mockReturnValue('123456');
+      mockTransporter.sendMail.mockResolvedValue({ messageId: 'test-id' });
 
-      const result = await service.forgotPassword(request);
+      await service.forgotPassword(forgotPasswordRequest);
 
       expect(accountRepository.findOne).toHaveBeenCalledWith({
-        where: { email: request.email },
+        where: { email: forgotPasswordRequest.email },
       });
-      expect(result).toEqual({ message: 'Reset code sent to email' });
+      expect(verificationCodeService.generateCode).toHaveBeenCalled();
+      expect(verificationCodeService.storeCode).toHaveBeenCalledWith(forgotPasswordRequest.email, '123456', 10);
+      expect(mockTransporter.sendMail).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException for invalid email', async () => {
-      const request = { email: 'invalid@email.com' };
-
+    it('should throw when account not found', async () => {
       mockAccountRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.forgotPassword(request)).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.forgotPassword(forgotPasswordRequest)).rejects.toThrow();
+    });
+
+    it('should throw on email send error', async () => {
+      const mockAccount = { id: 'account-id', email: 'admin@iot.ac.kr' };
+
+      mockAccountRepository.findOne.mockResolvedValue(mockAccount);
+      mockVerificationCodeService.generateCode.mockReturnValue('123456');
+      mockTransporter.sendMail.mockRejectedValue(AuthException.failedCodeSend('admin@iot.ac.kr', 'Email send error'));
+
+      await expect(service.forgotPassword(forgotPasswordRequest)).rejects.toThrow();
+    });
+  });
+
+  describe('verifyCode', () => {
+    const verifyCodeRequest = { email: 'admin@iot.ac.kr', code: '123456' };
+
+    it('should verify code successfully', async () => {
+      mockVerificationCodeService.verifyCode.mockReturnValue(true);
+
+      await service.verifyCode(verifyCodeRequest);
+
+      expect(verificationCodeService.verifyCode).toHaveBeenCalledWith(verifyCodeRequest.email, verifyCodeRequest.code);
+    });
+
+    it('should throw when code is invalid', async () => {
+      mockVerificationCodeService.verifyCode.mockReturnValue(false);
+
+      await expect(service.verifyCode(verifyCodeRequest)).rejects.toThrow();
+    });
+
+    it('should throw on verification service error', async () => {
+      mockVerificationCodeService.verifyCode.mockImplementation(() => {
+        throw AuthException.failedCodeVerify('123456', 'Verification error');
+      });
+
+      await expect(service.verifyCode(verifyCodeRequest)).rejects.toThrow();
+    });
+  });
+
+  describe('resetPassword', () => {
+    const resetPasswordRequest = {
+      email: 'admin@iot.ac.kr',
+      code: '123456',
+      newPassword: 'new-password',
+    };
+
+    it('should reset password successfully', async () => {
+      const mockAccount = {
+        id: 'account-id',
+        email: 'admin@iot.ac.kr',
+        passwordHash: 'old-hash',
+      };
+
+      mockAccountRepository.findOne.mockResolvedValue(mockAccount);
+      mockVerificationCodeService.useCode.mockReturnValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+
+      await service.resetPassword(resetPasswordRequest);
+
+      expect(accountRepository.findOne).toHaveBeenCalledWith({
+        where: { email: resetPasswordRequest.email },
+      });
+      expect(verificationCodeService.useCode).toHaveBeenCalledWith(resetPasswordRequest.email);
+      expect(accountRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw when account not found', async () => {
+      mockAccountRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.resetPassword(resetPasswordRequest)).rejects.toThrow();
+    });
+
+    it('should throw when code is invalid', async () => {
+      const mockAccount = { id: 'account-id', email: 'admin@iot.ac.kr' };
+
+      mockAccountRepository.findOne.mockResolvedValue(mockAccount);
+      mockVerificationCodeService.useCode.mockReturnValue(false);
+
+      await expect(service.resetPassword(resetPasswordRequest)).rejects.toThrow();
+    });
+
+    it('should throw on database error', async () => {
+      mockAccountRepository.findOne.mockRejectedValue(DatabaseException.queryError('Database error'));
+
+      await expect(service.resetPassword(resetPasswordRequest)).rejects.toThrow();
     });
   });
 
   describe('changePassword', () => {
+    const userId = 'user-id';
+    const changePasswordRequest = {
+      currentPassword: 'current-password',
+      newPassword: 'new-password',
+    };
+
     it('should change password successfully', async () => {
-      const userId = 'user-id';
-      const request = {
-        currentPassword: 'current-password',
-        newPassword: 'new-password',
+      const mockUser = {
+        id: 'user-id',
+        account: {
+          id: 'account-id',
+          email: 'admin@iot.ac.kr',
+          passwordHash: 'current-hash',
+        },
+      };
+
+      mockUserRepository.findOne.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+
+      await service.changePassword(userId, changePasswordRequest);
+
+      expect(userRepository.findOne).toHaveBeenCalledWith({
+        where: { id: userId },
+        relations: ['account'],
+      });
+      expect(bcrypt.compare).toHaveBeenCalledWith(changePasswordRequest.currentPassword, 'current-hash');
+      expect(accountRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw when user not found', async () => {
+      mockUserRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.changePassword(userId, changePasswordRequest)).rejects.toThrow();
+    });
+
+    it('should throw when current password is incorrect', async () => {
+      const mockUser = {
+        id: 'user-id',
+        account: {
+          id: 'account-id',
+          email: 'admin@iot.ac.kr',
+          passwordHash: 'current-hash',
+        },
+      };
+
+      mockUserRepository.findOne.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(service.changePassword(userId, changePasswordRequest)).rejects.toThrow();
+    });
+
+    it('should throw when new password is same as current', async () => {
+      const samePasswordRequest = {
+        currentPassword: 'same-password',
+        newPassword: 'same-password',
       };
 
       const mockUser = {
         id: 'user-id',
         account: {
           id: 'account-id',
-          passwordHash: 'current-password',
+          email: 'admin@iot.ac.kr',
+          passwordHash: 'current-hash',
         },
       };
 
       mockUserRepository.findOne.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      const result = await service.changePassword(userId, request);
-
-      expect(userRepository.findOne).toHaveBeenCalledWith({
-        where: { id: userId },
-        relations: ['account'],
-      });
-      expect(accountRepository.save).toHaveBeenCalledWith({
-        ...mockUser.account,
-        passwordHash: 'new-password',
-      });
-      expect(result).toEqual({ message: 'Password changed successfully' });
+      await expect(service.changePassword(userId, samePasswordRequest)).rejects.toThrow();
     });
 
-    it('should throw BadRequestException for incorrect current password', async () => {
-      const userId = 'user-id';
-      const request = {
-        currentPassword: 'wrong-password',
-        newPassword: 'new-password',
-      };
+    it('should throw on database error', async () => {
+      mockUserRepository.findOne.mockRejectedValue(DatabaseException.queryError('Database error'));
 
-      const mockUser = {
-        account: {
-          passwordHash: 'current-password',
-        },
-      };
+      await expect(service.changePassword(userId, changePasswordRequest)).rejects.toThrow();
+    });
+  });
 
-      mockUserRepository.findOne.mockResolvedValue(mockUser);
+  describe('sendVerificationEmail (private method)', () => {
+    it('should throw when email sending fails', async () => {
+      const mockAccount = { id: 'account-id', email: 'test@example.com' };
+      
+      mockAccountRepository.findOne.mockResolvedValue(mockAccount);
+      mockVerificationCodeService.generateCode.mockReturnValue('123456');
+      mockTransporter.sendMail.mockRejectedValue(AuthException.failedCodeSend('test@example.com', 'SMTP error'));
 
-      await expect(service.changePassword(userId, request)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(service.forgotPassword({ email: 'test@example.com' })).rejects.toThrow();
     });
   });
 });

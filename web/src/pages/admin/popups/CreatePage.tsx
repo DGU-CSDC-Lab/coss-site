@@ -65,10 +65,10 @@ export default function AdminPopupsCreatePage() {
       setFormData(data)
       setOriginalData(data)
       
-      // 기존 이미지 URL 설정
-      if (popupData.imageUrl) {
-        setImageUrl(popupData.imageUrl)
-      }
+      // 기존 이미지는 imageUrl state로 별도 관리
+      // if (popupData.imageUrl) {
+      //   setImageUrl(popupData.imageUrl)
+      // }
     } catch (error) {
       console.error('Failed to fetch popup:', error)
       alert.error('팝업 정보를 불러올 수 없습니다.')
@@ -82,8 +82,10 @@ export default function AdminPopupsCreatePage() {
     imageUrl,
     uploading: imageUploading,
     handleImageChange,
-    setImageUrl,
+    reset: resetImage,
   } = useImageUpload({
+    ownerType: 'popup',
+    ownerId: params.id || 'temp',
     onError: error => {
       alert.error('이미지 업로드 중 오류가 발생했습니다.')
     },

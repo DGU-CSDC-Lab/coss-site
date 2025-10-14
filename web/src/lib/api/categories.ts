@@ -1,4 +1,4 @@
-import { api } from '../apiClient'
+import { api } from '@/lib/apiClient'
 
 export interface Category {
   id: string

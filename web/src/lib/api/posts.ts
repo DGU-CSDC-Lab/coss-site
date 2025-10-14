@@ -1,7 +1,6 @@
-import { api } from '../apiClient'
-import { PagedResponse } from '../apiClient'
-import { filesApi } from './files'
-import { cleanHtml, isHtmlTooLarge } from '../../utils/htmlUtils'
+import { api } from '@/lib/apiClient'
+import { PagedResponse } from '@/lib/apiClient'
+import { cleanHtml, isHtmlTooLarge } from '@/utils/htmlUtils'
 
 export interface PostFile {
   id: string
@@ -61,7 +60,7 @@ export interface CreatePostFile {
 export interface CreatePostRequest {
   title: string
   contentHtml: string
-  categorySlug: string // categoryName 대신 categorySlug 사용
+  category: string // categoryName 대신 categorySlug 사용
   status: 'draft' | 'private' | 'public'
   thumbnailUrl?: string | null
   files?: CreatePostFile[]
@@ -70,7 +69,7 @@ export interface CreatePostRequest {
 export interface UpdatePostRequest {
   title?: string
   contentHtml?: string
-  categorySlug?: string
+  category?: string
   status?: 'draft' | 'private' | 'public'
   thumbnailUrl?: string
   files?: CreatePostFile[]

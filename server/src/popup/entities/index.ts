@@ -1,1 +1,1 @@
-export { Popup } from './popup.entity';
+export { Popup } from '@/popup/entities/popup.entity';

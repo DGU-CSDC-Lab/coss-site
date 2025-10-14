@@ -1,7 +1,7 @@
 import { IsString, IsDateString, IsEnum, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { ScheduleCategory } from '../entities';
-import { PaginationQuery } from '../../common/dto/pagination.dto';
+import { ScheduleCategory } from '@/schedule/entities';
+import { PaginationQuery } from '@/common/dto/response.dto';
 
 export class ScheduleQuery extends PaginationQuery {
   @ApiProperty({
@@ -201,16 +201,4 @@ export class ScheduleResponse {
     example: '본관 강당',
   })
   location?: string;
-
-  @ApiProperty({
-    description: '생성일시',
-    example: '2024-03-15T09:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: '수정일시',
-    example: '2024-03-15T09:00:00.000Z',
-  })
-  updatedAt: Date;
 }

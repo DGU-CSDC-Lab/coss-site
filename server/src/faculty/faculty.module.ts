@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from '../auth/auth.module';
-import { FacultyMember } from './entities';
-import { FacultyController } from './controllers/faculty.controller';
-import { FacultyService } from './services/faculty.service';
+import { AuthModule } from '@/auth/auth.module';
+import { FacultyMember } from '@/faculty/entities';
+import { FacultyController } from '@/faculty/controllers/faculty.controller';
+import { FacultyService } from '@/faculty/services/faculty.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([FacultyMember]), AuthModule],

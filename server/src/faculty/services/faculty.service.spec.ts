@@ -1,29 +1,43 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException, ConflictException } from '@nestjs/common';
-import { FacultyService } from './faculty.service';
-import { FacultyMember } from '../entities';
+import { Logger } from '@nestjs/common';
+import { FacultyService } from '@/faculty/services/faculty.service';
+import { FacultyMember } from '@/faculty/entities';
+import { CommonException } from '@/common/exceptions';
+import { PagedResponse } from '@/common/dto/response.dto';
 
 describe('FacultyService', () => {
   let service: FacultyService;
-  let _repository: Repository<FacultyMember>;
+  let facultyRepository: jest.Mocked<Repository<FacultyMember>>;
 
-  const mockQueryBuilder = {
-    andWhere: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(),
-    take: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    getManyAndCount: jest.fn(),
-  };
+  const mockFaculty = {
+    id: 'faculty-1',
+    name: 'Dr. John Doe',
+    jobTitle: 'Professor',
+    email: 'john.doe@university.edu',
+    phoneNumber: '010-1234-5678',
+    office: 'Engineering Building 301',
+    profileImageUrl: 'https://example.com/profile.jpg',
+    department: 'Computer Science',
+    researchAreas: 'AI, Machine Learning',
+    biography: 'Expert in AI and ML',
+    createdAt: new Date('2024-01-01'),
+  } as any;
 
-  const mockRepository = {
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
-    findOne: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    remove: jest.fn(),
-  };
+  const mockFaculty2 = {
+    id: 'faculty-2',
+    name: 'Dr. Jane Smith',
+    jobTitle: 'Associate Professor',
+    email: 'jane.smith@university.edu',
+    phoneNumber: '010-5678-1234',
+    office: 'Engineering Building 302',
+    profileImageUrl: 'https://example.com/profile2.jpg',
+    department: 'Electrical Engineering',
+    researchAreas: 'IoT, Embedded Systems',
+    biography: 'Expert in IoT systems',
+    createdAt: new Date('2024-01-02'),
+  } as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -31,190 +45,325 @@ describe('FacultyService', () => {
         FacultyService,
         {
           provide: getRepositoryToken(FacultyMember),
-          useValue: mockRepository,
+          useValue: {
+            createQueryBuilder: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            remove: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     service = module.get<FacultyService>(FacultyService);
-    _repository = module.get<Repository<FacultyMember>>(
-      getRepositoryToken(FacultyMember),
-    );
+    facultyRepository = module.get(getRepositoryToken(FacultyMember));
 
+    // Reset all mocks before each test
     jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    jest.spyOn(Logger.prototype, 'debug').mockImplementation();
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+    jest.spyOn(Logger.prototype, 'error').mockImplementation();
   });
 
   describe('findAll', () => {
-    it('should return paginated faculty members', async () => {
-      const mockFaculty = [
-        {
-          id: '1',
-          name: 'Dr. John Doe',
-          jobTitle: 'Professor',
-          email: 'john@iot.ac.kr',
-          department: 'IoT Engineering',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+    it('should return paginated faculty members successfully', async () => {
+      const mockQueryBuilder = {
+        andWhere: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[mockFaculty, mockFaculty2], 2]),
+      };
 
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockFaculty, 1]);
+      facultyRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
       const result = await service.findAll({ page: 1, size: 20 });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0].name).toBe('Dr. John Doe');
-      expect(result.meta.totalElements).toBe(1);
+      expect(result).toBeInstanceOf(PagedResponse);
+      expect(result.items).toHaveLength(2);
+      expect(result.meta.totalElements).toBe(2);
+      expect(mockQueryBuilder.skip).toHaveBeenCalledWith(0);
+      expect(mockQueryBuilder.take).toHaveBeenCalledWith(20);
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('faculty.name', 'ASC');
     });
 
-    it('should filter by name', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+    it('should filter by name when provided', async () => {
+      const mockQueryBuilder = {
+        andWhere: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[mockFaculty], 1]),
+      };
 
-      await service.findAll({ name: 'John', page: 1, size: 20 });
+      facultyRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'faculty.name LIKE :name',
-        { name: '%John%' },
-      );
+      await service.findAll({ name: 'John' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('faculty.name LIKE :name', { name: '%John%' });
     });
 
-    it('should filter by department', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+    it('should filter by department when provided', async () => {
+      const mockQueryBuilder = {
+        andWhere: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[mockFaculty], 1]),
+      };
 
-      await service.findAll({ department: 'IoT', page: 1, size: 20 });
+      facultyRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'faculty.department LIKE :department',
-        { department: '%IoT%' },
-      );
+      await service.findAll({ department: 'Computer' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('faculty.department LIKE :department', { department: '%Computer%' });
+    });
+
+    it('should filter by both name and department when provided', async () => {
+      const mockQueryBuilder = {
+        andWhere: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[mockFaculty], 1]),
+      };
+
+      facultyRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      await service.findAll({ name: 'John', department: 'Computer' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('faculty.name LIKE :name', { name: '%John%' });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('faculty.department LIKE :department', { department: '%Computer%' });
+    });
+
+    it('should use default pagination values', async () => {
+      const mockQueryBuilder = {
+        andWhere: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+
+      facultyRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      await service.findAll({});
+
+      expect(mockQueryBuilder.skip).toHaveBeenCalledWith(0); // (1-1) * 20
+      expect(mockQueryBuilder.take).toHaveBeenCalledWith(20);
+    });
+
+    it('should return empty results when no faculty found', async () => {
+      const mockQueryBuilder = {
+        andWhere: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+
+      facultyRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      const result = await service.findAll({});
+
+      expect(result.items).toHaveLength(0);
+      expect(result.meta.totalElements).toBe(0);
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      facultyRepository.createQueryBuilder.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(service.findAll({})).rejects.toThrow(CommonException);
     });
   });
 
   describe('findOne', () => {
-    it('should return faculty member by id', async () => {
-      const mockFaculty = {
-        id: '1',
-        name: 'Dr. John Doe',
-        jobTitle: 'Professor',
-        email: 'john@iot.ac.kr',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+    it('should return faculty member by id successfully', async () => {
+      facultyRepository.findOne.mockResolvedValue(mockFaculty);
 
-      mockRepository.findOne.mockResolvedValue(mockFaculty);
+      const result = await service.findOne('faculty-1');
 
-      const result = await service.findOne('1');
-
+      expect(result.id).toBe('faculty-1');
       expect(result.name).toBe('Dr. John Doe');
+      expect(facultyRepository.findOne).toHaveBeenCalledWith({ where: { id: 'faculty-1' } });
     });
 
-    it('should throw NotFoundException when faculty not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+    it('should throw FacultyException when faculty not found', async () => {
+      facultyRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne('nonexistent')).rejects.toThrow('해당하는 교수를 찾을 수 없습니다');
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      facultyRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.findOne('faculty-1')).rejects.toThrow(CommonException);
     });
   });
 
   describe('create', () => {
-    it('should create new faculty member', async () => {
+    it('should create faculty member successfully', async () => {
       const createDto = {
-        name: 'Dr. Jane Smith',
-        jobTitle: 'Associate Professor',
-        email: 'jane@iot.ac.kr',
-        department: 'IoT Engineering',
+        name: 'Dr. New Faculty',
+        jobTitle: 'Assistant Professor',
+        email: 'new.faculty@university.edu',
+        phoneNumber: '010-9999-8888',
+        office: 'Engineering Building 303',
+        department: 'Computer Science',
+        researchAreas: ['Data Science'],
+        biography: 'New faculty member',
       };
 
-      const mockFaculty = {
-        id: '1',
-        ...createDto,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockRepository.findOne.mockResolvedValue(null); // No existing faculty
-      mockRepository.create.mockReturnValue(mockFaculty);
-      mockRepository.save.mockResolvedValue(mockFaculty);
+      facultyRepository.create.mockReturnValue(mockFaculty);
+      facultyRepository.save.mockResolvedValue(mockFaculty);
 
       const result = await service.create(createDto);
 
-      expect(result.name).toBe('Dr. Jane Smith');
+      expect(result.id).toBe('faculty-1');
+      expect(facultyRepository.create).toHaveBeenCalledWith(createDto);
+      expect(facultyRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw ConflictException when faculty already exists', async () => {
+    it('should throw CommonException when database error occurs', async () => {
       const createDto = {
-        name: 'Dr. John Doe',
-        email: 'john@iot.ac.kr',
+        name: 'Dr. New Faculty',
+        jobTitle: 'Assistant Professor',
+        email: 'new.faculty@university.edu',
+        department: 'Computer Science',
       };
 
-      const existingFaculty = {
-        id: '1',
-        name: 'Dr. John Doe',
-        email: 'john@iot.ac.kr',
-      };
-      mockRepository.findOne.mockResolvedValue(existingFaculty);
+      facultyRepository.create.mockImplementation(() => {
+        throw new Error('Database error');
+      });
 
-      await expect(service.create(createDto)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(service.create(createDto)).rejects.toThrow(CommonException);
     });
   });
 
   describe('update', () => {
-    it('should update existing faculty member', async () => {
+    it('should update faculty member successfully', async () => {
       const updateDto = {
+        name: 'Dr. Updated Name',
         jobTitle: 'Full Professor',
-        department: 'Advanced IoT',
       };
 
-      const mockFaculty = {
-        id: '1',
-        name: 'Dr. John Doe',
-        jobTitle: 'Associate Professor',
-        email: 'john@iot.ac.kr',
-        department: 'IoT Engineering',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      facultyRepository.findOne.mockResolvedValue(mockFaculty);
+      facultyRepository.save.mockResolvedValue({ ...mockFaculty, ...updateDto } as any);
 
-      mockRepository.findOne.mockResolvedValue(mockFaculty);
-      mockRepository.save.mockResolvedValue({ ...mockFaculty, ...updateDto });
+      const result = await service.update('faculty-1', updateDto);
 
-      const result = await service.update('1', updateDto);
-
-      expect(result.jobTitle).toBe('Full Professor');
+      expect(result.name).toBe('Dr. Updated Name');
+      expect(facultyRepository.findOne).toHaveBeenCalledWith({ where: { id: 'faculty-1' } });
+      expect(facultyRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException when updating non-existent faculty', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+    it('should update only provided fields', async () => {
+      const updateDto = {
+        email: 'updated.email@university.edu',
+      };
 
-      await expect(
-        service.update('nonexistent', { name: 'Updated' }),
-      ).rejects.toThrow(NotFoundException);
+      facultyRepository.findOne.mockResolvedValue(mockFaculty);
+      facultyRepository.save.mockResolvedValue(mockFaculty);
+
+      await service.update('faculty-1', updateDto);
+
+      const savedFaculty = facultyRepository.save.mock.calls[0][0];
+      expect(savedFaculty.email).toBe('updated.email@university.edu');
+      expect(savedFaculty.name).toBe(mockFaculty.name); // unchanged
+    });
+
+    it('should log changes when updating faculty', async () => {
+      const updateDto = {
+        name: 'Dr. New Name',
+        email: 'new.email@university.edu',
+        department: 'New Department',
+        jobTitle: 'New Title',
+      };
+
+      facultyRepository.findOne.mockResolvedValue(mockFaculty);
+      facultyRepository.save.mockResolvedValue({ ...mockFaculty, ...updateDto } as any);
+
+      await service.update('faculty-1', updateDto);
+
+      // Verify that the update was called
+      expect(facultyRepository.save).toHaveBeenCalled();
+    });
+
+    it('should throw FacultyException when faculty not found', async () => {
+      facultyRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.update('nonexistent', {})).rejects.toThrow('해당하는 교수를 찾을 수 없습니다');
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      facultyRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.update('faculty-1', {})).rejects.toThrow(CommonException);
     });
   });
 
   describe('delete', () => {
-    it('should delete faculty member', async () => {
-      const mockFaculty = { id: '1', name: 'Dr. John Doe' };
-      mockRepository.findOne.mockResolvedValue(mockFaculty);
+    it('should delete faculty member successfully', async () => {
+      facultyRepository.findOne.mockResolvedValue(mockFaculty);
+      facultyRepository.remove.mockResolvedValue(mockFaculty);
 
-      await service.delete('1');
+      await service.delete('faculty-1');
 
-      expect(mockRepository.remove).toHaveBeenCalledWith(mockFaculty);
+      expect(facultyRepository.findOne).toHaveBeenCalledWith({ where: { id: 'faculty-1' } });
+      expect(facultyRepository.remove).toHaveBeenCalledWith(mockFaculty);
     });
 
-    it('should throw NotFoundException when deleting non-existent faculty', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+    it('should throw FacultyException when faculty not found', async () => {
+      facultyRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.delete('nonexistent')).rejects.toThrow('해당하는 교수를 찾을 수 없습니다');
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      facultyRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.delete('faculty-1')).rejects.toThrow(CommonException);
+    });
+  });
+
+  describe('toResponse (private method testing through public methods)', () => {
+    it('should convert faculty entity to response DTO correctly', async () => {
+      const freshMockFaculty = {
+        id: 'faculty-1',
+        name: 'Dr. John Doe',
+        jobTitle: 'Professor',
+        email: 'john.doe@university.edu',
+        phoneNumber: '010-1234-5678',
+        office: 'Engineering Building 301',
+        profileImageUrl: 'https://example.com/profile.jpg',
+        department: 'Computer Science',
+        researchAreas: 'AI, Machine Learning',
+        biography: 'Expert in AI and ML',
+        createdAt: new Date('2024-01-01'),
+      } as any;
+      
+      facultyRepository.findOne.mockResolvedValue(freshMockFaculty);
+
+      const result = await service.findOne('faculty-1');
+
+      expect(result).toEqual({
+        id: 'faculty-1',
+        name: 'Dr. John Doe',
+        jobTitle: 'Professor',
+        email: 'john.doe@university.edu',
+        phoneNumber: '010-1234-5678',
+        office: 'Engineering Building 301',
+        profileImageUrl: 'https://example.com/profile.jpg',
+        department: 'Computer Science',
+        researchAreas: 'AI, Machine Learning',
+        biography: 'Expert in AI and ML',
+        createdAt: new Date('2024-01-01'),
+      });
     });
   });
 });

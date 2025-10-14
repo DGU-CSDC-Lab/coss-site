@@ -1,5 +1,5 @@
 import { Entity, Column } from 'typeorm';
-import { SoftDeleteEntity } from '../../common/entities';
+import { SoftDeleteEntity } from '@/common/entities';
 
 export enum ScheduleCategory {
   ACADEMIC = 'academic',

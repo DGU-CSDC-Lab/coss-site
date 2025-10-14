@@ -1,7 +1,8 @@
 import { IsString, IsOptional, IsEmail, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { PaginationQuery } from '../../common/dto/pagination.dto';
+import { PaginationQuery } from '@/common/dto/response.dto';
 
+// 교수진 목록 조회 쿼리 DTO
 export class FacultyQuery extends PaginationQuery {
   @ApiProperty({
     description: '교수명 검색',
@@ -22,6 +23,7 @@ export class FacultyQuery extends PaginationQuery {
   department?: string;
 }
 
+// 교수진 생성 요청 DTO
 export class FacultyCreate {
   @ApiProperty({
     description: '교수명',
@@ -37,7 +39,7 @@ export class FacultyCreate {
   })
   @IsOptional()
   @IsString()
-  jobTitle?: string;
+  jobTitle: string;
 
   @ApiProperty({
     description: '이메일',
@@ -104,6 +106,7 @@ export class FacultyCreate {
   biography?: string;
 }
 
+// 교수진 수정 요청 DTO
 export class FacultyUpdate {
   @ApiProperty({
     description: '교수명',
@@ -188,6 +191,7 @@ export class FacultyUpdate {
   biography?: string;
 }
 
+// 교수진 응답 DTO
 export class FacultyResponse {
   @ApiProperty({
     description: '교수진 ID',
@@ -254,10 +258,4 @@ export class FacultyResponse {
     example: '2024-03-15T09:00:00.000Z',
   })
   createdAt: Date;
-
-  @ApiProperty({
-    description: '수정일시',
-    example: '2024-03-15T09:00:00.000Z',
-  })
-  updatedAt: Date;
 }

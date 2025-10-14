@@ -1,20 +1,34 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoryService } from './category.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Category } from '../entities';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { Logger } from '@nestjs/common';
+import { CategoryService } from '@/category/services/category.service';
+import { Category } from '@/category/entities';
+import { CommonException } from '@/common/exceptions';
 
 describe('CategoryService', () => {
   let service: CategoryService;
-  let categoryRepository: any;
+  let categoryRepository: jest.Mocked<Repository<Category>>;
 
-  const mockCategoryRepository = {
-    find: jest.fn(),
-    findOne: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    remove: jest.fn(),
-  };
+  const mockCategory = {
+    id: 'cat-1',
+    name: 'Test Category',
+    slug: 'test-category',
+    parentId: null,
+    order: 0,
+    createdAt: new Date('2024-01-01'),
+    children: [],
+  } as Category;
+
+  const mockSubCategory = {
+    id: 'cat-2',
+    name: 'Sub Category',
+    slug: 'sub-category',
+    parentId: 'cat-1',
+    order: 1,
+    createdAt: new Date('2024-01-02'),
+    children: [],
+  } as Category;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -22,294 +36,325 @@ describe('CategoryService', () => {
         CategoryService,
         {
           provide: getRepositoryToken(Category),
-          useValue: mockCategoryRepository,
+          useValue: {
+            find: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            remove: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     service = module.get<CategoryService>(CategoryService);
     categoryRepository = module.get(getRepositoryToken(Category));
-  });
 
-  afterEach(() => {
+    // Reset all mocks before each test
     jest.clearAllMocks();
+
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    jest.spyOn(Logger.prototype, 'debug').mockImplementation();
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+    jest.spyOn(Logger.prototype, 'error').mockImplementation();
   });
 
   describe('findAll', () => {
-    it('should return all root categories ordered by displayOrder and createdAt', async () => {
-      const mockCategories = [
-        {
-          id: 'cat-1',
-          name: '공지사항',
-          parentId: null,
-          displayOrder: 1,
-          createdAt: new Date('2024-01-01'),
-          updatedAt: new Date('2024-01-01'),
-        },
-        {
-          id: 'cat-2',
-          name: '학사공지',
-          parentId: null,
-          displayOrder: 2,
-          createdAt: new Date('2024-01-02'),
-          updatedAt: new Date('2024-01-02'),
-        },
-      ];
-
-      mockCategoryRepository.find.mockResolvedValue(mockCategories);
+    it('should return root categories when no parentId provided', async () => {
+      categoryRepository.find.mockResolvedValue([mockCategory]);
 
       const result = await service.findAll();
 
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe('cat-1');
       expect(categoryRepository.find).toHaveBeenCalledWith({
         where: { parentId: null },
-        select: ['id', 'name', 'slug', 'parentId', 'displayOrder', 'createdAt', 'updatedAt'],
-        order: {
-          displayOrder: 'ASC',
-          createdAt: 'ASC',
-        },
+        order: { order: 'ASC', createdAt: 'ASC' },
+        select: ['id', 'name', 'slug', 'parentId', 'order', 'createdAt'],
       });
-      expect(result).toEqual(
-        mockCategories.map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          parentId: cat.parentId,
-          order: cat.displayOrder,
-          createdAt: cat.createdAt,
-          updatedAt: cat.updatedAt,
-        })),
-      );
     });
 
-    it('should return subcategories when parentId is provided', async () => {
-      const parentId = 'parent-cat-id';
-      const mockCategories = [
-        {
-          id: 'sub-cat-1',
-          name: '하위 카테고리 1',
-          parentId: parentId,
-          displayOrder: 1,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+    it('should return subcategories when parentId provided', async () => {
+      categoryRepository.find.mockResolvedValue([mockSubCategory]);
 
-      mockCategoryRepository.find.mockResolvedValue(mockCategories);
+      const result = await service.findAll('cat-1');
 
-      const result = await service.findAll(parentId);
-
-      expect(categoryRepository.find).toHaveBeenCalledWith({
-        where: { parentId: parentId },
-        select: ['id', 'name', 'slug', 'parentId', 'displayOrder', 'createdAt', 'updatedAt'],
-        order: {
-          displayOrder: 'ASC',
-          createdAt: 'ASC',
-        },
-      });
       expect(result).toHaveLength(1);
+      expect(result[0].parentId).toBe('cat-1');
+      expect(categoryRepository.find).toHaveBeenCalledWith({
+        where: { parentId: 'cat-1' },
+        order: { order: 'ASC', createdAt: 'ASC' },
+        select: ['id', 'name', 'slug', 'parentId', 'order', 'createdAt'],
+      });
+    });
+
+    it('should return empty array when no categories found', async () => {
+      categoryRepository.find.mockResolvedValue([]);
+
+      const result = await service.findAll();
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      categoryRepository.find.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.findAll()).rejects.toThrow(CommonException);
     });
   });
 
   describe('create', () => {
-    it('should create a new category successfully', async () => {
+    it('should create root category successfully', async () => {
       const createDto = {
-        name: '새 카테고리',
-        parentId: null,
+        name: 'New Category',
         order: 1,
       };
 
-      const mockCategory = {
-        id: 'new-cat-id',
-        name: createDto.name,
-        parentId: createDto.parentId,
-        displayOrder: createDto.order,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockCategoryRepository.create.mockReturnValue(mockCategory);
-      mockCategoryRepository.save.mockResolvedValue(mockCategory);
+      categoryRepository.create.mockReturnValue(mockCategory);
+      categoryRepository.save.mockResolvedValue(mockCategory);
 
       const result = await service.create(createDto);
+
+      expect(result.name).toBe('Test Category');
+      expect(categoryRepository.create).toHaveBeenCalledWith({
+        name: 'New Category',
+        parentId: undefined,
+        order: 1,
+      });
+    });
+
+    it('should create subcategory with valid parent', async () => {
+      const createDto = {
+        name: 'Sub Category',
+        parentId: 'cat-1',
+        order: 2,
+      };
+
+      categoryRepository.findOne.mockResolvedValue(mockCategory);
+      categoryRepository.create.mockReturnValue(mockSubCategory);
+      categoryRepository.save.mockResolvedValue(mockSubCategory);
+
+      const result = await service.create(createDto);
+
+      expect(result.parentId).toBe('cat-1');
+      expect(categoryRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'cat-1' },
+      });
+    });
+
+    it('should use default order 0 when not provided', async () => {
+      const createDto = {
+        name: 'New Category',
+      };
+
+      categoryRepository.create.mockReturnValue(mockCategory);
+      categoryRepository.save.mockResolvedValue(mockCategory);
+
+      await service.create(createDto);
 
       expect(categoryRepository.create).toHaveBeenCalledWith({
-        name: createDto.name,
-        parentId: createDto.parentId,
-        displayOrder: createDto.order || 0,
-      });
-      expect(categoryRepository.save).toHaveBeenCalledWith(mockCategory);
-      expect(result).toEqual({
-        id: mockCategory.id,
-        name: mockCategory.name,
-        parentId: mockCategory.parentId,
-        order: mockCategory.displayOrder,
-        createdAt: mockCategory.createdAt,
-        updatedAt: mockCategory.updatedAt,
+        name: 'New Category',
+        parentId: undefined,
+        order: 0,
       });
     });
 
-    it('should create category with parent validation', async () => {
+    it('should throw CategoryException when parent category not found', async () => {
       const createDto = {
-        name: '하위 카테고리',
-        parentId: 'parent-id',
-        order: 1,
+        name: 'Sub Category',
+        parentId: 'nonexistent',
       };
 
-      const mockParent = {
-        id: 'parent-id',
-        name: '부모 카테고리',
-      };
-
-      const mockCategory = {
-        id: 'new-cat-id',
-        name: createDto.name,
-        parentId: createDto.parentId,
-        displayOrder: createDto.order,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      mockCategoryRepository.findOne.mockResolvedValue(mockParent);
-      mockCategoryRepository.create.mockReturnValue(mockCategory);
-      mockCategoryRepository.save.mockResolvedValue(mockCategory);
-
-      const result = await service.create(createDto);
-
-      expect(categoryRepository.findOne).toHaveBeenCalledWith({
-        where: { id: createDto.parentId },
-      });
-      expect(result.parentId).toBe(createDto.parentId);
-    });
-
-    it('should throw NotFoundException if parent category does not exist', async () => {
-      const createDto = {
-        name: '하위 카테고리',
-        parentId: 'non-existent-parent',
-        order: 1,
-      };
-
-      mockCategoryRepository.findOne.mockResolvedValue(null);
+      categoryRepository.findOne.mockResolvedValue(null);
 
       await expect(service.create(createDto)).rejects.toThrow(
-        NotFoundException,
+        '부모 카테고리를 찾을 수 없습니다',
       );
-      expect(categoryRepository.findOne).toHaveBeenCalledWith({
-        where: { id: createDto.parentId },
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      const createDto = {
+        name: 'New Category',
+      };
+
+      categoryRepository.create.mockImplementation(() => {
+        throw new Error('Database error');
       });
+
+      await expect(service.create(createDto)).rejects.toThrow(CommonException);
     });
   });
 
   describe('update', () => {
-    it('should update an existing category successfully', async () => {
-      const categoryId = 'cat-1';
+    it('should update category successfully', async () => {
       const updateDto = {
-        name: '수정된 카테고리',
-        order: 2,
+        name: 'Updated Category',
+        order: 5,
       };
 
-      const existingCategory = {
-        id: categoryId,
-        name: '원래 카테고리',
-        parentId: null,
-        displayOrder: 1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      categoryRepository.findOne.mockResolvedValue(mockCategory);
+      categoryRepository.save.mockResolvedValue({
+        ...mockCategory,
+        ...updateDto,
+      } as any);
 
-      const updatedCategory = {
-        ...existingCategory,
-        name: updateDto.name,
-        displayOrder: updateDto.order,
-        updatedAt: new Date(),
-      };
+      const result = await service.update('cat-1', updateDto);
 
-      mockCategoryRepository.findOne.mockResolvedValue(existingCategory);
-      mockCategoryRepository.save.mockResolvedValue(updatedCategory);
-
-      const result = await service.update(categoryId, updateDto);
-
-      expect(categoryRepository.findOne).toHaveBeenCalledWith({
-        where: { id: categoryId },
-      });
-      expect(categoryRepository.save).toHaveBeenCalledWith({
-        ...existingCategory,
-        name: updateDto.name,
-        parentId: existingCategory.parentId,
-        displayOrder: updateDto.order,
-      });
-      expect(result).toEqual({
-        id: updatedCategory.id,
-        name: updatedCategory.name,
-        parentId: updatedCategory.parentId,
-        order: updatedCategory.displayOrder,
-        createdAt: updatedCategory.createdAt,
-        updatedAt: updatedCategory.updatedAt,
-      });
+      expect(result.name).toBe('Updated Category');
+      expect(categoryRepository.save).toHaveBeenCalled();
     });
 
-    it('should throw NotFoundException if category does not exist', async () => {
-      const categoryId = 'non-existent-id';
-      const updateDto = { name: '수정된 카테고리' };
+    it('should update parent category when valid parent provided', async () => {
+      const updateDto = {
+        parentId: 'cat-2',
+      };
 
-      mockCategoryRepository.findOne.mockResolvedValue(null);
+      const parentCategory = { ...mockCategory, id: 'cat-2' } as any;
 
-      await expect(service.update(categoryId, updateDto)).rejects.toThrow(
-        NotFoundException,
-      );
-      expect(categoryRepository.findOne).toHaveBeenCalledWith({
-        where: { id: categoryId },
+      categoryRepository.findOne
+        .mockResolvedValueOnce(mockCategory)
+        .mockResolvedValueOnce(parentCategory);
+      categoryRepository.save.mockResolvedValue({
+        ...mockCategory,
+        parentId: 'cat-2',
+      } as any);
+
+      const result = await service.update('cat-1', updateDto);
+
+      expect(categoryRepository.findOne).toHaveBeenCalledTimes(2);
+      expect(categoryRepository.findOne).toHaveBeenNthCalledWith(2, {
+        where: { id: 'cat-2' },
       });
+      expect(result).toBeDefined();
+      expect(categoryRepository.save).toHaveBeenCalled();
+    });
+
+    it('should update only provided fields', async () => {
+      const updateDto = {
+        name: 'Updated Name',
+      };
+
+      categoryRepository.findOne.mockResolvedValue(mockCategory);
+      categoryRepository.save.mockResolvedValue(mockCategory);
+
+      await service.update('cat-1', updateDto);
+
+      const savedCategory = categoryRepository.save.mock.calls[0][0];
+      expect(savedCategory.name).toBe('Updated Name');
+      expect(savedCategory.order).toBe(mockCategory.order); // unchanged
+    });
+
+    it('should throw CategoryException when category not found', async () => {
+      categoryRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.update('nonexistent', {})).rejects.toThrow(
+        '카테고리를 찾을 수 없습니다',
+      );
+    });
+
+    it('should throw CategoryException when new parent category not found', async () => {
+      const updateDto = {
+        parentId: 'nonexistent',
+      };
+
+      categoryRepository.findOne
+        .mockResolvedValueOnce(mockCategory)
+        .mockResolvedValueOnce(null);
+
+      await expect(service.update('cat-1', updateDto)).rejects.toThrow(
+        '부모 카테고리를 찾을 수 없습니다',
+      );
+    });
+
+    it('should not check parent when parentId unchanged', async () => {
+      const updateDto = {
+        name: 'Updated Name',
+        parentId: null, // same as current
+      };
+
+      categoryRepository.findOne.mockResolvedValue(mockCategory);
+      categoryRepository.save.mockResolvedValue(mockCategory);
+
+      await service.update('cat-1', updateDto);
+
+      expect(categoryRepository.findOne).toHaveBeenCalledTimes(1); // only for category itself
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      categoryRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.update('cat-1', {})).rejects.toThrow(
+        CommonException,
+      );
     });
   });
 
   describe('delete', () => {
-    it('should delete a category successfully', async () => {
-      const categoryId = 'cat-1';
-      const existingCategory = {
-        id: categoryId,
-        name: '삭제할 카테고리',
-        children: [], // No children
-      };
+    it('should delete category without children successfully', async () => {
+      categoryRepository.findOne.mockResolvedValue(mockCategory);
+      categoryRepository.remove.mockResolvedValue(mockCategory);
 
-      mockCategoryRepository.findOne.mockResolvedValue(existingCategory);
-      mockCategoryRepository.remove.mockResolvedValue(existingCategory);
-
-      await service.delete(categoryId);
+      await service.delete('cat-1');
 
       expect(categoryRepository.findOne).toHaveBeenCalledWith({
-        where: { id: categoryId },
+        where: { id: 'cat-1' },
         relations: ['children'],
       });
-      expect(categoryRepository.remove).toHaveBeenCalledWith(existingCategory);
+      expect(categoryRepository.remove).toHaveBeenCalledWith(mockCategory);
     });
 
-    it('should throw NotFoundException if category does not exist', async () => {
-      const categoryId = 'non-existent-id';
+    it('should throw CategoryException when category not found', async () => {
+      categoryRepository.findOne.mockResolvedValue(null);
 
-      mockCategoryRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.delete(categoryId)).rejects.toThrow(
-        NotFoundException,
+      await expect(service.delete('nonexistent')).rejects.toThrow(
+        '카테고리를 찾을 수 없습니다',
       );
-      expect(categoryRepository.findOne).toHaveBeenCalledWith({
-        where: { id: categoryId },
-        relations: ['children'],
+    });
+
+    it('should throw CategoryException when category has children', async () => {
+      const categoryWithChildren = {
+        ...mockCategory,
+        children: [mockSubCategory],
+      } as any;
+
+      categoryRepository.findOne.mockResolvedValue(categoryWithChildren);
+
+      await expect(service.delete('cat-1')).rejects.toThrow(
+        '하위 카테고리가 존재하는 카테고리는 삭제할 수 없습니다',
+      );
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      categoryRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.delete('cat-1')).rejects.toThrow(CommonException);
+    });
+  });
+
+  describe('toResponse (private method testing through public methods)', () => {
+    it('should convert category entity to response DTO correctly', async () => {
+      const freshMockCategory = {
+        id: 'cat-1',
+        name: 'Test Category',
+        slug: 'test-category',
+        parentId: null,
+        order: 0,
+        createdAt: new Date('2024-01-01'),
+        children: [],
+      } as Category;
+
+      categoryRepository.find.mockResolvedValue([freshMockCategory]);
+
+      const result = await service.findAll();
+
+      expect(result[0]).toEqual({
+        id: 'cat-1',
+        name: 'Test Category',
+        slug: 'test-category',
+        parentId: null,
+        order: 0,
+        createdAt: new Date('2024-01-01'),
       });
-    });
-
-    it('should throw ConflictException if category has children', async () => {
-      const categoryId = 'cat-1';
-      const existingCategory = {
-        id: categoryId,
-        name: '부모 카테고리',
-        children: [{ id: 'child-1', name: '자식 카테고리' }],
-      };
-
-      mockCategoryRepository.findOne.mockResolvedValue(existingCategory);
-
-      await expect(service.delete(categoryId)).rejects.toThrow(
-        ConflictException,
-      );
-      expect(categoryRepository.remove).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/store/auth.store'
-import { authApi } from './api/auth'
+import { authApi } from '@/lib/api/auth'
 
 const API_BASE_URL = `${import.meta.env.VITE_API_URL}/${import.meta.env.VITE_API_VERSION}`
 
@@ -49,7 +49,7 @@ class ApiClient {
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
       throw new Error(
-        `API Error: ${response.status} - ${errorData.message || 'Unknown error'}`
+        `${errorData.message || 'Unknown error'}`
       )
     }
 
@@ -61,7 +61,11 @@ class ApiClient {
       return undefined as T
     }
 
-    return response.json()
+    const result = await response.json()
+    
+    // Extract data from SuccessResponse wrapper for single objects
+    // PagedResponse remains unchanged
+    return result.data !== undefined ? result.data : result
   }
 
   // 토큰 자동 주입 요청

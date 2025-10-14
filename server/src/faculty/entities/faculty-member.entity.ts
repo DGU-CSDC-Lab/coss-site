@@ -1,9 +1,9 @@
 import { Entity, Column } from 'typeorm';
-import { BaseEntity } from '../../common/entities';
+import { BaseEntity } from '@/common/entities';
 
 @Entity('faculty_members')
 export class FacultyMember extends BaseEntity {
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 100 })
   name: string;
 
   @Column({ name: 'job_title', type: 'varchar', nullable: true })

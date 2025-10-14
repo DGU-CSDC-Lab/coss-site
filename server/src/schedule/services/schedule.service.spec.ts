@@ -1,32 +1,29 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
-import { ScheduleService } from './schedule.service';
-import { AcademicSchedule, ScheduleCategory } from '../entities';
+import { Logger } from '@nestjs/common';
+import { ScheduleService } from '@/schedule/services/schedule.service';
+import { AcademicSchedule, ScheduleCategory } from '@/schedule/entities';
+import { CommonException } from '@/common/exceptions';
+import { PagedResponse } from '@/common/dto/response.dto';
 
 describe('ScheduleService', () => {
   let service: ScheduleService;
-  let _repository: Repository<AcademicSchedule>;
+  let scheduleRepository: jest.Mocked<Repository<AcademicSchedule>>;
 
-  const mockQueryBuilder = {
-    where: jest.fn().mockReturnThis(),
-    andWhere: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(),
-    take: jest.fn().mockReturnThis(),
-    getMany: jest.fn(),
-    getCount: jest.fn(),
-    getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
-  };
-
-  const mockRepository = {
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
-    findOne: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    softRemove: jest.fn(),
-  };
+  const mockSchedule = {
+    id: 'schedule-1',
+    title: '중간고사',
+    description: '2024년 1학기 중간고사',
+    startDate: new Date('2024-04-15'),
+    endDate: new Date('2024-04-19'),
+    location: '각 강의실',
+    category: ScheduleCategory.ACADEMIC,
+    createdById: 'user-1',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date('2024-01-01'),
+    deletedAt: null,
+  } as any;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -34,189 +31,273 @@ describe('ScheduleService', () => {
         ScheduleService,
         {
           provide: getRepositoryToken(AcademicSchedule),
-          useValue: mockRepository,
+          useValue: {
+            createQueryBuilder: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            softRemove: jest.fn(),
+          },
         },
       ],
     }).compile();
 
     service = module.get<ScheduleService>(ScheduleService);
-    _repository = module.get<Repository<AcademicSchedule>>(
-      getRepositoryToken(AcademicSchedule),
-    );
+    scheduleRepository = module.get(getRepositoryToken(AcademicSchedule));
 
     jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    jest.spyOn(Logger.prototype, 'debug').mockImplementation();
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+    jest.spyOn(Logger.prototype, 'error').mockImplementation();
   });
 
   describe('findAll', () => {
-    it('should return all schedules', async () => {
-      const mockSchedules = [
-        {
-          id: '1',
-          title: 'Test Schedule',
-          startDate: new Date('2024-01-01'),
-          endDate: new Date('2024-01-02'),
-          category: ScheduleCategory.ACADEMIC,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+    it('should return empty paginated schedules successfully', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
 
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockSchedules, 1]);
+      scheduleRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
-      const result = await service.findAll({});
+      const result = await service.findAll({ page: 1, size: 10 });
 
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0].title).toBe('Test Schedule');
+      expect(result).toBeInstanceOf(PagedResponse);
+      expect(result.items).toHaveLength(0);
+      expect(result.meta.totalElements).toBe(0);
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith('schedule.deletedAt IS NULL');
+      expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith('schedule.startDate', 'ASC');
     });
 
-    it('should filter by month', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+    it('should filter by specific date when provided', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
 
-      await service.findAll({ month: '2024-01' });
+      scheduleRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      await service.findAll({ date: '2024-04-15' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'DATE(schedule.startDate) <= :date AND (schedule.endDate IS NULL OR DATE(schedule.endDate) >= :date)',
+        { date: '2024-04-15' }
+      );
+    });
+
+    it('should filter by month when provided', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+
+      scheduleRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      await service.findAll({ month: '2024-04' });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'YEAR(schedule.startDate) = :year AND MONTH(schedule.startDate) = :month',
-        { year: 2024, month: 1 },
+        { year: 2024, month: 4 }
       );
     });
 
-    it('should filter by category', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+    it('should filter by category when provided', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
 
-      await service.findAll({ category: ScheduleCategory.ADMISSION });
+      scheduleRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+
+      await service.findAll({ category: ScheduleCategory.EVENT });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         'schedule.category = :category',
-        { category: ScheduleCategory.ADMISSION },
+        { category: ScheduleCategory.EVENT }
       );
     });
 
-    it('should filter by search keyword', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+    it('should throw CommonException when database error occurs', async () => {
+      scheduleRepository.createQueryBuilder.mockImplementation(() => {
+        throw new Error('Database error');
+      });
 
-      await service.findAll({ search: '개강' });
-
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'schedule.title LIKE :search',
-        { search: '%개강%' },
-      );
+      await expect(service.findAll({})).rejects.toThrow(CommonException);
     });
   });
 
   describe('findOne', () => {
-    it('should return schedule by id', async () => {
-      const mockSchedule = {
-        id: '1',
-        title: 'Test Schedule',
-        startDate: new Date('2024-01-01'),
-        category: ScheduleCategory.ACADEMIC,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+    it('should return schedule by id successfully', async () => {
+      scheduleRepository.findOne.mockResolvedValue(mockSchedule);
 
-      mockRepository.findOne.mockResolvedValue(mockSchedule);
+      const result = await service.findOne('schedule-1');
 
-      const result = await service.findOne('1');
-
-      expect(result.title).toBe('Test Schedule');
+      expect(result.id).toBe('schedule-1');
+      expect(result.title).toBe('중간고사');
+      expect(scheduleRepository.findOne).toHaveBeenCalledWith({ where: { id: 'schedule-1' } });
     });
 
-    it('should throw NotFoundException when schedule not found', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+    it('should throw ScheduleException when schedule not found', async () => {
+      scheduleRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.findOne('nonexistent')).rejects.toThrow('해당하는 일정을 찾을 수 없습니다');
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      scheduleRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.findOne('schedule-1')).rejects.toThrow(CommonException);
     });
   });
 
   describe('create', () => {
-    it('should create new schedule', async () => {
+    it('should create schedule successfully with all fields', async () => {
       const createDto = {
-        title: 'New Schedule',
-        startDate: '2024-01-01',
-        endDate: '2024-01-02',
-        description: 'Test description',
-        location: 'Test location',
+        title: '새로운 일정',
+        description: '새로운 학사일정입니다',
+        startDate: '2024-05-01',
+        endDate: '2024-05-03',
+        location: '강의실 101',
+        category: ScheduleCategory.EVENT,
+      };
+
+      scheduleRepository.create.mockReturnValue(mockSchedule);
+      scheduleRepository.save.mockResolvedValue(mockSchedule);
+
+      const result = await service.create(createDto, 'user-1');
+
+      expect(result.id).toBe('schedule-1');
+      expect(scheduleRepository.create).toHaveBeenCalledWith({
+        title: '새로운 일정',
+        startDate: new Date('2024-05-01'),
+        endDate: new Date('2024-05-03'),
+        description: '새로운 학사일정입니다',
+        location: '강의실 101',
+        category: ScheduleCategory.EVENT,
+        createdById: 'user-1',
+      });
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      const createDto = {
+        title: '새로운 일정',
+        description: '새로운 학사일정입니다',
+        startDate: '2024-05-01',
         category: ScheduleCategory.ACADEMIC,
       };
 
-      const mockSchedule = {
-        id: '1',
-        ...createDto,
-        startDate: new Date(createDto.startDate),
-        endDate: new Date(createDto.endDate),
-        createdById: 'user1',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      scheduleRepository.create.mockImplementation(() => {
+        throw new Error('Database error');
+      });
 
-      mockRepository.create.mockReturnValue(mockSchedule);
-      mockRepository.save.mockResolvedValue(mockSchedule);
-
-      const result = await service.create(createDto, 'user1');
-
-      expect(result.title).toBe('New Schedule');
-      expect(result.location).toBe('Test location');
+      await expect(service.create(createDto, 'user-1')).rejects.toThrow(CommonException);
     });
   });
 
   describe('update', () => {
-    it('should update existing schedule', async () => {
+    it('should update schedule successfully', async () => {
       const updateDto = {
-        title: 'Updated Schedule',
-        description: 'Updated description',
-        location: 'Updated location',
+        title: '수정된 제목',
+        description: '수정된 설명',
       };
 
-      const mockSchedule = {
-        id: '1',
-        title: 'Old Schedule',
-        startDate: new Date('2024-01-01'),
-        location: 'Old location',
-        category: ScheduleCategory.ACADEMIC,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      scheduleRepository.findOne.mockResolvedValue(mockSchedule);
+      scheduleRepository.save.mockResolvedValue({ ...mockSchedule, ...updateDto } as any);
 
-      mockRepository.findOne.mockResolvedValue(mockSchedule);
-      mockRepository.save.mockResolvedValue({ ...mockSchedule, ...updateDto });
+      const result = await service.update('schedule-1', updateDto);
 
-      const result = await service.update('1', updateDto);
-
-      expect(result.title).toBe('Updated Schedule');
-      expect(result.location).toBe('Updated location');
+      expect(result.title).toBe('수정된 제목');
+      expect(scheduleRepository.findOne).toHaveBeenCalledWith({ where: { id: 'schedule-1' } });
     });
 
-    it('should throw NotFoundException when updating non-existent schedule', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+    it('should throw ScheduleException when schedule not found', async () => {
+      scheduleRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.update('nonexistent', { title: 'Updated' }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(service.update('nonexistent', {})).rejects.toThrow('해당하는 일정을 찾을 수 없습니다');
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      scheduleRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.update('schedule-1', {})).rejects.toThrow(CommonException);
     });
   });
 
   describe('delete', () => {
-    it('should soft delete schedule', async () => {
-      const mockSchedule = { id: '1', title: 'Test Schedule' };
-      mockRepository.findOne.mockResolvedValue(mockSchedule);
+    it('should delete schedule successfully (soft delete)', async () => {
+      scheduleRepository.findOne.mockResolvedValue(mockSchedule);
+      scheduleRepository.softRemove.mockResolvedValue(mockSchedule);
 
-      await service.delete('1');
+      await service.delete('schedule-1');
 
-      expect(mockRepository.softRemove).toHaveBeenCalledWith(mockSchedule);
+      expect(scheduleRepository.findOne).toHaveBeenCalledWith({ where: { id: 'schedule-1' } });
+      expect(scheduleRepository.softRemove).toHaveBeenCalledWith(mockSchedule);
     });
 
-    it('should throw NotFoundException when deleting non-existent schedule', async () => {
-      mockRepository.findOne.mockResolvedValue(null);
+    it('should throw ScheduleException when schedule not found', async () => {
+      scheduleRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(service.delete('nonexistent')).rejects.toThrow('해당하는 일정을 찾을 수 없습니다');
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      scheduleRepository.findOne.mockRejectedValue(new Error('Database error'));
+
+      await expect(service.delete('schedule-1')).rejects.toThrow(CommonException);
+    });
+  });
+
+  describe('toResponse (private method testing through public methods)', () => {
+    it('should convert schedule entity to response DTO correctly', async () => {
+      const freshMockSchedule = {
+        id: 'schedule-1',
+        title: '중간고사',
+        description: '2024년 1학기 중간고사',
+        startDate: new Date('2024-04-15'),
+        endDate: new Date('2024-04-19'),
+        location: '각 강의실',
+        category: ScheduleCategory.ACADEMIC,
+        createdById: 'user-1',
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        deletedAt: null,
+      } as any;
+      
+      scheduleRepository.findOne.mockResolvedValue(freshMockSchedule);
+
+      const result = await service.findOne('schedule-1');
+
+      expect(result).toEqual({
+        id: 'schedule-1',
+        title: '중간고사',
+        description: '2024년 1학기 중간고사',
+        startDate: new Date('2024-04-15'),
+        endDate: new Date('2024-04-19'),
+        location: '각 강의실',
+        category: ScheduleCategory.ACADEMIC,
+      });
     });
   });
 });

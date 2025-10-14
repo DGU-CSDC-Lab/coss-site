@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { FileController } from './controllers/file.controller';
-import { FileService } from './services/file.service';
-import { S3Service } from './services/s3.service';
-import { File } from './entities';
-import { AuthModule } from '../auth/auth.module';
+import { FileController } from '@/file/controllers/file.controller';
+import { FileService } from '@/file/services/file.service';
+import { S3Service } from '@/file/services/s3.service';
+import { File } from '@/file/entities';
+import { AuthModule } from '@/auth/auth.module';
 
 @Module({
   imports: [

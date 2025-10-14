@@ -20,13 +20,14 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { CategoryService } from '../services/category.service';
-import { AdminGuard } from '../../auth/guards/admin.guard';
+import { CategoryService } from '@/category/services/category.service';
+import { AdminGuard } from '@/auth/guards/admin.guard';
+import { SuccessResponse } from '@/common/dto/response.dto';
 import {
   CategoryCreate,
   CategoryUpdate,
   CategoryResponse,
-} from '../dto/category.dto';
+} from '@/category/dto/category.dto';
 
 @ApiTags('Categories')
 @Controller()
@@ -65,7 +66,16 @@ export class CategoryController {
   @ApiResponse({
     status: 201,
     description: '카테고리 생성 완료',
-    type: CategoryResponse,
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/SuccessResponse' },
+        {
+          properties: {
+            data: { $ref: '#/components/schemas/CategoryResponse' }
+          }
+        }
+      ]
+    }
   })
   @ApiResponse({ status: 401, description: '인증 필요' })
   @ApiResponse({ status: 403, description: '관리자 권한 필요' })
@@ -87,7 +97,16 @@ export class CategoryController {
   @ApiResponse({
     status: 200,
     description: '카테고리 수정 완료',
-    type: CategoryResponse,
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/SuccessResponse' },
+        {
+          properties: {
+            data: { $ref: '#/components/schemas/CategoryResponse' }
+          }
+        }
+      ]
+    }
   })
   @ApiResponse({ status: 401, description: '인증 필요' })
   @ApiResponse({ status: 403, description: '관리자 권한 필요' })

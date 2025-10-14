@@ -1,1 +1,1 @@
-export { AcademicSchedule, ScheduleCategory } from './academic-schedule.entity';
+export { AcademicSchedule, ScheduleCategory } from '@/schedule/entities/academic-schedule.entity';

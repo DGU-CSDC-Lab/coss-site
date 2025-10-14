@@ -1,5 +1,3 @@
-'use client'
-
 import { useEffect, useRef, useState } from 'react'
 import {
   LinkIcon,
@@ -7,8 +5,32 @@ import {
   ScissorsIcon,
   PaintBrushIcon,
 } from '@heroicons/react/24/outline'
-import { uploadImageFile, insertImageToEditor } from '@/utils/imageUpload'
+import { uploadImageToS3Only, UploadResult } from '@/utils/fileUpload'
 import { useAlert } from '@/hooks/useAlert'
+import { OwnerData } from '@/lib/api'
+
+// 에디터에 이미지 삽입 함수
+const insertImageToEditor = (editorRef: React.RefObject<HTMLDivElement>, imageResult: UploadResult) => {
+  if (!editorRef.current) return
+  
+  const img = document.createElement('img')
+  img.src = imageResult.publicUrl || ''
+  img.alt = imageResult.originalName
+  img.style.maxWidth = '100%'
+  img.style.height = 'auto'
+  
+  const selection = window.getSelection()
+  if (selection && selection.rangeCount > 0) {
+    const range = selection.getRangeAt(0)
+    range.deleteContents()
+    range.insertNode(img)
+    range.collapse(false)
+    selection.removeAllRanges()
+    selection.addRange(range)
+  } else {
+    editorRef.current.appendChild(img)
+  }
+}
 
 interface HtmlEditorProps {
   value: string
@@ -18,6 +40,7 @@ interface HtmlEditorProps {
   onScroll?: (e: React.UIEvent<HTMLDivElement>) => void
   showToolbar?: boolean
   onGetImageFileKeys?: (getFileKeys: () => string[]) => void
+  ownerData: OwnerData
 }
 
 export default function HtmlEditor({
@@ -28,6 +51,7 @@ export default function HtmlEditor({
   onScroll,
   showToolbar = true,
   onGetImageFileKeys,
+  ownerData,
 }: HtmlEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -52,7 +76,7 @@ export default function HtmlEditor({
     if (!file) return
 
     try {
-      const imageResult = await uploadImageFile(file)
+      const imageResult = await uploadImageToS3Only(file, ownerData.ownerType, ownerData.ownerId)
       
       // 에디터에 포커스를 주고 잠시 기다린 후 이미지 삽입
       if (editorRef.current) {
@@ -155,7 +179,7 @@ export default function HtmlEditor({
   // 이미지 파일 처리 (업로드 + 삽입)
   const handleImageFile = async (file: File) => {
     try {
-      const imageResult = await uploadImageFile(file)
+      const imageResult = await uploadImageToS3Only(file, ownerData.ownerType, ownerData.ownerId)
       insertImageToEditor(editorRef, imageResult)
       handleInput() // 변경사항 반영
     } catch (error) {

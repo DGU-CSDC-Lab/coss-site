@@ -5,10 +5,10 @@
  * - 페이지별 조건에 따라 레이아웃 스타일을 동적으로 조정
  */
 import { useLocation } from 'react-router-dom'
-import TopNav from './TopNav'
-import Sidebar from './Sidebar'
-import Footer from './Footer'
-import PageHeader from '../tabs/PageHeader'
+import TopNav from '@/components/layout/TopNav'
+import Sidebar from '@/components/layout/Sidebar'
+import Footer from '@/components/layout/Footer'
+import PageHeader from '@/components/tabs/PageHeader'
 import clsx from 'clsx'
 
 interface LayoutProps {

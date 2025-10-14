@@ -1,4 +1,4 @@
-import { api } from '../apiClient'
+import { api } from '@/lib/apiClient'
 
 export interface LoginRequest {
   email: string
@@ -56,7 +56,7 @@ export const authApi = {
   refresh: (data: RefreshRequest): Promise<RefreshResponse> =>
     api.post('/auth/refresh', data),
 
-  me: (): Promise<User> => api.auth.get('/auth/me'),
+  me: (): Promise<User> => api.auth.get('/auth/info'),
 
   forgotPassword: (data: ForgotPasswordRequest): Promise<void> =>
     api.post('/auth/forgot-password', data),

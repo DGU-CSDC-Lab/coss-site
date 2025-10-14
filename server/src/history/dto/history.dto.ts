@@ -1,7 +1,7 @@
 import { IsString, IsInt, Min, Max, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { PaginationQuery } from '../../common/dto/pagination.dto';
+import { PaginationQuery } from '@/common/dto/response.dto';
 
 export class HistoryQuery extends PaginationQuery {
   @ApiProperty({
@@ -149,16 +149,4 @@ export class HistoryResponse {
     example: '지능IoT학과가 새롭게 신설되어 첫 신입생을 모집하였습니다.',
   })
   description: string;
-
-  @ApiProperty({
-    description: '생성일시',
-    example: '2024-03-15T09:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: '수정일시',
-    example: '2024-03-15T09:00:00.000Z',
-  })
-  updatedAt: Date;
 }

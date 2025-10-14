@@ -1,1 +1,1 @@
-export { FacultyMember } from './faculty-member.entity';
+export { FacultyMember } from '@/faculty/entities/faculty-member.entity';

@@ -29,6 +29,15 @@ services:
     command: server /data --console-address ":9001"
     restart: unless-stopped
 
+  # aws ses 대용 mailhog container (이메일 테스트용)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: coss-mailhog
+    ports:
+      - "1025:1025"  # SMTP
+      - "8025:8025"  # Web UI
+    restart: unless-stopped
+
 volumes:
   mariadb_data:
   minio_data:

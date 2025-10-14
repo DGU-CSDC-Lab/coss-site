@@ -1,1 +1,1 @@
-export { File, OwnerType, FileStatus } from './file.entity';
+export { File, OwnerType, FileStatus } from '@/file/entities/file.entity';

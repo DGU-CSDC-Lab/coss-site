@@ -1,27 +1,29 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { DatabaseSeeder } from './database.seeder';
+import { DatabaseSeeder } from '@/database/database.seeder';
 
 // Import entities directly from domains
-import { Account, User } from '../auth/entities';
-import { BoardPost, PostFile } from '../board/entities';
-import { AcademicSchedule } from '../schedule/entities';
-import { File } from '../file/entities';
-import { Popup } from '../popup/entities';
-import { FacultyMember } from '../faculty/entities';
-import { History } from '../history/entities';
-import { Course } from '../course/entities';
-import { Category } from '../category/entities';
-import { HeaderAsset } from '../header-asset/entities';
+import { Account, User, PendingUser } from '@/auth/entities';
+import { BoardPost } from '@/board/entities';
+import { AcademicSchedule } from '@/schedule/entities';
+import { File } from '@/file/entities';
+import { Popup } from '@/popup/entities';
+import { FacultyMember } from '@/faculty/entities';
+import { History } from '@/history/entities';
+import { Course } from '@/course/entities';
+import { Category } from '@/category/entities';
+import { HeaderAsset } from '@/header-asset/entities';
 
 @Module({
   imports: [
+    // forRootAsync: 비동기 설정 지원 - Global Module도 주입 필요함
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
+      imports: [ConfigModule], // app.module.ts에서 ConfigModule을 가져옴
+      inject: [ConfigService], // 의존성 주입
       useFactory: (configService: ConfigService) => ({
-        type: 'mysql',
-        host: configService.get('DB_HOST'),
+        type: 'mysql', // mariaDB도 mysql 드라이버 사용
+        host: configService.get('DB_HOST'), // .env에서 가져오는 값들
         port: configService.get('DB_PORT'),
         username: configService.get('DB_USERNAME'),
         password: configService.get('DB_PASSWORD'),
@@ -29,8 +31,8 @@ import { HeaderAsset } from '../header-asset/entities';
         entities: [
           Account,
           User,
+          PendingUser,
           BoardPost,
-          PostFile,
           AcademicSchedule,
           File,
           Popup,
@@ -41,11 +43,10 @@ import { HeaderAsset } from '../header-asset/entities';
           HeaderAsset,
         ],
         synchronize: true, // 개발환경에서만 사용
-        logging: true,
+        logging: true, // 쿼리 로깅 활성화
       }),
-      inject: [ConfigService],
     }),
   ],
-  providers: [DatabaseSeeder],
+  providers: [DatabaseSeeder], // DI 컨테이너에 등록
 })
 export class DatabaseModule {}

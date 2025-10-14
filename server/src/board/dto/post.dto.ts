@@ -8,7 +8,8 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { PostStatus } from '../entities/board-post.entity';
+import { PostStatus } from '@/board/entities/board-post.entity';
+import { Category } from '@/category/entities';
 
 export class PostFileDto {
   @ApiProperty({
@@ -54,7 +55,7 @@ export class PostFileResponse {
     description: '원본 파일명',
     example: 'document.pdf',
   })
-  originalName: string;
+  fileName: string;
 
   @ApiProperty({
     description: '파일 크기 (bytes)',
@@ -69,13 +70,14 @@ export class PostFileResponse {
   downloadUrl: string;
 }
 
+// 게시글 생성 요청 DTO
 export class PostCreateRequest {
   @ApiProperty({
     description: '게시글 제목',
     example: '2024학년도 신입생 모집 안내',
   })
   @IsString()
-  @MaxLength(255)
+  @MaxLength(100)
   title: string;
 
   @ApiProperty({
@@ -91,7 +93,7 @@ export class PostCreateRequest {
     example: 'notices',
   })
   @IsString()
-  categorySlug: string;
+  category: Category['slug'];
 
   @ApiProperty({
     description: '게시글 상태',
@@ -126,6 +128,7 @@ export class PostCreateRequest {
   files?: PostFileDto[];
 }
 
+// 게시글 수정 요청 DTO
 export class PostUpdateRequest {
   @ApiProperty({
     description: '게시글 제목',
@@ -152,7 +155,7 @@ export class PostUpdateRequest {
   })
   @IsOptional()
   @IsString()
-  categorySlug?: string;
+  category?: Category['slug'];
 
   @ApiProperty({
     description: '게시글 상태 (임시저장은 생성 시에만 가능)',
@@ -186,6 +189,7 @@ export class PostUpdateRequest {
   files?: PostFileDto[];
 }
 
+// 게시글 목록 조회 쿼리 DTO
 export class PostListQuery {
   @ApiProperty({
     description: '카테고리 슬러그로 필터링 (영어)',
@@ -194,7 +198,7 @@ export class PostListQuery {
   })
   @IsOptional()
   @IsString()
-  categorySlug?: string;
+  category?: Category['slug'];
 
   @ApiProperty({
     description: '제목 또는 내용 검색 키워드',
@@ -238,6 +242,7 @@ export class PostListQuery {
   sort?: 'latest' | 'popular' = 'latest';
 }
 
+// 관리자용 게시글 목록 조회 쿼리 DTO (상태 필터 추가)
 export class AdminPostListQuery extends PostListQuery {
   @ApiProperty({
     description: '게시글 상태 필터 (관리자 전용). 생략 시 전체 상태의 게시글 조회',
@@ -250,6 +255,7 @@ export class AdminPostListQuery extends PostListQuery {
   status?: PostStatus;
 }
 
+// 게시글 목록 응답 DTO
 export class PostResponse {
   @ApiProperty({
     description: '게시글 ID',
@@ -262,12 +268,6 @@ export class PostResponse {
     example: '2024학년도 신입생 모집 안내',
   })
   title: string;
-
-  @ApiProperty({
-    description: '카테고리 ID',
-    example: 'cat-notice-001',
-  })
-  categoryId: string;
 
   @ApiProperty({
     description: '카테고리명',
@@ -324,12 +324,6 @@ export class PostResponse {
     example: '2024-03-15T09:00:00.000Z',
   })
   createdAt: Date;
-
-  @ApiProperty({
-    description: '수정일시',
-    example: '2024-03-15T09:30:00.000Z',
-  })
-  updatedAt: Date;
 }
 
 export class PostDetailResponse extends PostResponse {
@@ -359,30 +353,4 @@ export class PostDetailResponse extends PostResponse {
     required: false,
   })
   nextPost?: { id: string; title: string };
-}
-
-export class PageMeta {
-  @ApiProperty({
-    description: '현재 페이지 번호',
-    example: 1,
-  })
-  page: number;
-
-  @ApiProperty({
-    description: '페이지당 항목 수',
-    example: 10,
-  })
-  size: number;
-
-  @ApiProperty({
-    description: '전체 항목 수',
-    example: 45,
-  })
-  totalElements: number;
-
-  @ApiProperty({
-    description: '전체 페이지 수',
-    example: 5,
-  })
-  totalPages: number;
 }

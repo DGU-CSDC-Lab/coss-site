@@ -1,10 +1,28 @@
 import { NestFactory } from '@nestjs/core';
+import { LogLevel } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AppModule } from './app.module';
+import { AppModule } from '@/app.module';
 
+// 로그 레벨 설정 함수
+const getLogLevels = (): LogLevel[] => {
+  const level = process.env.LOG_LEVEL || 'log';
+  
+  switch (level) {
+    case 'debug': return ['error', 'warn', 'log', 'debug'];
+    case 'info': return ['error', 'warn', 'log'];
+    case 'warn': return ['error', 'warn'];
+    case 'error': return ['error'];
+    default: return ['error', 'warn', 'log'];
+  }
+};
+
+// 환경변수 로드
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // Nest App 인스턴스 생성
+  const app = await NestFactory.create(AppModule, {
+    logger: getLogLevels(),
+  });
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -25,15 +43,17 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Swagger 설정
   const swaggerServerUrl = process.env.SWAGGER_SERVER_URL;
   
   const config = new DocumentBuilder()
-    .setTitle('COSS Backend API')
+    .setTitle('COSS DGU Backend API Swagger')
     .setDescription(
-      '동국대학교 COSS 사이트 백엔드 API (계층형 카테고리, 관리자 /admin/**, S3 Presigned Upload, 디버깅 친화적 에러 응답)',
+      '동국대학교 COSS 지능IoT학과 홈페이지 백엔드 API 문서입니다. \n\n',
     )
-    .setVersion('4.0.0')
-    .addServer(swaggerServerUrl, process.env.NODE_ENV === 'production' ? 'Production' : 'Development')
+    .setVersion('1.0.0') // 서버 버전 태그
+    .addServer(swaggerServerUrl, process.env.NODE_ENV === 'production' ? 'Production' : 'Development') // 서버 URL 설정
+    // Bearer Auth 설정
     .addBearerAuth(
       {
         type: 'http',
@@ -41,20 +61,23 @@ async function bootstrap() {
         bearerFormat: 'JWT',
         description: 'Authorization: Bearer <JWT>',
       },
-      'bearerAuth',
+      'bearerAuth', // 이 설정의 이름 (Security 이름)
     )
     .build();
 
+  // Swagger 모듈 설정
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document, {
+  SwaggerModule.setup('api-docs', app, document, { // api-docs 경로로 설정
     swaggerOptions: {
       persistAuthorization: true,
     },
   });
 
-  await app.listen(process.env.PORT || 3001, '0.0.0.0');
+  // 서버 시작
+  await app.listen(process.env.PORT || 3000, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
   console.log(`Swagger docs available at: ${await app.getUrl()}/api-docs`);
-  console.log(`CORS origins: ${JSON.stringify([...allowedOrigins, /^https:\/\/.*\.cloudfront\.net$/])}`);
+  console.log(`CORS origins: ${JSON.stringify([...allowedOrigins])}`);
 }
+
 bootstrap();

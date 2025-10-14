@@ -1,8 +1,9 @@
 import { IsString, IsBoolean, IsOptional, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { PaginationQuery } from '../../common/dto/pagination.dto';
+import { PaginationQuery } from '@/common/dto/response.dto';
 
+// 팝업 목록 조회 쿼리 DTO
 export class PopupQuery extends PaginationQuery {
   @ApiProperty({
     description: '활성 상태 필터',
@@ -14,6 +15,7 @@ export class PopupQuery extends PaginationQuery {
   isActive?: boolean;
 }
 
+// 팝업 생성 요청 DTO
 export class PopupCreate {
   @ApiProperty({
     description: '팝업 제목',
@@ -69,6 +71,7 @@ export class PopupCreate {
   isActive: boolean;
 }
 
+// 팝업 수정 요청 DTO
 export class PopupUpdate {
   @ApiProperty({
     description: '팝업 제목',
@@ -134,6 +137,7 @@ export class PopupUpdate {
   isActive?: boolean;
 }
 
+// 팝업 응답 DTO
 export class PopupResponse {
   @ApiProperty({
     description: '팝업 ID',
@@ -184,16 +188,4 @@ export class PopupResponse {
     example: true,
   })
   isActive: boolean;
-
-  @ApiProperty({
-    description: '생성일시',
-    example: '2024-03-15T09:00:00.000Z',
-  })
-  createdAt: Date;
-
-  @ApiProperty({
-    description: '수정일시',
-    example: '2024-03-15T09:00:00.000Z',
-  })
-  updatedAt: Date;
 }

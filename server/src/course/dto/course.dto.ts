@@ -10,8 +10,10 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
-import { PaginationQuery } from '../../common/dto/pagination.dto';
 
+import { PaginationQuery } from '@/common/dto/response.dto';
+
+// 교과목 목록 조회 쿼리 DTO
 export class CourseQuery extends PaginationQuery {
   @ApiProperty({
     description: '연도 필터',
@@ -89,6 +91,7 @@ export class CourseQuery extends PaginationQuery {
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
 }
 
+// 교과목 생성 요청 DTO
 export class CourseCreate {
   @ApiProperty({
     description: '학년도',
@@ -202,6 +205,7 @@ export class CourseCreate {
   syllabusUrl?: string;
 }
 
+// 교과목 수정 요청 DTO
 export class CourseUpdate {
   @ApiProperty({
     description: '학년도',
@@ -325,6 +329,7 @@ export class CourseUpdate {
   syllabusUrl?: string;
 }
 
+// 교과목 응답 DTO
 export class CourseResponse {
   @ApiProperty({
     description: '교과목 ID',
@@ -431,6 +436,7 @@ export class CourseResponse {
   updatedAt: Date;
 }
 
+// 교과목 일괄 등록 요청 DTO
 export class CourseBulkInitRequest {
   @ApiProperty({
     description: '학년도',
@@ -458,6 +464,7 @@ export class CourseBulkInitRequest {
   courses: CourseCreate[];
 }
 
+// 교과목 일괄 등록 결과 DTO
 export class CourseUploadResult {
   @ApiProperty({
     description: '업로드 성공 개수',

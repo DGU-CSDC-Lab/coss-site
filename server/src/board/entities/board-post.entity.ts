@@ -1,8 +1,8 @@
 import { Entity, Column, ManyToOne, OneToMany, JoinColumn } from 'typeorm';
-import { SoftDeleteEntity } from '../../common/entities';
-import { User } from '../../auth/entities';
-import { Category } from '../../category/entities';
-import { PostFile } from './post-file.entity';
+import { SoftDeleteEntity } from '@/common/entities';
+import { User } from '@/auth/entities';
+import { Category } from '@/category/entities';
+import { File } from '@/file/entities';
 
 export enum PostStatus {
   DRAFT = 'draft',      // 임시저장
@@ -22,9 +22,6 @@ export class BoardPost extends SoftDeleteEntity {
   @Column({ type: 'text' })
   content: string;
 
-  @Column({ name: 'author_id' })
-  authorId: string;
-
   @ManyToOne(() => User)
   @JoinColumn({ name: 'author_id' })
   author: User;
@@ -38,10 +35,10 @@ export class BoardPost extends SoftDeleteEntity {
   @Column({
     type: 'enum',
     enum: PostStatus,
-    default: PostStatus.PUBLIC,
+    default: PostStatus.PUBLIC, // 기본값은 공개
   })
   status: PostStatus;
 
-  @OneToMany(() => PostFile, file => file.post, { cascade: true })
-  files: PostFile[];
+  @OneToMany(() => File, (file) => file.ownerId)
+  files: File[]
 }

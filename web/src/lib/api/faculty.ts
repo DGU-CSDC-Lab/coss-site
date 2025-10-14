@@ -1,5 +1,5 @@
-import { api } from '../apiClient'
-import { PagedResponse } from '../apiClient'
+import { api } from '@/lib/apiClient'
+import { PagedResponse } from '@/lib/apiClient'
 
 export interface Faculty {
   id: string

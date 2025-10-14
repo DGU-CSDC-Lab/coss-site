@@ -67,11 +67,14 @@ export const usePopups = () => {
   const loadActivePopups = async () => {
     try {
       setLoading(true)
-      const activePopups = await popupsApi.getActivePopups()
+      const response = await popupsApi.getActivePopups()
+      
+      // SuccessResponse에서 data 추출
+      const activePopups = Array.isArray(response) ? response : (response as any).data || response
       
       // 현재 날짜에 해당하는 팝업만 필터링
       const now = new Date()
-      const currentPopups = activePopups.filter(popup => {
+      const currentPopups = activePopups.filter((popup: any) => {
         const startDate = new Date(popup.startDate)
         const endDate = new Date(popup.endDate)
         return now >= startDate && now <= endDate
@@ -82,7 +85,7 @@ export const usePopups = () => {
       // 숨겨진 팝업 제외
       const hiddenPopups = getHiddenPopups()
       const hiddenIds = hiddenPopups.map(item => item.id)
-      const visiblePopups = currentPopups.filter(popup => !hiddenIds.includes(popup.id))
+      const visiblePopups = currentPopups.filter((popup: any) => !hiddenIds.includes(popup.id))
       
       setVisiblePopups(visiblePopups)
       setShowModal(visiblePopups.length > 0)

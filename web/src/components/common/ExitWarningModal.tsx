@@ -1,5 +1,5 @@
 import { XMarkIcon } from '@heroicons/react/24/outline'
-import Button from './Button'
+import Button from '@/components/common/Button'
 
 interface ExitWarningModalProps {
   isOpen: boolean

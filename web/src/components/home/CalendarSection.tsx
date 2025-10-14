@@ -3,7 +3,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline'
 import { Link } from 'react-router-dom'
 import { schedulesApi, Schedule } from '@/lib/api/schedules'
 import Button from '@/components/common/Button'
-import EmptyState from '../common/EmptyState'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function CalendarSection() {
   const [currentDate, setCurrentDate] = useState(new Date())

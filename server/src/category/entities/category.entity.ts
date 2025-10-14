@@ -1,5 +1,5 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { BaseEntity } from '../../common/entities';
+import { BaseEntity } from '@/common/entities';
 
 @Entity('categories')
 export class Category extends BaseEntity {
@@ -15,8 +15,8 @@ export class Category extends BaseEntity {
   @Column({ name: 'parent_id', nullable: true })
   parentId?: string;
 
-  @Column({ name: 'display_order', type: 'int', default: 0 })
-  displayOrder: number;
+  @Column({ name: 'order', type: 'int', default: 0 })
+  order: number;
 
   @ManyToOne(() => Category, category => category.children, { nullable: true })
   @JoinColumn({ name: 'parent_id' })

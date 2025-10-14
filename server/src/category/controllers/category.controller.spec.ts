@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CategoryController } from './category.controller';
-import { CategoryService } from '../services/category.service';
-import { CategoryCreate, CategoryUpdate } from '../dto/category.dto';
-import { AdminGuard } from '../../auth/guards/admin.guard';
+import { CategoryController } from '@/category/controllers/category.controller';
+import { CategoryService } from '@/category/services/category.service';
+import { CategoryCreate, CategoryUpdate } from '@/category/dto/category.dto';
+import { AdminGuard } from '@/auth/guards/admin.guard';
 
 describe('CategoryController', () => {
   let controller: CategoryController;

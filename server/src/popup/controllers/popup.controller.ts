@@ -18,15 +18,15 @@ import {
   ApiResponse,
   ApiParam,
 } from '@nestjs/swagger';
-import { PopupService } from '../services/popup.service';
-import { AdminGuard } from '../../auth/guards/admin.guard';
+import { PopupService } from '@/popup/services/popup.service';
+import { AdminGuard } from '@/auth/guards/admin.guard';
 import {
   PopupCreate,
   PopupUpdate,
   PopupResponse,
   PopupQuery,
-} from '../dto/popup.dto';
-import { PagedResponse } from '../../common/dto/pagination.dto';
+} from '@/popup/dto/popup.dto';
+import { PagedResponse, SuccessResponse } from '@/common/dto/response.dto';
 
 @ApiTags('Popups')
 @Controller()
@@ -57,7 +57,19 @@ export class PopupController {
   @ApiResponse({
     status: 200,
     description: '활성 팝업 조회 성공',
-    type: [PopupResponse],
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/SuccessResponse' },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/PopupResponse' }
+            }
+          }
+        }
+      ]
+    }
   })
   @Get('api/v1/popups/active')
   async getActivePopups(): Promise<PopupResponse[]> {
@@ -72,7 +84,16 @@ export class PopupController {
   @ApiResponse({
     status: 200,
     description: '팝업 상세 조회 성공',
-    type: PopupResponse,
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/SuccessResponse' },
+        {
+          properties: {
+            data: { $ref: '#/components/schemas/PopupResponse' }
+          }
+        }
+      ]
+    }
   })
   @Get('api/v1/popups/:id')
   async getPopup(@Param('id') id: string): Promise<PopupResponse> {
@@ -86,7 +107,16 @@ export class PopupController {
   @ApiResponse({
     status: 201,
     description: '팝업 생성 성공',
-    type: PopupResponse,
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/SuccessResponse' },
+        {
+          properties: {
+            data: { $ref: '#/components/schemas/PopupResponse' }
+          }
+        }
+      ]
+    }
   })
   @Post('api/v1/admin/popups')
   @UseGuards(AdminGuard)
@@ -105,7 +135,16 @@ export class PopupController {
   @ApiResponse({
     status: 200,
     description: '팝업 수정 성공',
-    type: PopupResponse,
+    schema: {
+      allOf: [
+        { $ref: '#/components/schemas/SuccessResponse' },
+        {
+          properties: {
+            data: { $ref: '#/components/schemas/PopupResponse' }
+          }
+        }
+      ]
+    }
   })
   @Put('api/v1/admin/popups/:id')
   @UseGuards(AdminGuard)

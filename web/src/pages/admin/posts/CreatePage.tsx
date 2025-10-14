@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline'
 import { postsApi, CreatePostRequest, UpdatePostRequest, Post } from '@/lib/api/posts'
@@ -15,23 +15,15 @@ import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import SubTitle from '@/components/common/title/SubTitle'
 import ExitWarningModal from '@/components/common/ExitWarningModal'
 import { useAlert } from '@/hooks/useAlert'
+import { getCategoryOptions } from '@/config/categoryConfig'
 
-const CATEGORIES = [
-  { value: 'news-articles', label: '뉴스' },
-  { value: 'news', label: '소식' },
-  { value: 'scholarship', label: '장학정보' },
-  { value: 'resources', label: '자료실' },
-  { value: 'notice', label: '공지사항' },
-  { value: 'contest-info', label: '공모전 정보' },
-  { value: 'education-job', label: '교육/활동/취업 정보' },
-]
+const CATEGORIES = getCategoryOptions()
 
 export default function AdminPostsCreatePage() {
   const navigate = useNavigate()
   const params = useParams()
   const isEdit = !!params.id
   const alert = useAlert()
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   const [loading, setLoading] = useState(false)
   const [initialLoading, setInitialLoading] = useState(false)
@@ -42,7 +34,7 @@ export default function AdminPostsCreatePage() {
   const [thumbnailFileName, setThumbnailFileName] = useState('')
   const [formData, setFormData] = useState({
     title: '',
-    categoryId: 'news',
+    categoryId: 'announcements',
     contentHtml: '',
   })
   const [files, setFiles] = useState<UploadResult[]>([])
@@ -132,7 +124,7 @@ export default function AdminPostsCreatePage() {
   }
 
   const handleSubmit = async (isDraft = false) => {
-    if (formData.categoryId === 'news' && !thumbnailUrl && !post?.thumbnailUrl) {
+    if (formData.categoryId === 'department-news' && !thumbnailUrl && !post?.thumbnailUrl) {
       alert.error('뉴스 카테고리는 썸네일 이미지가 필수입니다.')
       return
     }
@@ -162,7 +154,7 @@ export default function AdminPostsCreatePage() {
         const postData: UpdatePostRequest = {
           title: formData.title,
           contentHtml: formData.contentHtml,
-          categorySlug: formData.categoryId,
+          category: formData.categoryId,
           status: isDraft ? 'draft' : isPublic ? 'public' : 'private',
           thumbnailUrl: thumbnailUrl || post?.thumbnailUrl || undefined,
           files: allFiles,
@@ -174,7 +166,7 @@ export default function AdminPostsCreatePage() {
         const postData: CreatePostRequest = {
           title: formData.title,
           contentHtml: formData.contentHtml,
-          categorySlug: formData.categoryId,
+          category: formData.categoryId,
           status: isDraft ? 'draft' : isPublic ? 'public' : 'private',
           thumbnailUrl: thumbnailUrl || null,
           files: allFiles,
@@ -267,6 +259,7 @@ export default function AdminPostsCreatePage() {
               height="100%"
               showToolbar={true}
               onGetImageFileKeys={setGetEditorImageFileKeys}
+              ownerData={{ ownerType: 'post', ownerId: params.id || 'temp' }}
             />
           </div>
         </div>
@@ -300,7 +293,7 @@ export default function AdminPostsCreatePage() {
 
             <div className="flex gap-8">
               {/* 썸네일 영역 - 뉴스 카테고리인 경우에만 표시 */}
-              {formData.categoryId === 'news' && (
+              {formData.categoryId === 'department-news' && (
                 <div className="flex-1">
                   <div className="mb-4">
                     <div className="border rounded-lg overflow-hidden">
@@ -381,6 +374,8 @@ export default function AdminPostsCreatePage() {
                     onFilesChange={setFiles}
                     maxFiles={5}
                     maxSize={10 * 1024 * 1024}
+                    ownerType="post"
+                    ownerId={params.id || 'temp'}
                   />
                 </div>
               </div>

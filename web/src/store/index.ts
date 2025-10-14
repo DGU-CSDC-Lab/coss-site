@@ -1,3 +1,3 @@
-export { useAlertStore } from './alert.store'
-export { useAuthStore } from './auth.store'
-export { useUIStore } from './ui.store'
+export { useAlertStore } from '@/store/alert.store'
+export { useAuthStore } from '@/store/auth.store'
+export { useUIStore } from '@/store/ui.store'

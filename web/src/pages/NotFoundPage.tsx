@@ -4,6 +4,7 @@ import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import NewsDetail from '@/components/news/NewsDetail'
 import { PostDetail, postsApi } from '@/lib/api/posts'
 import EmptyState from '@/components/common/EmptyState'
+import { categoryNameToKey } from '@/config/categoryConfig'
 
 export default function NotFoundPage() {
   const location = useLocation()
@@ -54,22 +55,10 @@ export default function NotFoundPage() {
       }
 
       if (!post) {
-        return (
-          <EmptyState message="존재하지 않는 게시글입니다." />
-        )
+        return <EmptyState message="존재하지 않는 게시글입니다." />
       }
 
       const getBackPath = () => {
-        const categoryNameToKey: Record<string, string> = {
-          뉴스: 'news',
-          소식: 'updates',
-          장학정보: 'scholarship',
-          자료실: 'resources',
-          공지사항: 'notices',
-          '공모전 정보': 'contests',
-          '교육/활동/취업 정보': 'activities',
-        }
-
         const decodedCategory = decodeURIComponent(category)
         const categoryKey = categoryNameToKey[decodedCategory]
 

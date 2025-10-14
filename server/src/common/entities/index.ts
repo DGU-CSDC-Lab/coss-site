@@ -1,2 +1,2 @@
-export { BaseEntity } from './base.entity';
-export { SoftDeleteEntity } from './soft-delete.entity';
+export { BaseEntity } from '@/common/entities/base.entity';
+export { SoftDeleteEntity } from '@/common/entities/soft-delete.entity';

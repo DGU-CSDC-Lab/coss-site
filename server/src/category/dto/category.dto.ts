@@ -1,5 +1,6 @@
 import { IsString, IsOptional, IsInt, Min } from 'class-validator';
 
+// 카테고리 생성 요청 DTO
 export class CategoryCreate {
   @IsString()
   name: string;
@@ -14,6 +15,7 @@ export class CategoryCreate {
   order?: number = 0;
 }
 
+// 카테고리 수정 요청 DTO
 export class CategoryUpdate {
   @IsOptional()
   @IsString()
@@ -29,6 +31,7 @@ export class CategoryUpdate {
   order?: number;
 }
 
+// 카테고리 응답 DTO
 export class CategoryResponse {
   id: string;
   name: string;
@@ -36,5 +39,4 @@ export class CategoryResponse {
   parentId?: string;
   order: number;
   createdAt: Date;
-  updatedAt: Date;
 }

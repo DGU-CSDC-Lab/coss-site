@@ -11,8 +11,8 @@ import { Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
-import LoadingSpinner from '../common/loading/LoadingSpinner'
-import EmptyState from '../common/EmptyState'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
 
 interface NewsListProps {
   posts: PaginatedResponse<Post> | null

@@ -1,1 +1,1 @@
-export { Course } from './course.entity';
+export { Course } from '@/course/entities/course.entity';

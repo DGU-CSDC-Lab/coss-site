@@ -1,27 +1,55 @@
 import {
   Injectable,
-  NotFoundException,
-  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Course } from '../entities';
+import { Course } from '@/course/entities';
 import {
   CourseCreate,
   CourseUpdate,
   CourseResponse,
   CourseQuery,
   CourseUploadResult,
-} from '../dto/course.dto';
-import { PagedResponse } from '../../common/dto/pagination.dto';
+} from '@/course/dto/course.dto';
+import { PagedResponse } from '@/common/dto/response.dto';
+import { CommonException, CourseException } from '@/common/exceptions';
 
+/**
+ * 교과목 관리 서비스
+ *
+ * 지능IoT학과 교과목 정보를 관리하는 서비스입니다.
+ * - 교과목 목록 조회 (다양한 필터링 및 정렬 옵션 지원)
+ * - 교과목 상세 정보 조회
+ * - 교과목 정보 생성, 수정, 삭제
+ * - CSV 파일을 통한 교과목 일괄 업로드
+ * - 년도/학기별 교과목 일괄 초기화
+ */
 @Injectable()
 export class CourseService {
+  private readonly logger = new Logger(CourseService.name);
+
   constructor(
     @InjectRepository(Course)
     private courseRepository: Repository<Course>,
   ) {}
 
+  /**
+   * 교과목 목록 조회 (페이지네이션 및 다중 필터링 지원)
+   *
+   * @param query 검색 및 페이지네이션 조건
+   *              - year: 연도 필터
+   *              - semester: 학기 필터
+   *              - department: 학과명 부분 검색
+   *              - name: 교과목명 부분 검색
+   *              - code: 교과목 코드 부분 검색
+   *              - grade: 학년 부분 검색
+   *              - sortBy: 정렬 기준 (name, code, department, grade, credit, createdAt)
+   *              - sortOrder: 정렬 순서 (ASC, DESC)
+   *              - page: 페이지 번호 (기본값: 1)
+   *              - size: 페이지당 항목 수 (기본값: 20)
+   * @returns 페이지네이션된 교과목 목록 응답
+   */
   async findAll(query: CourseQuery): Promise<PagedResponse<CourseResponse>> {
     const {
       year,
@@ -36,38 +64,75 @@ export class CourseService {
       size = 20,
     } = query;
 
-    const queryBuilder = this.courseRepository.createQueryBuilder('course');
+    this.logger.log(
+      `Finding courses - year: ${year || 'all'}, semester: ${semester || 'all'}, department: ${department || 'all'}, page: ${page}, size: ${size}`,
+    );
 
-    // 필터링
-    if (year) queryBuilder.andWhere('course.year = :year', { year });
-    if (semester)
-      queryBuilder.andWhere('course.semester = :semester', { semester });
-    if (department)
-      queryBuilder.andWhere('course.department LIKE :department', {
-        department: `%${department}%`,
-      });
-    if (name)
-      queryBuilder.andWhere('course.name LIKE :name', { name: `%${name}%` });
-    if (code)
-      queryBuilder.andWhere('course.code LIKE :code', { code: `%${code}%` });
-    if (grade)
-      queryBuilder.andWhere('course.grade LIKE :grade', {
-        grade: `%${grade}%`,
-      });
+    try {
+      // QueryBuilder를 사용하여 동적 검색 조건 구성
+      const queryBuilder = this.courseRepository.createQueryBuilder('course');
 
-    // 정렬
-    const sortField = this.getSortField(sortBy);
-    queryBuilder.orderBy(sortField, sortOrder);
+      // 다양한 필터링 조건 적용
+      if (year) {
+        queryBuilder.andWhere('course.year = :year', { year });
+        this.logger.debug(`Added year filter: ${year}`);
+      }
+      if (semester) {
+        queryBuilder.andWhere('course.semester = :semester', { semester });
+        this.logger.debug(`Added semester filter: ${semester}`);
+      }
+      if (department) {
+        queryBuilder.andWhere('course.department LIKE :department', {
+          department: `%${department}%`,
+        });
+        this.logger.debug(`Added department filter: ${department}`);
+      }
+      if (name) {
+        queryBuilder.andWhere('course.name LIKE :name', { name: `%${name}%` });
+        this.logger.debug(`Added name filter: ${name}`);
+      }
+      if (code) {
+        queryBuilder.andWhere('course.code LIKE :code', { code: `%${code}%` });
+        this.logger.debug(`Added code filter: ${code}`);
+      }
+      if (grade) {
+        queryBuilder.andWhere('course.grade LIKE :grade', {
+          grade: `%${grade}%`,
+        });
+        this.logger.debug(`Added grade filter: ${grade}`);
+      }
 
-    const [courses, totalElements] = await queryBuilder
-      .skip((page - 1) * size)
-      .take(size)
-      .getManyAndCount();
+      // 정렬 조건 적용
+      const sortField = this.getSortField(sortBy);
+      queryBuilder.orderBy(sortField, sortOrder);
+      this.logger.debug(`Applied sorting: ${sortField} ${sortOrder}`);
 
-    const items = courses.map(this.toResponse);
-    return new PagedResponse(items, page, size, totalElements);
+      // 페이지네이션 적용 및 결과 조회
+      const [courses, totalElements] = await queryBuilder
+        .skip((page - 1) * size) // 페이지네이션: 건너뛸 항목 수
+        .take(size) // 페이지네이션: 가져올 항목 수
+        .getManyAndCount(); // 데이터와 총 개수를 함께 조회
+
+      this.logger.debug(
+        `Found ${courses.length} courses out of ${totalElements} total`,
+      );
+
+      // 엔티티를 응답 DTO로 변환하고 페이지네이션 정보와 함께 반환
+      const items = courses.map(this.toResponse);
+      return new PagedResponse(items, page, size, totalElements);
+    } catch (error) {
+      this.logger.error('Error finding courses', error.stack);
+      throw CommonException.internalServerError(error.message);
+    }
   }
 
+  /**
+   * 정렬 필드명을 실제 데이터베이스 컬럼명으로 매핑
+   *
+   * @param sortBy 클라이언트에서 요청한 정렬 필드명
+   * @returns 실제 데이터베이스 컬럼명 (테이블 별칭 포함)
+   * @private 내부에서만 사용하는 유틸리티 메서드
+   */
   private getSortField(sortBy: string): string {
     const fieldMap: { [key: string]: string } = {
       name: 'course.name',
@@ -80,194 +145,378 @@ export class CourseService {
     return fieldMap[sortBy] || 'course.createdAt';
   }
 
+  /**
+   * 특정 교과목 상세 정보 조회
+   *
+   * @param id 조회할 교과목 ID
+   * @returns 교과목 상세 정보 응답
+   * @throws NotFoundException 해당 ID의 교과목이 존재하지 않는 경우
+   */
   async findOne(id: string): Promise<CourseResponse> {
-    const course = await this.courseRepository.findOne({ where: { id } });
-    if (!course) {
-      throw new NotFoundException('Course not found');
+    this.logger.log(`Finding course by id: ${id}`);
+
+    try {
+      // ID로 교과목 조회
+      const course = await this.courseRepository.findOne({ where: { id } });
+      if (!course) {
+        this.logger.warn(`Course not found: ${id}`);
+        throw CourseException.courseNotFound(id);
+      }
+
+      this.logger.debug(`Found course: ${course.name} (${course.code})`);
+      return this.toResponse(course);
+    } catch (error) {
+      this.logger.error('Error finding course', error.stack);
+      throw CommonException.internalServerError(error.message);
     }
-    return this.toResponse(course);
   }
 
+  /**
+   * 새 교과목 정보 생성
+   *
+   * @param createDto 생성할 교과목 정보
+   * @returns 생성된 교과목 정보 응답
+   */
   async create(createDto: CourseCreate): Promise<CourseResponse> {
-    const course = this.courseRepository.create({
-      year: createDto.year,
-      semester: createDto.semester,
-      department: createDto.department,
-      code: createDto.courseCode,
-      name: createDto.subjectName,
-      englishName: createDto.englishName,
-      grade: createDto.grade,
-      credit: createDto.credit,
-      time: createDto.classTime,
-      instructor: createDto.instructor,
-      classroom: createDto.classroom,
-      courseType: createDto.courseType,
-      syllabusUrl: createDto.syllabusUrl,
-    });
+    this.logger.debug(
+      `Creating course: ${createDto.subjectName} (${createDto.courseCode})`,
+    );
+    try {
+      // DTO 필드명을 엔티티 필드명으로 매핑하여 교과목 엔티티 생성
+      const course = this.courseRepository.create({
+        year: createDto.year,
+        semester: createDto.semester,
+        department: createDto.department,
+        code: createDto.courseCode, // DTO의 courseCode -> 엔티티의 code
+        name: createDto.subjectName, // DTO의 subjectName -> 엔티티의 name
+        englishName: createDto.englishName,
+        grade: createDto.grade,
+        credit: createDto.credit,
+        time: createDto.classTime, // DTO의 classTime -> 엔티티의 time
+        instructor: createDto.instructor,
+        classroom: createDto.classroom,
+        courseType: createDto.courseType,
+        syllabusUrl: createDto.syllabusUrl,
+      });
 
-    const saved = await this.courseRepository.save(course);
-    return this.toResponse(saved);
-  }
+      // 데이터베이스에 저장
+      const saved = await this.courseRepository.save(course);
+      this.logger.log(
+        `Course created successfully: ${saved.name} (id: ${saved.id})`,
+      );
 
-  async update(id: string, updateDto: CourseUpdate): Promise<CourseResponse> {
-    const course = await this.courseRepository.findOne({ where: { id } });
-    if (!course) {
-      throw new NotFoundException('Course not found');
+      return this.toResponse(saved);
+    } catch (error) {
+      this.logger.error('Error creating course', error.stack);
+      throw CommonException.internalServerError(error.message);
     }
-
-    Object.assign(course, {
-      year: updateDto.year ?? course.year,
-      semester: updateDto.semester ?? course.semester,
-      department: updateDto.department ?? course.department,
-      code: updateDto.courseCode ?? course.code,
-      name: updateDto.subjectName ?? course.name,
-      englishName: updateDto.englishName ?? course.englishName,
-      grade: updateDto.grade ?? course.grade,
-      credit: updateDto.credit ?? course.credit,
-      time: updateDto.classTime ?? course.time,
-      instructor: updateDto.instructor ?? course.instructor,
-      classroom: updateDto.classroom ?? course.classroom,
-      courseType: updateDto.courseType ?? course.courseType,
-      syllabusUrl: updateDto.syllabusUrl ?? course.syllabusUrl,
-    });
-
-    const saved = await this.courseRepository.save(course);
-    return this.toResponse(saved);
   }
 
+  /**
+   * 기존 교과목 정보 수정
+   *
+   * @param id 수정할 교과목 ID
+   * @param updateDto 수정할 정보
+   * @returns 수정된 교과목 정보 응답
+   * @throws NotFoundException 해당 ID의 교과목이 존재하지 않는 경우
+   */
+  async update(id: string, updateDto: CourseUpdate): Promise<CourseResponse> {
+    try {
+      this.logger.debug(`Updating course: ${id}`);
+
+      // 수정할 교과목 존재 여부 확인
+      const course = await this.courseRepository.findOne({ where: { id } });
+      if (!course) {
+        this.logger.warn(`Course not found for update: ${id}`);
+        throw CourseException.courseNotFound(id);
+      }
+
+      this.logger.debug(
+        `Found course to update: ${course.name} (${course.code})`,
+      );
+
+      // 변경사항 로깅
+      const changes: string[] = [];
+      if (updateDto.subjectName && updateDto.subjectName !== course.name) {
+        changes.push(`name: ${course.name} → ${updateDto.subjectName}`);
+      }
+      if (updateDto.courseCode && updateDto.courseCode !== course.code) {
+        changes.push(`code: ${course.code} → ${updateDto.courseCode}`);
+      }
+      if (updateDto.year && updateDto.year !== course.year) {
+        changes.push(`year: ${course.year} → ${updateDto.year}`);
+      }
+      if (updateDto.semester && updateDto.semester !== course.semester) {
+        changes.push(`semester: ${course.semester} → ${updateDto.semester}`);
+      }
+
+      if (changes.length > 0) {
+        this.logger.debug(`Course changes: ${changes.join(', ')}`);
+      }
+
+      // 제공된 필드들로 기존 엔티티 업데이트 (null 병합 연산자 사용)
+      Object.assign(course, {
+        year: updateDto.year ?? course.year,
+        semester: updateDto.semester ?? course.semester,
+        department: updateDto.department ?? course.department,
+        code: updateDto.courseCode ?? course.code,
+        name: updateDto.subjectName ?? course.name,
+        englishName: updateDto.englishName ?? course.englishName,
+        grade: updateDto.grade ?? course.grade,
+        credit: updateDto.credit ?? course.credit,
+        time: updateDto.classTime ?? course.time,
+        instructor: updateDto.instructor ?? course.instructor,
+        classroom: updateDto.classroom ?? course.classroom,
+        courseType: updateDto.courseType ?? course.courseType,
+        syllabusUrl: updateDto.syllabusUrl ?? course.syllabusUrl,
+      });
+
+      // 변경사항 저장
+      const saved = await this.courseRepository.save(course);
+      this.logger.log(
+        `Course updated successfully: ${saved.name} (id: ${saved.id})`,
+      );
+
+      return this.toResponse(saved);
+    } catch (error) {
+      this.logger.error('Error updating course', error.stack);
+      throw CommonException.internalServerError(error.message);
+    }
+  }
+
+  /**
+   * 특정 년도/학기의 교과목 일괄 초기화
+   *
+   * @param year 대상 연도
+   * @param semester 대상 학기
+   * @param courses 새로 등록할 교과목 목록
+   * @returns 업로드 결과 (성공/실패 개수, 에러 목록)
+   */
   async bulkInit(
     year: number,
     semester: string,
     courses: CourseCreate[],
   ): Promise<CourseUploadResult> {
-    // 기존 년도/학기 데이터 삭제
-    await this.courseRepository.delete({ year, semester });
+    this.logger.debug(
+      `Bulk initializing courses for ${year} ${semester} - ${courses.length} courses`,
+    );
 
-    let successCount = 0;
-    const errors: string[] = [];
+    try {
+      // 기존 년도/학기 데이터 삭제
+      const deleteResult = await this.courseRepository.delete({
+        year,
+        semester,
+      });
+      this.logger.log(
+        `Deleted ${deleteResult.affected || 0} existing courses for ${year} ${semester}`,
+      );
 
-    // 새 데이터 추가
-    for (let i = 0; i < courses.length; i++) {
-      try {
-        const courseData = {
-          year,
-          semester,
-          department: courses[i].department,
-          code: courses[i].courseCode,
-          name: courses[i].subjectName,
-          englishName: courses[i].englishName,
-          grade: courses[i].grade,
-          credit: courses[i].credit,
-          time: courses[i].classTime,
-          instructor: courses[i].instructor,
-          classroom: courses[i].classroom,
-          courseType: courses[i].courseType,
-          syllabusUrl: courses[i].syllabusUrl,
-        };
-        const course = this.courseRepository.create(courseData);
-        await this.courseRepository.save(course);
-        successCount++;
-      } catch (error) {
-        errors.push(`${i + 1}번째 교과목: ${error.message}`);
+      let successCount = 0;
+      const errors: string[] = [];
+
+      // 새 데이터 추가
+      for (let i = 0; i < courses.length; i++) {
+        try {
+          // DTO 필드명을 엔티티 필드명으로 매핑
+          const courseData = {
+            year,
+            semester,
+            department: courses[i].department,
+            code: courses[i].courseCode,
+            name: courses[i].subjectName,
+            englishName: courses[i].englishName,
+            grade: courses[i].grade,
+            credit: courses[i].credit,
+            time: courses[i].classTime,
+            instructor: courses[i].instructor,
+            classroom: courses[i].classroom,
+            courseType: courses[i].courseType,
+            syllabusUrl: courses[i].syllabusUrl,
+          };
+
+          const course = this.courseRepository.create(courseData);
+          await this.courseRepository.save(course);
+          successCount++;
+
+          if ((i + 1) % 10 === 0) {
+            this.logger.debug(`Processed ${i + 1}/${courses.length} courses`);
+          }
+        } catch (error) {
+          const errorMsg = `${i + 1}번째 교과목: ${error.message}`;
+          errors.push(errorMsg);
+          this.logger.warn(errorMsg);
+        }
       }
-    }
 
-    return {
-      successCount,
-      failureCount: errors.length,
-      errors,
-    };
+      this.logger.log(
+        `Bulk init completed - Success: ${successCount}, Failed: ${errors.length}`,
+      );
+
+      return {
+        successCount,
+        failureCount: errors.length,
+        errors,
+      };
+    } catch (error) {
+      this.logger.error('Error during bulk course initialization', error.stack);
+      throw CommonException.internalServerError(error.message);
+    }
   }
 
+  /**
+   * 교과목 정보 삭제
+   *
+   * @param id 삭제할 교과목 ID
+   * @throws NotFoundException 해당 ID의 교과목이 존재하지 않는 경우
+   */
   async delete(id: string): Promise<void> {
-    const course = await this.courseRepository.findOne({ where: { id } });
-    if (!course) {
-      throw new NotFoundException('Course not found');
+    this.logger.debug(`Deleting course: ${id}`);
+
+    try {
+      // 삭제할 교과목 존재 여부 확인
+      const course = await this.courseRepository.findOne({ where: { id } });
+      if (!course) {
+        this.logger.warn(`Course not found for deletion: ${id}`);
+        throw CourseException.courseNotFound(id);
+      }
+
+      this.logger.debug(
+        `Found course to delete: ${course.name} (${course.code})`,
+      );
+
+      // 교과목 정보 삭제 (물리적 삭제)
+      await this.courseRepository.remove(course);
+
+      this.logger.log(
+        `Course deleted successfully: ${course.name} (id: ${id})`,
+      );
+    } catch (error) {
+      this.logger.error('Error deleting course', error.stack);
+      throw CommonException.internalServerError(error.message);
     }
-    await this.courseRepository.remove(course);
   }
 
+  /**
+   * CSV 파일을 통한 교과목 일괄 업로드
+   *
+   * @param buffer CSV 파일 버퍼
+   * @param filename 파일명 (확장자 검증용)
+   * @returns 업로드 결과 (성공/실패 개수, 에러 목록)
+   * @throws BadRequestException CSV 파일이 아니거나 형식이 잘못된 경우
+   */
   async uploadFromFile(
     buffer: Buffer,
     filename: string,
   ): Promise<CourseUploadResult> {
-    if (!filename.endsWith('.csv')) {
-      throw new BadRequestException('Only CSV files are supported');
-    }
+    this.logger.debug(`Uploading courses from file: ${filename}`);
 
-    const csvData = buffer.toString('utf-8');
-    const lines = csvData.split('\n').filter(line => line.trim());
-
-    if (lines.length < 2) {
-      throw new BadRequestException(
-        'CSV file must contain header and at least one data row',
-      );
-    }
-
-    const errors: string[] = [];
-    let successCount = 0;
-    let failureCount = 0;
-
-    // Skip header row
-    for (let i = 1; i < lines.length; i++) {
-      try {
-        const columns = lines[i].split(',').map(col => col.trim());
-
-        if (columns.length < 4) {
-          errors.push(`Row ${i + 1}: Insufficient columns`);
-          failureCount++;
-          continue;
-        }
-
-        const courseData: CourseCreate = {
-          year: parseInt(columns[0]) || new Date().getFullYear(),
-          semester: columns[1] || '1학기',
-          department: columns[2] || '',
-          courseCode: columns[3] || '',
-          subjectName: columns[4] || '',
-          englishName: columns[5] || undefined,
-          grade: columns[6] || undefined,
-          credit: columns[7] ? parseFloat(columns[7]) : undefined,
-          classTime: columns[8] || undefined,
-          instructor: columns[9] || undefined,
-          classroom: columns[10] || undefined,
-          courseType: columns[11] || undefined,
-          syllabusUrl: columns[12] || undefined,
-        };
-
-        await this.create(courseData);
-        successCount++;
-      } catch (error) {
-        errors.push(`Row ${i + 1}: ${error.message}`);
-        failureCount++;
+    try {
+      // 파일 확장자 검증
+      if (!filename.endsWith('.csv')) {
+        this.logger.warn(`Invalid file type: ${filename}`);
+        throw CourseException.availableOnlyCsvFormat();
       }
-    }
 
-    return {
-      successCount,
-      failureCount,
-      errors,
-    };
+      // CSV 데이터 파싱
+      const csvData = buffer.toString('utf-8');
+      const lines = csvData.split('\n').filter(line => line.trim());
+
+      if (lines.length < 2) {
+        this.logger.warn(`Invalid CSV format: ${lines.length} lines`);
+        throw CourseException.moreThanOneHeaderRow();
+      }
+
+      this.logger.debug(`Processing ${lines.length - 1} data rows from CSV`);
+
+      const errors: string[] = [];
+      let successCount = 0;
+      let failureCount = 0;
+
+      // 헤더 행 건너뛰고 데이터 행 처리
+      for (let i = 1; i < lines.length; i++) {
+        try {
+          // CSV 행을 컬럼으로 분할 (쉼표 기준)
+          const columns = lines[i].split(',').map(col => col.trim());
+
+          if (columns.length < 4) {
+            const errorMsg = `Row ${i + 1}: Insufficient columns`;
+            errors.push(errorMsg);
+            failureCount++;
+            continue;
+          }
+
+          // CSV 컬럼을 CourseCreate DTO로 매핑
+          const courseData: CourseCreate = {
+            year: parseInt(columns[0]) || new Date().getFullYear(),
+            semester: columns[1] || '1학기',
+            department: columns[2] || '',
+            courseCode: columns[3] || '',
+            subjectName: columns[4] || '',
+            englishName: columns[5] || undefined,
+            grade: columns[6] || undefined,
+            credit: columns[7] ? parseFloat(columns[7]) : undefined,
+            classTime: columns[8] || undefined,
+            instructor: columns[9] || undefined,
+            classroom: columns[10] || undefined,
+            courseType: columns[11] || undefined,
+            syllabusUrl: columns[12] || undefined,
+          };
+
+          // 교과목 생성
+          await this.create(courseData);
+          successCount++;
+
+          if (successCount % 10 === 0) {
+            this.logger.debug(`Processed ${successCount} courses from CSV`);
+          }
+        } catch (error) {
+          const errorMsg = `Row ${i + 1}: ${error.message}`;
+          errors.push(errorMsg);
+          failureCount++;
+          this.logger.warn(errorMsg);
+        }
+      }
+
+      this.logger.log(
+        `CSV upload completed - Success: ${successCount}, Failed: ${failureCount}`,
+      );
+
+      return {
+        successCount,
+        failureCount,
+        errors,
+      };
+    } catch (error) {
+      this.logger.error('Error uploading courses from file', error.stack);
+      throw CommonException.internalServerError(error.message);
+    }
   }
 
+  /**
+   * Course 엔티티를 CourseResponse DTO로 변환
+   *
+   * @param course Course 엔티티
+   * @returns CourseResponse DTO
+   * @private 내부에서만 사용하는 유틸리티 메서드
+   */
   private toResponse(course: Course): CourseResponse {
     return {
       id: course.id,
-      year: course.year,
-      semester: course.semester,
-      department: course.department,
-      courseCode: course.code,
-      subjectName: course.name,
-      englishName: course.englishName,
-      grade: course.grade,
-      credit: course.credit,
-      classTime: course.time,
-      instructor: course.instructor,
-      classroom: course.classroom,
-      courseType: course.courseType,
-      syllabusUrl: course.syllabusUrl,
-      createdAt: course.createdAt,
-      updatedAt: course.updatedAt,
+      year: course.year, // 연도
+      semester: course.semester, // 학기
+      department: course.department, // 학과
+      courseCode: course.code, // 엔티티의 code -> DTO의 courseCode
+      subjectName: course.name, // 엔티티의 name -> DTO의 subjectName
+      englishName: course.englishName, // 영문 교과목명
+      grade: course.grade, // 학년
+      credit: course.credit, // 학점
+      classTime: course.time, // 엔티티의 time -> DTO의 classTime
+      instructor: course.instructor, // 담당교수
+      classroom: course.classroom, // 강의실
+      courseType: course.courseType, // 교과목 유형
+      syllabusUrl: course.syllabusUrl, // 강의계획서 URL
+      createdAt: course.createdAt, // 생성일시
+      updatedAt: course.updatedAt, // 수정일시
     };
   }
 }

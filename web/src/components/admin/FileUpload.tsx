@@ -7,7 +7,7 @@ import {
   FileUploadError,
   formatFileSize,
 } from '@/utils/fileUpload'
-import Button from '../common/Button'
+import Button from '@/components/common/Button'
 
 interface FileUploadProps {
   onFilesChange: (files: UploadResult[]) => void
@@ -15,6 +15,8 @@ interface FileUploadProps {
   maxFiles?: number
   accept?: string
   maxSize?: number
+  ownerType: 'post' | 'popup' | 'faculty'
+  ownerId: string
 }
 
 export default function FileUpload({
@@ -23,6 +25,8 @@ export default function FileUpload({
   maxFiles = 5,
   accept = '*/*',
   maxSize = 10 * 1024 * 1024,
+  ownerType,
+  ownerId,
 }: FileUploadProps) {
   const [files, setFiles] = useState<UploadResult[]>(initialFiles)
   const [uploading, setUploading] = useState(false)
@@ -30,9 +34,12 @@ export default function FileUpload({
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // initialFiles가 변경되면 files 상태 업데이트 (깊은 비교로 무한 루프 방지)
+  // initialFiles가 변경되면 files 상태 업데이트 (빈 배열로는 덮어쓰지 않음)
   useEffect(() => {
-    if (JSON.stringify(files) !== JSON.stringify(initialFiles)) {
+    console.log('FileUpload useEffect - initialFiles:', initialFiles, 'current files:', files)
+    // initialFiles가 비어있지 않을 때만 업데이트
+    if (initialFiles.length > 0 && JSON.stringify(files) !== JSON.stringify(initialFiles)) {
+      console.log('Updating files state with initialFiles')
       setFiles(initialFiles)
     }
   }, [initialFiles, files])
@@ -61,6 +68,8 @@ export default function FileUpload({
                 ((i + fileProgress / 100) / selectedFiles.length) * 100
               setProgress(Math.round(totalProgress))
             },
+            ownerType,
+            ownerId,
           })
 
           console.log('Upload result:', result)
@@ -77,7 +86,9 @@ export default function FileUpload({
 
       const updatedFiles = [...files, ...newFiles]
       console.log('Updated files:', updatedFiles)
+      console.log('Current files state before setFiles:', files)
       setFiles(updatedFiles)
+      console.log('Calling onFilesChange with:', updatedFiles)
       onFilesChange(updatedFiles)
     } finally {
       setUploading(false)

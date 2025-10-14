@@ -1,5 +1,65 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { IsInt, IsOptional, Max, Min } from 'class-validator';
 
+// 페이지네이션 쿼리 기본 클래스
+export class PaginationQuery {
+  @ApiProperty({
+    description: '페이지 번호',
+    example: 1,
+    minimum: 1,
+    default: 1,
+    required: false,
+  })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  @Min(1)
+  page?: number = 1;
+
+  @ApiProperty({
+    description: '페이지당 항목 수',
+    example: 20,
+    minimum: 1,
+    maximum: 100,
+    default: 20,
+    required: false,
+  })
+  @IsOptional()
+  @Transform(({ value }) => parseInt(value))
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  size?: number = 20;
+}
+
+// 공통 성공 응답 DTO
+export class SuccessResponse<T> {
+  @ApiProperty({
+    description: '성공 여부',
+    example: true,
+  })
+  success: boolean;
+
+  @ApiProperty({
+    description: '응답 데이터',
+  })
+  data: T;
+
+  @ApiProperty({
+    description: '응답 시간',
+    example: '2025-10-12T18:57:40.370Z',
+  })
+  timestamp: string;
+
+  constructor(data: T) {
+    this.success = true;
+    this.data = data;
+    this.timestamp = new Date().toISOString();
+  }
+}
+
+// 공통 에러 응답 DTO
 export class ErrorResponse {
   @ApiProperty({
     description: '에러 코드',
@@ -40,6 +100,7 @@ export class ErrorResponse {
   }
 }
 
+// 페이지네이션 메타데이터 DTO
 export class PageMeta {
   @ApiProperty({
     description: '현재 페이지 번호',

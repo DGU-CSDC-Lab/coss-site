@@ -4,7 +4,7 @@ import { headerAssetsApi, HeaderAsset } from '@/lib/api/headerAssets'
 
 import { Link } from 'react-router-dom'
 import { PagedResponse } from '@/lib/apiClient'
-import EmptyState from '../common/EmptyState'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function HeaderSlider() {
   const [currentIndex, setCurrentIndex] = useState(0)

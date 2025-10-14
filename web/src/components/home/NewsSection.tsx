@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 
 import { postsApi, Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
-import EmptyState from '../common/EmptyState'
+import EmptyState from '@/components/common/EmptyState'
 
 export default function NewsSection() {
   const [news, setNews] = useState<Post[]>([])

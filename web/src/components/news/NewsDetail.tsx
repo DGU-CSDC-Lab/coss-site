@@ -1,8 +1,8 @@
 import { Link } from 'react-router-dom'
 import { PaperClipIcon } from '@heroicons/react/24/outline'
-import { PostDetail } from '@/lib/api/posts'
-import LoadingSpinner from '../common/loading/LoadingSpinner'
-import EmptyState from '../common/EmptyState'
+import { PostDetail, PostFile } from '@/lib/api/posts'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import EmptyState from '@/components/common/EmptyState'
 
 interface NewsDetailProps {
   post: PostDetail | null
@@ -15,6 +15,26 @@ export default function NewsDetail({
   loading,
   backPath,
 }: NewsDetailProps) {
+  const handleFileDownload = async (file: PostFile) => {
+    try {
+      const response = await fetch(file.downloadUrl)
+      const blob = await response.blob()
+      
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = file.originalName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+    } catch (error) {
+      console.error('Download failed:', error)
+      // 실패 시 직접 링크로 이동
+      window.open(file.downloadUrl, '_blank')
+    }
+  }
+
   if (loading) {
     return <LoadingSpinner size="lg" />
   }
@@ -73,10 +93,9 @@ export default function NewsDetail({
           <hr className="border-gray-800" />
           {post.files.map((file, index) => (
             <div key={file.id}>
-              <a
-                href={file.downloadUrl}
-                download={file.originalName}
-                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors group"
+              <button
+                onClick={() => handleFileDownload(file)}
+                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-100 transition-colors group w-full text-left"
               >
                 <div className="flex-shrink-0 bg-point-2 p-2 rounded-full">
                   <PaperClipIcon className="w-4 h-4 text-white transition-colors" />
@@ -84,7 +103,7 @@ export default function NewsDetail({
                 <span className="text-body-14-regular text-gray-900 truncate group-hover:text-info-600 transition-colors">
                   {file.originalName}
                 </span>
-              </a>
+              </button>
               {index < post.files.length - 1 && (
                 <hr className="border-gray-800" />
               )}

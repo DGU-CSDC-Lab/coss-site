@@ -1,4 +1,4 @@
-import { api, PagedResponse } from '../apiClient'
+import { api, PagedResponse } from '@/lib/apiClient'
 
 export interface Course {
   id: string

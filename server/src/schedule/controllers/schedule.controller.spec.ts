@@ -1,24 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ScheduleController } from './schedule.controller';
-import { ScheduleService } from '../services/schedule.service';
-import { AdminGuard } from '../../auth/guards/admin.guard';
-import { ScheduleCategory } from '../entities';
+import { ScheduleController } from '@/schedule/controllers/schedule.controller';
+import { ScheduleService } from '@/schedule/services/schedule.service';
+import { AdminGuard } from '@/auth/guards/admin.guard';
+import { ScheduleCategory } from '@/schedule/entities';
+import { PagedResponse } from '@/common/dto/response.dto';
 
 describe('ScheduleController', () => {
   let controller: ScheduleController;
-  let _service: ScheduleService;
+  let scheduleService: jest.Mocked<ScheduleService>;
 
-  const mockScheduleService = {
-    findAll: jest.fn(),
-    findOne: jest.fn(),
-    create: jest.fn(),
-    update: jest.fn(),
-    delete: jest.fn(),
+  const mockScheduleResponse = {
+    id: 'schedule-1',
+    title: '중간고사',
+    description: '2024년 1학기 중간고사',
+    startDate: new Date('2024-04-15'),
+    endDate: new Date('2024-04-19'),
+    location: '각 강의실',
+    category: ScheduleCategory.ACADEMIC,
   };
 
-  const mockAdminGuard = {
-    canActivate: jest.fn(() => true),
-  };
+  const mockPagedResponse = new PagedResponse([mockScheduleResponse], 1, 10, 1);
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -26,139 +27,90 @@ describe('ScheduleController', () => {
       providers: [
         {
           provide: ScheduleService,
-          useValue: mockScheduleService,
+          useValue: {
+            findAll: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+          },
         },
       ],
     })
       .overrideGuard(AdminGuard)
-      .useValue(mockAdminGuard)
+      .useValue({ canActivate: jest.fn(() => true) })
       .compile();
 
     controller = module.get<ScheduleController>(ScheduleController);
-    _service = module.get<ScheduleService>(ScheduleService);
-
-    jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
+    scheduleService = module.get(ScheduleService);
   });
 
   describe('getSchedules', () => {
-    it('should return all schedules', async () => {
-      const mockSchedules = [
-        {
-          id: '1',
-          title: 'Test Schedule',
-          startDate: new Date('2024-01-01'),
-          category: ScheduleCategory.ACADEMIC,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+    it('should return paginated schedules', async () => {
+      scheduleService.findAll.mockResolvedValue(mockPagedResponse);
 
-      mockScheduleService.findAll.mockResolvedValue(mockSchedules);
+      const result = await controller.getSchedules({ page: 1, size: 10 });
 
-      const result = await controller.getSchedules({});
-
-      expect(result).toEqual(mockSchedules);
-      expect(mockScheduleService.findAll).toHaveBeenCalledWith({});
-    });
-
-    it('should filter by month and category', async () => {
-      mockScheduleService.findAll.mockResolvedValue([]);
-
-      await controller.getSchedules({
-        month: '2024-01',
-        category: ScheduleCategory.ADMISSION,
-      });
-
-      expect(mockScheduleService.findAll).toHaveBeenCalledWith({
-        month: '2024-01',
-        category: ScheduleCategory.ADMISSION,
-      });
+      expect(result).toBe(mockPagedResponse);
+      expect(scheduleService.findAll).toHaveBeenCalledWith({ page: 1, size: 10 });
     });
   });
 
   describe('getSchedule', () => {
     it('should return schedule by id', async () => {
-      const mockSchedule = {
-        id: '1',
-        title: 'Test Schedule',
-        startDate: new Date('2024-01-01'),
-        category: ScheduleCategory.ACADEMIC,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      scheduleService.findOne.mockResolvedValue(mockScheduleResponse);
 
-      mockScheduleService.findOne.mockResolvedValue(mockSchedule);
+      const result = await controller.getSchedule('schedule-1');
 
-      const result = await controller.getSchedule('1');
-
-      expect(result).toEqual(mockSchedule);
+      expect(result).toBe(mockScheduleResponse);
+      expect(scheduleService.findOne).toHaveBeenCalledWith('schedule-1');
     });
   });
 
   describe('createSchedule', () => {
-    it('should create new schedule', async () => {
+    it('should create schedule', async () => {
       const createDto = {
-        title: 'New Schedule',
-        startDate: '2024-01-01',
-        category: ScheduleCategory.ACADEMIC,
+        title: '새로운 일정',
+        description: '새로운 학사일정입니다',
+        startDate: '2024-05-01',
+        endDate: '2024-05-03',
+        location: '강의실 101',
+        category: ScheduleCategory.EVENT,
       };
+      const mockRequest = { user: { id: 'user-1' } };
 
-      const mockSchedule = {
-        id: '1',
-        ...createDto,
-        startDate: new Date(createDto.startDate),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      const mockRequest = { user: { id: 'user1' } };
-
-      mockScheduleService.create.mockResolvedValue(mockSchedule);
+      scheduleService.create.mockResolvedValue(mockScheduleResponse);
 
       const result = await controller.createSchedule(createDto, mockRequest);
 
-      expect(result).toEqual(mockSchedule);
-      expect(mockScheduleService.create).toHaveBeenCalledWith(
-        createDto,
-        'user1',
-      );
+      expect(result).toBe(mockScheduleResponse);
+      expect(scheduleService.create).toHaveBeenCalledWith(createDto, 'user-1');
     });
   });
 
   describe('updateSchedule', () => {
-    it('should update existing schedule', async () => {
+    it('should update schedule', async () => {
       const updateDto = {
-        title: 'Updated Schedule',
+        title: '수정된 일정',
+        description: '수정된 설명',
       };
 
-      const mockSchedule = {
-        id: '1',
-        title: 'Updated Schedule',
-        startDate: new Date('2024-01-01'),
-        category: ScheduleCategory.ACADEMIC,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+      scheduleService.update.mockResolvedValue(mockScheduleResponse);
 
-      mockScheduleService.update.mockResolvedValue(mockSchedule);
+      const result = await controller.updateSchedule('schedule-1', updateDto);
 
-      const result = await controller.updateSchedule('1', updateDto);
-
-      expect(result).toEqual(mockSchedule);
+      expect(result).toBe(mockScheduleResponse);
+      expect(scheduleService.update).toHaveBeenCalledWith('schedule-1', updateDto);
     });
   });
 
   describe('deleteSchedule', () => {
     it('should delete schedule', async () => {
-      mockScheduleService.delete.mockResolvedValue(undefined);
+      scheduleService.delete.mockResolvedValue();
 
-      await controller.deleteSchedule('1');
+      await controller.deleteSchedule('schedule-1');
 
-      expect(mockScheduleService.delete).toHaveBeenCalledWith('1');
+      expect(scheduleService.delete).toHaveBeenCalledWith('schedule-1');
     });
   });
 });

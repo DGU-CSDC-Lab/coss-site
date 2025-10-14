@@ -1,45 +1,57 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
-import { BoardService } from './board.service';
-import { BoardPost } from '../entities';
-import { User } from '../../auth/entities';
-import { Category } from '../../category/entities';
-import { S3Service } from '../../file/services/s3.service';
+import { Logger } from '@nestjs/common';
+import { BoardService } from '@/board/services/board.service';
+import { BoardPost, PostStatus } from '@/board/entities';
+import { User } from '@/auth/entities';
+import { Category } from '@/category/entities';
+import { File, OwnerType } from '@/file/entities';
+import { S3Service } from '@/file/services/s3.service';
+import { CommonException } from '@/common/exceptions';
+import { PagedResponse } from '@/common/dto/response.dto';
 
 describe('BoardService', () => {
   let service: BoardService;
-  let _postRepository: Repository<BoardPost>;
-  let _userRepository: Repository<User>;
-  let categoryRepository: Repository<Category>;
+  let postRepository: jest.Mocked<Repository<BoardPost>>;
+  let fileRepository: jest.Mocked<Repository<File>>;
+  let categoryRepository: jest.Mocked<Repository<Category>>;
+  let s3Service: jest.Mocked<S3Service>;
 
-  const mockQueryBuilder = {
-    leftJoinAndSelect: jest.fn().mockReturnThis(),
-    leftJoin: jest.fn().mockReturnThis(),
-    where: jest.fn().mockReturnThis(),
-    andWhere: jest.fn().mockReturnThis(),
-    orderBy: jest.fn().mockReturnThis(),
-    groupBy: jest.fn().mockReturnThis(),
-    addGroupBy: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    skip: jest.fn().mockReturnThis(),
-    take: jest.fn().mockReturnThis(),
-    getManyAndCount: jest.fn(),
-    getOne: jest.fn(),
-  };
+  const mockUser = {
+    id: 'user-1',
+    username: 'testuser',
+  } as User;
 
-  const mockPostRepository = {
-    createQueryBuilder: jest.fn(() => mockQueryBuilder),
-    findOne: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
-    softRemove: jest.fn(),
-  };
+  const mockCategory = {
+    id: 'cat-1',
+    name: 'Test Category',
+    slug: 'test-category',
+  } as Category;
 
-  const mockUserRepository = {
-    findOne: jest.fn(),
-  };
+  const mockPost = {
+    id: 'post-1',
+    title: 'Test Post',
+    content: '<p>Test content</p>',
+    status: PostStatus.PUBLIC,
+    viewCount: 10,
+    thumbnailUrl: 'https://example.com/thumb.jpg',
+    author: mockUser,
+    category: mockCategory,
+    files: [],
+    createdAt: new Date('2024-01-01'),
+  } as BoardPost;
+
+  const mockFile = {
+    id: 'file-1',
+    ownerId: 'post-1',
+    ownerType: OwnerType.POST,
+    fileKey: 'test-file-key',
+    fileName: 'test.pdf',
+    fileSize: 1024,
+    mimeType: 'application/pdf',
+    displayOrder: 0,
+  } as File;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -47,17 +59,21 @@ describe('BoardService', () => {
         BoardService,
         {
           provide: getRepositoryToken(BoardPost),
-          useValue: mockPostRepository,
-        },
-        {
-          provide: 'PostFileRepository',
           useValue: {
-            count: jest.fn().mockResolvedValue(0),
+            createQueryBuilder: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+            softRemove: jest.fn(),
           },
         },
         {
-          provide: getRepositoryToken(User),
-          useValue: mockUserRepository,
+          provide: getRepositoryToken(File),
+          useValue: {
+            count: jest.fn(),
+            create: jest.fn(),
+            save: jest.fn(),
+          },
         },
         {
           provide: getRepositoryToken(Category),
@@ -68,68 +84,102 @@ describe('BoardService', () => {
         {
           provide: S3Service,
           useValue: {
-            getFileUrl: jest.fn().mockReturnValue('https://test-file-url'),
+            getFileUrl: jest.fn(),
           },
         },
       ],
     }).compile();
 
     service = module.get<BoardService>(BoardService);
-    _postRepository = module.get<Repository<BoardPost>>(
-      getRepositoryToken(BoardPost),
-    );
-    _userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    categoryRepository = module.get<Repository<Category>>(
-      getRepositoryToken(Category),
-    );
+    postRepository = module.get(getRepositoryToken(BoardPost));
+    fileRepository = module.get(getRepositoryToken(File));
+    categoryRepository = module.get(getRepositoryToken(Category));
+    s3Service = module.get(S3Service);
 
-    // Reset mocks
-    jest.clearAllMocks();
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    jest.spyOn(Logger.prototype, 'log').mockImplementation();
+    jest.spyOn(Logger.prototype, 'debug').mockImplementation();
+    jest.spyOn(Logger.prototype, 'warn').mockImplementation();
+    jest.spyOn(Logger.prototype, 'error').mockImplementation();
   });
 
   describe('findAll', () => {
-    it('should return paginated posts with author relation', async () => {
-      const mockPosts = [
-        {
-          id: '1',
-          title: 'Test Post',
-          categoryId: 'cat1',
-          authorId: 'user1',
-          viewCount: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          author: { username: 'testuser' },
-        },
-      ];
+    it('should return paginated public posts successfully', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[mockPost], 1]),
+      };
 
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([mockPosts, 1]);
+      postRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
+      fileRepository.count.mockResolvedValue(1);
 
       const result = await service.findAll({ page: 1, size: 10 });
 
+      expect(result).toBeInstanceOf(PagedResponse);
       expect(result.items).toHaveLength(1);
-      expect(result.items[0].author).toBe('testuser');
-      expect(result.meta.totalElements).toBe(1);
-    });
-
-    it('should filter by category', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
-
-      await service.findAll({ categorySlug: 'news', page: 1, size: 10 });
-
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
-        'category.slug = :categorySlug',
-        { categorySlug: 'news' },
+        'post.status = :status',
+        { status: PostStatus.PUBLIC },
       );
     });
 
-    it('should search by keyword', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+    it('should filter by category when provided', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
 
-      await service.findAll({ keyword: 'test', page: 1, size: 10 });
+      postRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
+
+      await service.findAll({ category: 'test-category' });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'category.slug = :category',
+        { category: 'test-category' },
+      );
+    });
+
+    it('should search by keyword when provided', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+
+      postRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
+
+      await service.findAll({ keyword: 'test' });
 
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         '(post.title LIKE :keyword OR post.content LIKE :keyword)',
@@ -137,179 +187,397 @@ describe('BoardService', () => {
       );
     });
 
-    it('should sort by popularity', async () => {
-      mockQueryBuilder.getManyAndCount.mockResolvedValue([[], 0]);
+    it('should sort by popular when specified', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
 
-      await service.findAll({ sort: 'popular', page: 1, size: 10 });
+      postRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
+
+      await service.findAll({ sort: 'popular' });
 
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith(
         'post.viewCount',
         'DESC',
       );
     });
+
+    it('should throw CommonException when database error occurs', async () => {
+      postRepository.createQueryBuilder.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(service.findAll({})).rejects.toThrow(CommonException);
+    });
+  });
+
+  describe('findAllForAdmin', () => {
+    it('should return all posts for admin without status filter', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[mockPost], 1]),
+      };
+
+      postRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
+      fileRepository.count.mockResolvedValue(0);
+
+      const result = await service.findAllForAdmin({});
+
+      expect(result).toBeInstanceOf(PagedResponse);
+      expect(mockQueryBuilder.andWhere).not.toHaveBeenCalledWith(
+        'post.status = :status',
+        expect.any(Object),
+      );
+    });
+
+    it('should filter by status when provided', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+      };
+
+      postRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
+
+      await service.findAllForAdmin({ status: PostStatus.DRAFT });
+
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'post.status = :status',
+        { status: PostStatus.DRAFT },
+      );
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      postRepository.createQueryBuilder.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(service.findAllForAdmin({})).rejects.toThrow(
+        CommonException,
+      );
+    });
   });
 
   describe('findOne', () => {
-    it('should return post with incremented view count and author', async () => {
-      const mockPost = {
-        id: '1',
-        title: 'Test Post',
-        content: 'Test content',
-        categoryId: 'cat1',
-        authorId: 'user1',
-        viewCount: 5,
-        status: 'public',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        author: { username: 'testuser' },
-        category: { id: 'cat1', name: 'Test Category' },
+    it('should return post detail and increment view count for public post', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(mockPost),
       };
 
-      // Set up the main query to return the post
-      mockQueryBuilder.getOne.mockResolvedValueOnce(mockPost);
-      // Set up prev/next queries to return null
-      mockQueryBuilder.getOne.mockResolvedValueOnce(null);
-      mockQueryBuilder.getOne.mockResolvedValueOnce(null);
+      const mockPrevNextQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(null),
+      };
 
-      mockPostRepository.save.mockResolvedValue({ ...mockPost, viewCount: 6 });
-
-      const result = await service.findOne('1', false);
-
-      expect(mockPostRepository.createQueryBuilder).toHaveBeenCalledWith('post');
-      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('post.author', 'author');
-      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('post.category', 'category');
-      expect(mockQueryBuilder.leftJoinAndSelect).toHaveBeenCalledWith('post.files', 'files');
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('post.id = :id', { id: '1' });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('post.status = :status', { status: 'public' });
-      expect(mockPostRepository.save).toHaveBeenCalledWith({
+      postRepository.createQueryBuilder
+        .mockReturnValueOnce(mockQueryBuilder as any)
+        .mockReturnValue(mockPrevNextQueryBuilder as any);
+      postRepository.save.mockResolvedValue({
         ...mockPost,
-        viewCount: 6,
-      });
-      expect(result.contentHtml).toBe('Test content');
-      expect(result.author).toBe('testuser');
+        viewCount: 11,
+      } as BoardPost);
+      s3Service.getFileUrl.mockReturnValue('https://example.com/download');
+
+      const result = await service.findOne('post-1');
+
+      expect(result.id).toBe('post-1');
+      expect(postRepository.save).toHaveBeenCalledWith(
+        expect.objectContaining({ viewCount: 11 }),
+      );
     });
 
-    it('should throw NotFoundException when post not found', async () => {
-      mockQueryBuilder.getOne.mockResolvedValue(null);
+    it('should return post detail without incrementing view count for admin', async () => {
+      const draftPost = { ...mockPost, status: PostStatus.DRAFT };
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(draftPost),
+      };
 
-      await expect(service.findOne('nonexistent', false)).rejects.toThrow(
-        NotFoundException,
+      const mockPrevNextQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(null),
+      };
+
+      postRepository.createQueryBuilder
+        .mockReturnValueOnce(mockQueryBuilder as any)
+        .mockReturnValue(mockPrevNextQueryBuilder as any);
+
+      const result = await service.findOne('post-1', true);
+
+      expect(result.id).toBe('post-1');
+      expect(postRepository.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw PostException when post not found', async () => {
+      const mockQueryBuilder = {
+        createQueryBuilder: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getOne: jest.fn().mockResolvedValue(null),
+      };
+
+      postRepository.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
       );
+
+      await expect(service.findOne('nonexistent')).rejects.toThrow(
+        '게시글을 찾을 수 없습니다',
+      );
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      postRepository.createQueryBuilder.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(service.findOne('post-1')).rejects.toThrow(CommonException);
     });
   });
 
   describe('create', () => {
-    it('should create new post', async () => {
+    it('should create post successfully', async () => {
       const createDto = {
         title: 'New Post',
-        contentHtml: 'New content',
-        categorySlug: 'notices',
-        thumbnailUrl: 'thumb.jpg',
+        contentHtml: '<p>Content</p>',
+        category: 'test-category',
+        status: PostStatus.PUBLIC,
       };
 
-      const mockPost = {
-        id: '1',
-        ...createDto,
-        content: createDto.contentHtml,
-        authorId: 'user1',
-        viewCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+      categoryRepository.findOne.mockResolvedValue(mockCategory);
+      postRepository.create.mockReturnValue(mockPost);
+      postRepository.save.mockResolvedValue(mockPost);
+
+      jest.spyOn(service, 'findOne').mockResolvedValue({
+        id: 'post-1',
+        title: 'New Post',
+        contentHtml: '<p>Content</p>',
+        files: [],
+      } as any);
+
+      const result = await service.create(createDto, 'user-1');
+
+      expect(result.id).toBe('post-1');
+      expect(categoryRepository.findOne).toHaveBeenCalledWith({
+        where: { slug: 'test-category' },
+      });
+    });
+
+    it('should create post with files', async () => {
+      const createDto = {
+        title: 'New Post',
+        contentHtml: '<p>Content</p>',
+        category: 'test-category',
+        files: [
+          {
+            fileKey: 'file-key-1',
+            originalName: 'test.pdf',
+            fileSize: 1024,
+            mimeType: 'application/pdf',
+          },
+        ],
       };
 
-      const mockUser = { username: 'testuser' };
-      const mockCategory = { id: 'cat1', name: '공지사항' };
-      const mockResult = { title: 'New Post', author: 'testuser' };
+      categoryRepository.findOne.mockResolvedValue(mockCategory);
+      postRepository.create.mockReturnValue(mockPost);
+      postRepository.save.mockResolvedValue(mockPost);
+      fileRepository.create.mockReturnValue(mockFile);
+      fileRepository.save.mockResolvedValue([mockFile] as any);
 
-      mockPostRepository.create.mockReturnValue(mockPost);
-      mockPostRepository.save.mockResolvedValue(mockPost);
-      mockUserRepository.findOne.mockResolvedValue(mockUser);
-      (categoryRepository.findOne as jest.Mock).mockResolvedValue(mockCategory);
+      jest.spyOn(service, 'findOne').mockResolvedValue({
+        id: 'post-1',
+        files: [mockFile],
+      } as any);
 
-      // Spy on findOne method
-      jest.spyOn(service, 'findOne').mockResolvedValue(mockResult as any);
+      const result = await service.create(createDto, 'user-1');
 
-      const result = await service.create(createDto, 'user1');
+      expect(result.id).toBe('post-1');
+      expect(result.files).toHaveLength(1);
+      expect(fileRepository.save).toHaveBeenCalled();
+    });
 
-      expect(result.title).toBe('New Post');
-      expect(result.author).toBe('testuser');
+    it('should throw PostException when category not found', async () => {
+      const createDto = {
+        title: 'New Post',
+        contentHtml: '<p>Content</p>',
+        category: 'nonexistent',
+      };
+
+      categoryRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.create(createDto, 'user-1')).rejects.toThrow(
+        '카테고리를 찾을 수 없습니다',
+      );
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      const createDto = {
+        title: 'New Post',
+        contentHtml: '<p>Content</p>',
+        category: 'test-category',
+      };
+
+      categoryRepository.findOne.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(service.create(createDto, 'user-1')).rejects.toThrow(
+        CommonException,
+      );
     });
   });
 
   describe('update', () => {
-    it('should update existing post with author relation', async () => {
+    it('should update post successfully', async () => {
       const updateDto = {
-        title: 'Updated Post',
-        contentHtml: 'Updated content',
+        title: 'Updated Title',
+        contentHtml: '<p>Updated content</p>',
       };
 
-      const mockPost = {
-        id: '1',
-        title: 'Old Post',
-        content: 'Old content',
-        categoryId: 'cat1',
-        authorId: 'user1',
-        viewCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        author: { username: 'testuser' },
-        status: 'PUBLIC',
-        category: { name: 'test' },
-      };
-
-      const mockUpdatedResult = {
-        id: '1',
-        title: 'Updated Post',
-        contentHtml: 'Updated content',
-        author: 'testuser',
-        viewCount: 0,
-        createdAt: mockPost.createdAt,
-        updatedAt: mockPost.updatedAt,
-      };
-
-      mockPostRepository.findOne.mockResolvedValue(mockPost);
-      mockPostRepository.save.mockResolvedValue({
+      postRepository.findOne.mockResolvedValue(mockPost);
+      postRepository.save.mockResolvedValue({
         ...mockPost,
-        title: updateDto.title,
-        content: updateDto.contentHtml,
-      });
-      
-      jest.spyOn(service, 'findOne').mockResolvedValue(mockUpdatedResult as any);
+        ...updateDto,
+      } as any);
 
-      const result = await service.update('1', updateDto);
+      jest.spyOn(service, 'findOne').mockResolvedValue({
+        id: 'post-1',
+        title: 'Updated Title',
+      } as any);
 
-      expect(mockPostRepository.findOne).toHaveBeenCalledWith({
-        where: { id: '1' },
-        relations: ['author', 'category'],
-      });
-      expect(result.title).toBe('Updated Post');
+      const result = await service.update('post-1', updateDto);
+
+      expect(result.title).toBe('Updated Title');
     });
 
-    it('should throw NotFoundException when updating non-existent post', async () => {
-      mockPostRepository.findOne.mockResolvedValue(null);
+    it('should update post category', async () => {
+      const updateDto = {
+        category: 'new-category',
+      };
 
-      await expect(
-        service.update('nonexistent', { title: 'Updated' }),
-      ).rejects.toThrow(NotFoundException);
+      const newCategory = {
+        ...mockCategory,
+        slug: 'new-category',
+        name: 'New Category',
+      } as Category;
+
+      postRepository.findOne.mockResolvedValue(mockPost);
+      categoryRepository.findOne.mockResolvedValue(newCategory);
+      postRepository.save.mockResolvedValue(mockPost);
+
+      jest.spyOn(service, 'findOne').mockResolvedValue({ id: 'post-1' } as any);
+
+      await service.update('post-1', updateDto);
+
+      expect(categoryRepository.findOne).toHaveBeenCalledWith({
+        where: { slug: 'new-category' },
+      });
+    });
+
+    it('should throw PostException when post not found', async () => {
+      postRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.update('nonexistent', {})).rejects.toThrow(
+        '게시글을 찾을 수 없습니다',
+      );
+    });
+
+    it('should throw PostException when category not found', async () => {
+      const updateDto = { category: 'nonexistent' };
+
+      postRepository.findOne.mockResolvedValue(mockPost);
+      categoryRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.update('post-1', updateDto)).rejects.toThrow(
+        '카테고리를 찾을 수 없습니다',
+      );
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      postRepository.findOne.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(service.update('post-1', {})).rejects.toThrow(
+        CommonException,
+      );
     });
   });
 
   describe('delete', () => {
-    it('should soft delete post', async () => {
-      const mockPost = { id: '1', title: 'Test Post' };
-      mockPostRepository.findOne.mockResolvedValue(mockPost);
+    it('should delete post successfully', async () => {
+      postRepository.findOne.mockResolvedValue(mockPost);
+      postRepository.softRemove.mockResolvedValue(mockPost);
 
-      await service.delete('1');
+      await service.delete('post-1');
 
-      expect(mockPostRepository.softRemove).toHaveBeenCalledWith(mockPost);
+      expect(postRepository.softRemove).toHaveBeenCalledWith(mockPost);
     });
 
-    it('should throw NotFoundException when deleting non-existent post', async () => {
-      mockPostRepository.findOne.mockResolvedValue(null);
+    it('should throw PostException when post not found', async () => {
+      postRepository.findOne.mockResolvedValue(null);
 
       await expect(service.delete('nonexistent')).rejects.toThrow(
-        NotFoundException,
+        '게시글을 찾을 수 없습니다',
       );
+    });
+
+    it('should throw CommonException when database error occurs', async () => {
+      postRepository.findOne.mockImplementation(() => {
+        throw new Error('Database error');
+      });
+
+      await expect(service.delete('post-1')).rejects.toThrow(CommonException);
     });
   });
 });

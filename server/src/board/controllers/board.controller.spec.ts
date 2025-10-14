@@ -1,8 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { BoardController } from './board.controller';
-import { BoardService } from '../services/board.service';
-import { PostCreateRequest, PostUpdateRequest } from '../dto/post.dto';
-import { AdminGuard } from '../../auth/guards/admin.guard';
+import { JwtService } from '@nestjs/jwt';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { BoardController } from '@/board/controllers/board.controller';
+import { BoardService } from '@/board/services/board.service';
+import { AdminGuard } from '@/auth/guards/admin.guard';
+import { User } from '@/auth/entities';
+import {
+  PostCreateRequest,
+  PostUpdateRequest,
+  PostResponse,
+  PostDetailResponse,
+} from '@/board/dto/post.dto';
+import { PagedResponse } from '@/common/dto/response.dto';
+import { PostStatus } from '@/board/entities/board-post.entity';
 
 describe('BoardController', () => {
   let controller: BoardController;
@@ -10,14 +20,24 @@ describe('BoardController', () => {
 
   const mockBoardService = {
     findAll: jest.fn(),
+    findAllForAdmin: jest.fn(),
     findOne: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
   };
 
+  const mockJwtService = {
+    verify: jest.fn(),
+    sign: jest.fn(),
+  };
+
+  const mockUserRepository = {
+    findOne: jest.fn(),
+  };
+
   const mockAdminGuard = {
-    canActivate: jest.fn(() => true),
+    canActivate: jest.fn().mockReturnValue(true),
   };
 
   beforeEach(async () => {
@@ -27,6 +47,14 @@ describe('BoardController', () => {
         {
           provide: BoardService,
           useValue: mockBoardService,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
+        },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockUserRepository,
         },
       ],
     })
@@ -43,38 +71,43 @@ describe('BoardController', () => {
   });
 
   describe('getPosts', () => {
-    it('should return paginated posts', async () => {
-      const query = { page: 1, size: 10, categorySlug: 'notices' };
-      const expectedResult = {
-        items: [
+    it('should return paginated public posts', async () => {
+      const rawQuery = {
+        category: 'notices',
+        page: '1',
+        size: '10',
+        sort: 'latest',
+      };
+      const expectedResult = new PagedResponse(
+        [
           {
             id: 'post-1',
             title: '테스트 게시글',
-            categoryId: 'cat-1',
+            categoryName: '공지사항',
+            categorySlug: 'notices',
             author: 'admin',
             viewCount: 0,
+            status: PostStatus.PUBLIC,
             thumbnailUrl: null,
+            hasFiles: false,
+            fileCount: 0,
             createdAt: new Date(),
-            updatedAt: new Date(),
-          },
+          } as PostResponse,
         ],
-        meta: {
-          page: 1,
-          size: 10,
-          totalElements: 1,
-          totalPages: 1,
-        },
-      };
+        1,
+        10,
+        1,
+      );
 
       mockBoardService.findAll.mockResolvedValue(expectedResult);
 
-      const result = await controller.getPosts(query);
+      const result = await controller.getPosts(rawQuery);
 
       expect(boardService.findAll).toHaveBeenCalledWith({
-        categorySlug: 'notices',
+        category: 'notices',
+        keyword: undefined,
         page: 1,
         size: 10,
-        keyword: undefined,
         sort: 'latest',
       });
       expect(result).toEqual(expectedResult);
@@ -82,18 +115,22 @@ describe('BoardController', () => {
   });
 
   describe('getPost', () => {
-    it('should return a single post', async () => {
+    it('should return a single public post', async () => {
       const postId = 'post-1';
-      const expectedPost = {
+      const expectedPost: PostDetailResponse = {
         id: postId,
         title: '테스트 게시글',
         contentHtml: '<p>테스트 내용</p>',
-        categoryId: 'cat-1',
+        categoryName: '공지사항',
+        categorySlug: 'notices',
         author: 'admin',
         viewCount: 1,
+        status: PostStatus.PUBLIC,
         thumbnailUrl: null,
+        hasFiles: false,
+        fileCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        files: [],
         prevPost: null,
         nextPost: null,
       };
@@ -107,26 +144,107 @@ describe('BoardController', () => {
     });
   });
 
+  describe('getAdminPosts', () => {
+    it('should return paginated admin posts', async () => {
+      const rawQuery = {
+        status: PostStatus.PUBLIC,
+        category: 'notices',
+        page: '1',
+        size: '10',
+        sort: 'latest',
+      };
+      const expectedResult = new PagedResponse(
+        [
+          {
+            id: 'post-1',
+            title: '관리자 게시글',
+            categoryName: '공지사항',
+            categorySlug: 'notices',
+            author: 'admin',
+            viewCount: 0,
+            status: PostStatus.PUBLIC,
+            thumbnailUrl: null,
+            hasFiles: false,
+            fileCount: 0,
+            createdAt: new Date(),
+          } as PostResponse,
+        ],
+        1,
+        10,
+        1,
+      );
+
+      mockBoardService.findAllForAdmin.mockResolvedValue(expectedResult);
+
+      const result = await controller.getAdminPosts(rawQuery);
+
+      expect(boardService.findAllForAdmin).toHaveBeenCalledWith({
+        status: PostStatus.PUBLIC,
+        category: 'notices',
+        keyword: undefined,
+        page: 1,
+        size: 10,
+        sort: 'latest',
+      });
+      expect(result).toEqual(expectedResult);
+    });
+  });
+
+  describe('getAdminPost', () => {
+    it('should return a single admin post', async () => {
+      const postId = 'post-1';
+      const expectedPost: PostDetailResponse = {
+        id: postId,
+        title: '관리자 게시글',
+        contentHtml: '<p>관리자 내용</p>',
+        categoryName: '공지사항',
+        categorySlug: 'notices',
+        author: 'admin',
+        viewCount: 1,
+        status: PostStatus.PUBLIC,
+        thumbnailUrl: null,
+        hasFiles: false,
+        fileCount: 0,
+        createdAt: new Date(),
+        files: [],
+        prevPost: null,
+        nextPost: null,
+      };
+
+      mockBoardService.findOne.mockResolvedValue(expectedPost);
+
+      const result = await controller.getAdminPost(postId);
+
+      expect(boardService.findOne).toHaveBeenCalledWith(postId, true);
+      expect(result).toEqual(expectedPost);
+    });
+  });
+
   describe('createPost', () => {
     it('should create a new post', async () => {
       const createDto: PostCreateRequest = {
         title: '새 게시글',
         contentHtml: '<p>새 게시글 내용</p>',
-        categorySlug: 'notices',
+        category: 'notices',
         thumbnailUrl: null,
+        status: PostStatus.PUBLIC,
       };
 
       const mockRequest = { user: { id: 'user-1' } };
-      const expectedPost = {
+      const expectedPost: PostDetailResponse = {
         id: 'new-post-id',
         title: createDto.title,
         contentHtml: createDto.contentHtml,
-        categoryId: createDto.categorySlug,
+        categoryName: '공지사항',
+        categorySlug: createDto.category,
         author: 'admin',
         viewCount: 0,
+        status: PostStatus.PUBLIC,
         thumbnailUrl: createDto.thumbnailUrl,
+        hasFiles: false,
+        fileCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        files: [],
         prevPost: null,
         nextPost: null,
       };
@@ -148,16 +266,20 @@ describe('BoardController', () => {
         contentHtml: '<p>수정된 내용</p>',
       };
 
-      const expectedPost = {
+      const expectedPost: PostDetailResponse = {
         id: postId,
         title: '수정된 게시글',
         contentHtml: '<p>수정된 내용</p>',
-        categoryId: 'cat-1',
+        categoryName: '공지사항',
+        categorySlug: 'notices',
         author: 'admin',
         viewCount: 0,
+        status: PostStatus.PUBLIC,
         thumbnailUrl: null,
+        hasFiles: false,
+        fileCount: 0,
         createdAt: new Date(),
-        updatedAt: new Date(),
+        files: [],
         prevPost: null,
         nextPost: null,
       };
@@ -177,9 +299,10 @@ describe('BoardController', () => {
 
       mockBoardService.delete.mockResolvedValue(undefined);
 
-      await controller.deletePost(postId);
+      const result = await controller.deletePost(postId);
 
       expect(boardService.delete).toHaveBeenCalledWith(postId);
+      expect(result).toBeUndefined();
     });
   });
 });

@@ -4,14 +4,17 @@ export interface UploadOptions {
   onProgress?: (progress: number) => void
   maxSize?: number // bytes
   allowedTypes?: string[]
+  ownerType: 'post' | 'popup' | 'faculty'
+  ownerId: string
 }
 
 export interface UploadResult {
   fileKey: string
-  fileUrl: string
+  fileId?: string // 등록 후 받는 DB ID
   originalName: string
   fileSize: number
   mimeType: string
+  publicUrl?: string
 }
 
 export class FileUploadError extends Error {
@@ -25,7 +28,7 @@ export class FileUploadError extends Error {
 }
 
 // 파일 검증
-export const validateFile = (file: File, options: UploadOptions = {}): void => {
+export const validateFile = (file: File, options: Partial<UploadOptions> = {}): void => {
   const {
     maxSize = 10 * 1024 * 1024, // 10MB 기본값
     allowedTypes = SUPPORTED_FILE_TYPES,
@@ -48,12 +51,12 @@ export const validateFile = (file: File, options: UploadOptions = {}): void => {
   }
 }
 
-// 단일 파일 업로드 (단순 presigned URL 방식)
+// 단일 파일 업로드 (presigned URL + 메타데이터 등록)
 export const uploadFile = async (
   file: File,
-  options: UploadOptions = {}
+  options: UploadOptions
 ): Promise<UploadResult> => {
-  const { onProgress } = options
+  const { onProgress, ownerType, ownerId } = options
 
   try {
     // 파일 검증
@@ -65,9 +68,10 @@ export const uploadFile = async (
     // 1. Presigned URL 생성
     const presignData = await filesApi.getPresignedUrl({
       fileName: file.name,
-      fileType: file.type,
-      contentType: file.type,
       fileSize: file.size,
+      mimeType: file.type,
+      ownerType,
+      ownerId,
     })
 
     onProgress?.(30)
@@ -75,15 +79,28 @@ export const uploadFile = async (
     // 2. S3에 파일 업로드
     await filesApi.uploadFile(file, presignData.uploadUrl)
 
+    onProgress?.(70)
+
+    // 3. 파일 메타데이터 등록
+    const fileInfo = await filesApi.registerFile({
+      fileKey: presignData.fileKey,
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+      ownerType,
+      ownerId,
+    })
+
     // 진행률 완료
     onProgress?.(100)
 
     return {
       fileKey: presignData.fileKey,
-      fileUrl: presignData.fileUrl,
+      fileId: fileInfo.id,
       originalName: file.name,
       fileSize: file.size,
       mimeType: file.type,
+      publicUrl: fileInfo.publicUrl,
     }
   } catch (error) {
     if (error instanceof FileUploadError) {
@@ -102,7 +119,7 @@ export const uploadFile = async (
 // 다중 파일 업로드
 export const uploadMultipleFiles = async (
   files: File[],
-  options: UploadOptions = {}
+  options: UploadOptions
 ): Promise<UploadResult[]> => {
   const { onProgress } = options
   const results: UploadResult[] = []
@@ -134,7 +151,7 @@ export const uploadMultipleFiles = async (
 // 이미지 파일만 업로드
 export const uploadImage = async (
   file: File,
-  options: Omit<UploadOptions, 'allowedTypes'> = {}
+  options: Omit<UploadOptions, 'allowedTypes'>
 ): Promise<UploadResult> => {
   return uploadFile(file, {
     ...options,
@@ -145,7 +162,7 @@ export const uploadImage = async (
 // 문서 파일만 업로드
 export const uploadDocument = async (
   file: File,
-  options: Omit<UploadOptions, 'allowedTypes'> = {}
+  options: Omit<UploadOptions, 'allowedTypes'>
 ): Promise<UploadResult> => {
   return uploadFile(file, {
     ...options,
@@ -155,7 +172,74 @@ export const uploadDocument = async (
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
       'application/vnd.ms-excel',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain',
+      'application/zip',
     ],
+  })
+}
+
+// S3만 업로드 (DB 등록 없음) - 기존 imageUpload.ts 대체
+export const uploadFileToS3Only = async (
+  file: File,
+  ownerType: 'post' | 'popup' | 'faculty',
+  ownerId: string,
+  options: Partial<UploadOptions> = {}
+): Promise<UploadResult> => {
+  const { onProgress } = options
+
+  try {
+    // 파일 검증
+    validateFile(file, options)
+
+    onProgress?.(0)
+
+    // 1. Presigned URL 생성
+    const presignData = await filesApi.getPresignedUrl({
+      fileName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+      ownerType,
+      ownerId,
+    })
+
+    onProgress?.(50)
+
+    // 2. S3에 파일 업로드만
+    await filesApi.uploadFile(file, presignData.uploadUrl)
+
+    onProgress?.(100)
+
+    return {
+      fileKey: presignData.fileKey,
+      originalName: file.name,
+      fileSize: file.size,
+      mimeType: file.type,
+      publicUrl: presignData.publicUrl,
+    }
+  } catch (error) {
+    if (error instanceof FileUploadError) {
+      throw error
+    }
+
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : '파일 업로드 중 오류가 발생했습니다.'
+
+    throw new FileUploadError(errorMessage, 'UPLOAD_FAILED')
+  }
+}
+
+// 이미지 파일만 S3 업로드
+export const uploadImageToS3Only = async (
+  file: File,
+  ownerType: 'post' | 'popup' | 'faculty',
+  ownerId: string,
+  options: Partial<UploadOptions> = {}
+): Promise<UploadResult> => {
+  return uploadFileToS3Only(file, ownerType, ownerId, {
+    ...options,
+    allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
   })
 }
 
