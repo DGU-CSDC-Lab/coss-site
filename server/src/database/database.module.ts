@@ -43,7 +43,7 @@ import { HeaderAsset } from '@/header-asset/entities';
           Category,
           HeaderAsset,
         ],
-        synchronize: true, // 임시로 활성화
+        synchronize: process.env.NODE_ENV !== 'production', // 임시로 활성화
         logging: process.env.NODE_ENV === 'production' ? ['error', 'warn'] : true, // 프로덕션에서는 에러/경고만
         dropSchema: false, // production에서는 false로 설정
       }),
