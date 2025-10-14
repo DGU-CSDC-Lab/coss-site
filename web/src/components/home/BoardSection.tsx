@@ -27,7 +27,7 @@ export default function BoardSection() {
     <div className="bg-white flex flex-col gap-3 rounded-lg p-4">
       <div className="flex justify-between items-center">
         <h2 className="text-body-20-medium text-gray-900">게시판</h2>
-        <Link to="/news/news">
+        <Link to="/news?category=scholarships">
           <Button radius="md" size="sm" variant="point_2">
             더보기
           </Button>
