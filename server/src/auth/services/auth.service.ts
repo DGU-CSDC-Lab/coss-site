@@ -457,7 +457,7 @@ export class AuthService {
   ): Promise<void> {
     try {
       const mailOptions = {
-        from: process.env.SMTP_FROM, // 발신자 주소
+        from: process.env.FROM_EMAIL, // 발신자 주소
         to: email,
         subject: '[IoT학과] 비밀번호 재설정 인증번호',
         html: `
@@ -470,15 +470,7 @@ export class AuthService {
       await this.transporter.sendMail(mailOptions);
       this.logger.log(`Verification email sent successfully: ${email}`);
     } catch (error) {
-      this.logger.error(
-        `Failed to send verification email: ${email}`,
-        {
-          message: error.message,
-          command: error.command,
-          response: error.response,
-          stack: error.stack
-        }
-      );
+      this.logger.error(`Failed to send verification email: ${email} - ${error.message}`);
       throw AuthException.failedCodeSend(email, error.message);
     }
   }
