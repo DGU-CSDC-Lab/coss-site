@@ -215,22 +215,22 @@ export default function AdminPostsPage() {
         <table className="w-full min-w-[900px]">
           <thead className="bg-info-50 border-b border-info-100">
             <tr>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-4/10">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-4/10 select-none">
                 제목
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10 select-none">
                 카테고리
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10 select-none">
                 상태
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10 select-none">
                 조회수
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-1/10 select-none">
                 작성일
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-2/10">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-2/10 select-none">
                 관리
               </th>
             </tr>

@@ -7,13 +7,18 @@ import Button from '@/components/common/Button'
 import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
+import Input from '@/components/common/Input'
 
 export default function AdminSchedulesPage() {
-  const [schedules, setSchedules] = useState<PagedResponse<Schedule> | null>(null)
+  const [schedules, setSchedules] = useState<PagedResponse<Schedule> | null>(
+    null
+  )
   const [loading, setLoading] = useState(true)
   const [category, setCategory] = useState('')
   const [search, setSearch] = useState('')
-  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear().toString())
+  const [selectedYear, setSelectedYear] = useState(() =>
+    new Date().getFullYear().toString()
+  )
   const [selectedMonth, setSelectedMonth] = useState('')
   const [selectedDay, setSelectedDay] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
@@ -36,16 +41,16 @@ export default function AdminSchedulesPage() {
     { value: '', label: '전체 월' },
     ...Array.from({ length: 12 }, (_, i) => ({
       value: (i + 1).toString().padStart(2, '0'),
-      label: `${i + 1}월`
-    }))
+      label: `${i + 1}월`,
+    })),
   ]
 
   const dayOptions = [
     { value: '', label: '전체 일' },
     ...Array.from({ length: 31 }, (_, i) => ({
       value: (i + 1).toString().padStart(2, '0'),
-      label: `${i + 1}일`
-    }))
+      label: `${i + 1}일`,
+    })),
   ]
 
   useEffect(() => {
@@ -55,7 +60,7 @@ export default function AdminSchedulesPage() {
   const fetchSchedules = async () => {
     try {
       setLoading(true)
-      
+
       const params: any = {
         category: category || undefined,
         search: search || undefined,
@@ -128,44 +133,46 @@ export default function AdminSchedulesPage() {
       <div className="flex justify-between items-center mb-6">
         <div className="font-body-18-medium text-gray-900">
           전체{' '}
-          <span className="text-pri-500">{schedules?.meta.totalElements || 0}</span>{' '}
+          <span className="text-pri-500">
+            {schedules?.meta.totalElements || 0}
+          </span>{' '}
           건
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Dropdown
             value={category}
             onChange={setCategory}
             options={categoryOptions}
             size="md"
-            className="w-32"
+            className="sm:w-32"
           />
           <Dropdown
             value={selectedYear}
             onChange={setSelectedYear}
             options={yearOptions}
             size="md"
-            className="w-24"
+            className="sm:w-24"
           />
           <Dropdown
             value={selectedMonth}
             onChange={setSelectedMonth}
             options={monthOptions}
             size="md"
-            className="w-24"
+            className="sm:w-24"
           />
           <Dropdown
             value={selectedDay}
             onChange={setSelectedDay}
             options={dayOptions}
             size="md"
-            className="w-24"
+            className="sm:w-24"
           />
-          <input
+          <Input
             type="text"
             placeholder="일정명 검색"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={setSearch}
             className="px-3 py-2 border border-gray-300 rounded-md font-caption-14 w-40"
           />
           <Button
@@ -176,12 +183,7 @@ export default function AdminSchedulesPage() {
           >
             검색
           </Button>
-          <Button
-            variant="cancel"
-            radius="md"
-            size="md"
-            onClick={handleReset}
-          >
+          <Button variant="cancel" radius="md" size="md" onClick={handleReset}>
             초기화
           </Button>
         </div>

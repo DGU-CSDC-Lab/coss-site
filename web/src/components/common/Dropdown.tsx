@@ -67,7 +67,7 @@ export default function Dropdown({
         disabled={disabled}
         className={`${baseClasses} ${sizeClasses[size]} ${className} w-full text-left flex items-center justify-between gap-2`}
       >
-        <span className={selectedOption ? 'text-gray-900' : 'text-gray-400'}>
+        <span className={`whitespace-nowrap ${selectedOption ? 'text-gray-900' : 'text-gray-400'}`}>
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <ChevronDownIcon

@@ -31,7 +31,7 @@ export default function NewsSection() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex justify-between items-center">
-        <h2 className="text-body-20-medium text-gray-900">소식</h2>
+        <h2 className="text-body-20-medium text-gray-900 select-none">학과 뉴스</h2>
         <Link to="/news?category=department-news">
           <Button radius="md" size="sm" variant="point_2">
             더보기
