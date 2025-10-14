@@ -2,7 +2,7 @@ import { getCategoryKey } from './categoryConfig'
 
 const menuConfig = [
   {
-    name: '사업 소개',
+    name: '학과 소개',
     path: '/about',
     children: [
       { name: '인사말', path: '/about/greeting' },
