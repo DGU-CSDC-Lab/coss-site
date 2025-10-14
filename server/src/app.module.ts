@@ -19,7 +19,7 @@ import { HealthModule } from '@/health/health.module';
   imports: [
     // Environment variables 설정
     ConfigModule.forRoot({
-      envFilePath: process.env.NODE_ENV === 'local' ? '.env.local' : `.env.${process.env.NODE_ENV}`,
+      envFilePath: process.env.NODE_ENV === 'local' ? '.env.local' : `.env.${process.env.NODE_ENV}`, // Todo:: node_env를 production -> prod로 수정 필요함.
       isGlobal: true, // 전역 모듈로 설정 - 어디서든 주입 받을 수 있음.
     }),
     CommonModule,
