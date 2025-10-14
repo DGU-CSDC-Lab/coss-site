@@ -10,6 +10,8 @@ import {
 } from '@/popup/dto/popup.dto';
 import { PagedResponse } from '@/common/dto/response.dto';
 import { CommonException, PopupException } from '@/common/exceptions';
+import { FileService } from '@/file/services/file.service';
+import { OwnerType } from '@/file/entities';
 
 /**
  * 팝업 관리 서비스
@@ -27,6 +29,7 @@ export class PopupService {
 
   constructor(
     @InjectRepository(Popup) private popupRepository: Repository<Popup>,
+    private fileService: FileService,
   ) {}
 
   /**
@@ -183,6 +186,9 @@ export class PopupService {
         `Popup created successfully: ${saved.title} (id: ${saved.id})`,
       );
 
+      // temp 파일들을 실제 popup ID로 업데이트
+      await this.fileService.updateOwner('temp', saved.id, OwnerType.POPUP);
+
       return this.toResponse(saved);
     } catch (error) {
       this.logger.error('Error creating popup', error.stack);
@@ -324,6 +330,7 @@ export class PopupService {
       linkUrl: popup.linkUrl, // 클릭 시 이동할 링크 URL
       startDate: popup.startDate, // 팝업 시작일
       endDate: popup.endDate, // 팝업 종료일
+      createdAt: popup.createdAt, // 팝업 생성일
       isActive: popup.isActive, // 활성화 상태
     };
   }

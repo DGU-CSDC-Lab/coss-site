@@ -8,6 +8,7 @@ import { User } from '@/auth/entities';
 import { Category } from '@/category/entities';
 import { File, OwnerType } from '@/file/entities';
 import { S3Service } from '@/file/services/s3.service';
+import { FileService } from '@/file/services/file.service';
 import { CommonException } from '@/common/exceptions';
 import { PagedResponse } from '@/common/dto/response.dto';
 
@@ -86,6 +87,12 @@ describe('BoardService', () => {
           provide: S3Service,
           useValue: {
             getFileUrl: jest.fn(),
+          },
+        },
+        {
+          provide: FileService,
+          useValue: {
+            updateOwner: jest.fn(),
           },
         },
       ],

@@ -29,6 +29,29 @@ export class FileService {
     private s3Service: S3Service,
   ) {}
 
+  // 파일 소유자 업데이트 (temp -> 실제 ID)
+  async updateOwner(
+    tempId: string,
+    realId: string,
+    ownerType: OwnerType,
+  ): Promise<void> {
+    try {
+      this.logger.log(
+        `Updating file owner from ${tempId} to ${realId} for type ${ownerType}`,
+      );
+
+      const result = await this.fileRepository.update(
+        { ownerId: tempId, ownerType },
+        { ownerId: realId },
+      );
+
+      this.logger.debug(`Updated ${result.affected} files`);
+    } catch (error) {
+      this.logger.error('Error updating file owner', error.stack);
+      throw CommonException.internalServerError(error.message);
+    }
+  }
+
   // 10.1. Presigned URL 발급
   async generatePresignedUrl(
     request: PresignedUrlRequest,

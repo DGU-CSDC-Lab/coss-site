@@ -291,7 +291,7 @@ export default function AdminPostsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
-                      <Link to={`/admin/posts/edit/${post.id}`}>
+                      <Link to={`/admin/posts/${post.id}`}>
                         <Button variant="unstyled" size="sm" radius="md">
                           수정
                         </Button>

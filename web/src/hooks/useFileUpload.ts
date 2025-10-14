@@ -9,7 +9,7 @@ import {
 } from '@/utils/fileUpload'
 
 interface UseFileUploadOptions {
-  ownerType: 'post' | 'popup' | 'faculty'
+  ownerType: 'post' | 'popup' | 'faculty' | 'header'
   ownerId: string
   onSuccess?: (result: UploadResult, file: File) => void
   onError?: (error: Error) => void
@@ -70,7 +70,7 @@ export const useFileUpload = (options: UseFileUploadOptions) => {
 
 // 이미지 전용 훅 (기존 useImageUpload 대체)
 export const useImageUpload = (options: {
-  ownerType?: 'post' | 'popup' | 'faculty'
+  ownerType?: 'post' | 'popup' | 'faculty' | 'header'
   ownerId?: string
   onSuccess?: (result: UploadResult, file: File) => void
   onError?: (error: Error) => void

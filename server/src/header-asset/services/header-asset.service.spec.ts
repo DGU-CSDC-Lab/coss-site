@@ -6,6 +6,7 @@ import { HeaderAssetService } from '@/header-asset/services/header-asset.service
 import { HeaderAsset } from '@/header-asset/entities';
 import { CommonException } from '@/common/exceptions';
 import { PagedResponse } from '@/common/dto/response.dto';
+import { FileService } from '@/file/services/file.service';
 
 describe('HeaderAssetService', () => {
   let service: HeaderAssetService;
@@ -45,6 +46,12 @@ describe('HeaderAssetService', () => {
             create: jest.fn(),
             save: jest.fn(),
             softRemove: jest.fn(),
+          },
+        },
+        {
+          provide: FileService,
+          useValue: {
+            updateOwner: jest.fn(),
           },
         },
       ],

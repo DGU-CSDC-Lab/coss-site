@@ -13,6 +13,8 @@ import {
 } from '@/faculty/dto/faculty.dto';
 import { PagedResponse } from '@/common/dto/response.dto';
 import { CommonException, FacultyException } from '@/common/exceptions';
+import { FileService } from '@/file/services/file.service';
+import { OwnerType } from '@/file/entities';
 
 /**
  * 교수진 관리 서비스
@@ -30,6 +32,7 @@ export class FacultyService {
   constructor(
     @InjectRepository(FacultyMember)
     private facultyRepository: Repository<FacultyMember>,
+    private fileService: FileService,
   ) {}
 
   /**
@@ -131,6 +134,9 @@ export class FacultyService {
       // 새 교수진 엔티티 생성 및 저장
       const faculty = this.facultyRepository.create(createDto);
       const saved = await this.facultyRepository.save(faculty);
+
+      // temp 파일들을 실제 faculty ID로 업데이트
+      await this.fileService.updateOwner('temp', saved.id, OwnerType.FACULTY);
 
       this.logger.log(
         `Faculty member created successfully: ${saved.name} (id: ${saved.id})`,

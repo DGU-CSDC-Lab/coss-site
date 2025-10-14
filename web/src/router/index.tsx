@@ -185,7 +185,7 @@ export const router = createBrowserRouter([
         element: <AdminPostsCreatePage />,
       },
       {
-        path: 'admin/posts/edit/:id',
+        path: 'admin/posts/:id',
         element: <AdminPostsCreatePage />,
       },
       {

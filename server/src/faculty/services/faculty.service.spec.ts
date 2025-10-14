@@ -6,6 +6,7 @@ import { FacultyService } from '@/faculty/services/faculty.service';
 import { FacultyMember } from '@/faculty/entities';
 import { CommonException } from '@/common/exceptions';
 import { PagedResponse } from '@/common/dto/response.dto';
+import { FileService } from '@/file/services/file.service';
 
 describe('FacultyService', () => {
   let service: FacultyService;
@@ -51,6 +52,12 @@ describe('FacultyService', () => {
             create: jest.fn(),
             save: jest.fn(),
             remove: jest.fn(),
+          },
+        },
+        {
+          provide: FileService,
+          useValue: {
+            updateOwner: jest.fn(),
           },
         },
       ],

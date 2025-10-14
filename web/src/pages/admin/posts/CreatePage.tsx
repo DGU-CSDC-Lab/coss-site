@@ -39,7 +39,7 @@ export default function AdminPostsCreatePage() {
   const [thumbnailFileName, setThumbnailFileName] = useState('')
   const [formData, setFormData] = useState({
     title: '',
-    categoryId: '',
+    categoryId: 'select',
     contentHtml: '',
   })
   const [files, setFiles] = useState<UploadResult[]>([])
@@ -252,14 +252,13 @@ export default function AdminPostsCreatePage() {
         {/* Left Panel - Editor */}
         <div className="w-full p-6 lg:w-1/2 flex flex-col overflow-hidden">
           <div
-            className={`border-b flex-shrink-0 transition-all duration-300 ${
+            className={`border-b transition-all duration-300 ${
               showTitle
                 ? 'opacity-100 translate-y-0'
                 : 'opacity-0 -translate-y-full pointer-events-none'
             }`}
             style={{
-              height: showTitle ? 'auto' : '0px',
-              overflow: showTitle ? 'visible' : 'hidden',
+              marginBottom: showTitle ? '0' : '-100px',
             }}
           >
             <Input
@@ -282,7 +281,7 @@ export default function AdminPostsCreatePage() {
                 setFormData(prev => ({ ...prev, contentHtml: value }))
               }
               onScroll={handleScroll}
-              height="100%"
+              height="auto"
               showToolbar={true}
               onGetImageFileKeys={setGetEditorImageFileKeys}
               ownerData={{ ownerType: 'post', ownerId: params.id || 'temp' }}

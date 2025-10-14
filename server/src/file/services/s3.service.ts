@@ -107,7 +107,7 @@ export class S3Service {
     }
 
     // 프로덕션 S3 URL
-    const url = `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileKey}`;
+    const url = `https://${this.bucketName}.s3.${process.env.REGION}.amazonaws.com/${fileKey}`;
     this.logger.debug(`Generated S3 URL for file: ${fileKey}`);
     return url;
   }

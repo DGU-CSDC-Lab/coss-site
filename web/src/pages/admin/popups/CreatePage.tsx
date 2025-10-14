@@ -232,6 +232,7 @@ export default function AdminPopupsCreatePage() {
                   시작일
                 </Label>
                 <DateInput
+                  type="datetime-local"
                   value={formData.startDate}
                   onChange={value =>
                     setFormData({ ...formData, startDate: value })
@@ -247,6 +248,7 @@ export default function AdminPopupsCreatePage() {
                   종료일
                 </Label>
                 <DateInput
+                  type="datetime-local"
                   value={formData.endDate}
                   onChange={value =>
                     setFormData({ ...formData, endDate: value })

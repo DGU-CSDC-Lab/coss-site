@@ -182,6 +182,12 @@ export class PopupResponse {
     example: '2024-03-31T23:59:59.000Z',
   })
   endDate: Date;
+  
+  @ApiProperty({
+    description: '팝업 생성일',
+    example: '2024-02-15T12:34:56.000Z',
+  })
+  createdAt: Date;
 
   @ApiProperty({
     description: '활성화 여부',

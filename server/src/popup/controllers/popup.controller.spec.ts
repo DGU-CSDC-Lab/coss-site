@@ -16,6 +16,7 @@ describe('PopupController', () => {
     linkUrl: 'https://example.com/notice',
     startDate: new Date('2024-01-01'),
     endDate: new Date('2024-12-31'),
+    createdAt: new Date('2024-01-01T10:00:00.000Z'),
     isActive: true,
   };
 

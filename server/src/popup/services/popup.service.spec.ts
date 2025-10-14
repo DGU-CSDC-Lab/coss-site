@@ -6,6 +6,7 @@ import { PopupService } from '@/popup/services/popup.service';
 import { Popup } from '@/popup/entities';
 import { CommonException } from '@/common/exceptions';
 import { PagedResponse } from '@/common/dto/response.dto';
+import { FileService } from '@/file/services/file.service';
 
 describe('PopupService', () => {
   let service: PopupService;
@@ -19,6 +20,7 @@ describe('PopupService', () => {
     linkUrl: 'https://example.com/notice',
     startDate: new Date('2024-01-01'),
     endDate: new Date('2024-12-31'),
+    createdAt: new Date('2024-01-01T10:00:00.000Z'),
     isActive: true,
     priority: 1,
     createdById: 'user-1',
@@ -32,6 +34,7 @@ describe('PopupService', () => {
     linkUrl: 'https://example.com/event',
     startDate: new Date('2024-02-01'),
     endDate: new Date('2024-02-28'),
+    createdAt: new Date('2024-02-01T10:00:00.000Z'),
     isActive: false,
     priority: 2,
     createdById: 'user-2',
@@ -49,6 +52,12 @@ describe('PopupService', () => {
             create: jest.fn(),
             save: jest.fn(),
             softRemove: jest.fn(),
+          },
+        },
+        {
+          provide: FileService,
+          useValue: {
+            updateOwner: jest.fn(),
           },
         },
       ],
@@ -349,6 +358,7 @@ describe('PopupService', () => {
         linkUrl: 'https://example.com/notice',
         startDate: new Date('2024-01-01'),
         endDate: new Date('2024-12-31'),
+        createdAt: new Date('2024-01-01T10:00:00.000Z'),
         isActive: true,
         priority: 1,
         createdById: 'user-1',
@@ -366,6 +376,7 @@ describe('PopupService', () => {
         linkUrl: 'https://example.com/notice',
         startDate: new Date('2024-01-01'),
         endDate: new Date('2024-12-31'),
+        createdAt: new Date('2024-01-01T10:00:00.000Z'),
         isActive: true,
       });
     });

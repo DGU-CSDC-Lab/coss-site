@@ -14,7 +14,7 @@ interface FileUploadProps {
   maxFiles?: number
   accept?: string
   maxSize?: number
-  ownerType: 'post' | 'popup' | 'faculty'
+  ownerType: 'post' | 'popup' | 'faculty' | 'header'
   ownerId: string
 }
 

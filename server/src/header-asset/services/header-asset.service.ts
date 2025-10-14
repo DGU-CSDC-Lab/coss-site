@@ -10,6 +10,8 @@ import {
 } from '@/header-asset/dto/header-asset.dto';
 import { PagedResponse } from '@/common/dto/response.dto';
 import { CommonException, HeaderAssetException } from '@/common/exceptions';
+import { FileService } from '@/file/services/file.service';
+import { OwnerType } from '@/file/entities';
 
 /**
  * 헤더 에셋 관리 서비스
@@ -28,6 +30,7 @@ export class HeaderAssetService {
   constructor(
     @InjectRepository(HeaderAsset)
     private headerAssetRepository: Repository<HeaderAsset>,
+    private fileService: FileService,
   ) {}
 
   /**
@@ -148,6 +151,9 @@ export class HeaderAssetService {
       this.logger.log(
         `Header asset created successfully: ${saved.title} (id: ${saved.id})`,
       );
+
+      // temp 파일들을 실제 header-asset ID로 업데이트
+      await this.fileService.updateOwner('temp', saved.id, OwnerType.HEADER);
 
       return this.toResponse(saved);
     } catch (error) {

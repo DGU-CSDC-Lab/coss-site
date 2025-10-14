@@ -126,7 +126,9 @@ export default function AdminSchedulesPage() {
       <div className="flex justify-between items-center mb-6">
         <Title>학사일정 관리</Title>
         <Link to="/admin/schedules/create">
-          <Button variant="info">새 일정 추가</Button>
+          <Button variant="info" radius="md">
+            새 일정 추가
+          </Button>
         </Link>
       </div>
 

@@ -4,7 +4,7 @@ export interface UploadOptions {
   onProgress?: (progress: number) => void
   maxSize?: number // bytes
   allowedTypes?: string[]
-  ownerType: 'post' | 'popup' | 'faculty'
+  ownerType: 'post' | 'popup' | 'faculty' | 'header'
   ownerId: string
 }
 
@@ -181,7 +181,7 @@ export const uploadDocument = async (
 // S3만 업로드 (DB 등록 없음) - 기존 imageUpload.ts 대체
 export const uploadFileToS3Only = async (
   file: File,
-  ownerType: 'post' | 'popup' | 'faculty',
+  ownerType: 'post' | 'popup' | 'faculty' | 'header',
   ownerId: string,
   options: Partial<UploadOptions> = {}
 ): Promise<UploadResult> => {
@@ -233,7 +233,7 @@ export const uploadFileToS3Only = async (
 // 이미지 파일만 S3 업로드
 export const uploadImageToS3Only = async (
   file: File,
-  ownerType: 'post' | 'popup' | 'faculty',
+  ownerType: 'post' | 'popup' | 'faculty' | 'header',
   ownerId: string,
   options: Partial<UploadOptions> = {}
 ): Promise<UploadResult> => {

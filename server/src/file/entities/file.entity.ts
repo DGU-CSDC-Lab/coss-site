@@ -5,6 +5,7 @@ export enum OwnerType {
   POST = 'post',
   POPUP = 'popup',
   FACULTY = 'faculty',
+  HEADER = 'header',
 }
 
 export enum FileStatus {

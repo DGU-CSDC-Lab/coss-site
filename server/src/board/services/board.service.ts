@@ -5,6 +5,7 @@ import { BoardPost, PostStatus } from '@/board/entities';
 import { User } from '@/auth/entities';
 import { Category } from '@/category/entities';
 import { S3Service } from '@/file/services/s3.service';
+import { FileService } from '@/file/services/file.service';
 import {
   PostCreateRequest,
   PostUpdateRequest,
@@ -30,6 +31,7 @@ export class BoardService {
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
     private s3Service: S3Service,
+    private fileService: FileService,
   ) {}
 
   /**
@@ -361,6 +363,9 @@ export class BoardService {
 
       const saved = await this.postRepository.save(post);
       this.logger.log(`Post created successfully: ${saved.id}`);
+
+      // temp 파일들을 실제 post ID로 업데이트
+      await this.fileService.updateOwner('temp', saved.id, OwnerType.POST);
 
       if (createDto.files && createDto.files.length > 0) {
         const fileCount = Math.min(createDto.files.length, 10);
