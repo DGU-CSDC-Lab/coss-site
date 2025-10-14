@@ -1,5 +1,3 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { popupsApi, PopupResponse } from '@/lib/api/popups'
 

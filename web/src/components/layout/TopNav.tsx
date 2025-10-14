@@ -1,5 +1,3 @@
-'use client'
-
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useUIStore } from '@/store/ui.store'

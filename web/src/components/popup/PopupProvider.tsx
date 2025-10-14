@@ -1,5 +1,3 @@
-'use client'
-
 import { usePopups } from '@/hooks/usePopups'
 import PopupModal from '@/components/popup/PopupModal'
 
