@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { LogLevel } from '@nestjs/common';
+import { LogLevel, Logger } from '@nestjs/common';
 import { ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from '@/app.module';
@@ -7,18 +7,26 @@ import { AppModule } from '@/app.module';
 // 로그 레벨 설정 함수
 const getLogLevels = (): LogLevel[] => {
   const level = process.env.LOG_LEVEL || 'log';
-  
+
   switch (level) {
-    case 'debug': return ['error', 'warn', 'log', 'debug'];
-    case 'info': return ['error', 'warn', 'log'];
-    case 'warn': return ['error', 'warn'];
-    case 'error': return ['error'];
-    default: return ['error', 'warn', 'log'];
+    case 'debug':
+      return ['error', 'warn', 'log', 'debug'];
+    case 'info':
+      return ['error', 'warn', 'log'];
+    case 'warn':
+      return ['error', 'warn'];
+    case 'error':
+      return ['error'];
+    default:
+      return ['error', 'warn', 'log'];
   }
 };
 
 // 환경변수 로드
 async function bootstrap() {
+  // HTTP 요청 로깅 미들웨어
+  const logger = new Logger('HTTP');
+
   // Nest App 인스턴스 생성
   const app = await NestFactory.create(AppModule, {
     logger: getLogLevels(),
@@ -33,26 +41,39 @@ async function bootstrap() {
     }),
   );
 
+  app.use((req, res, next) => {
+    logger.log(`${req.method} ${req.url}`);
+
+    res.on('finish', () => {
+      logger.log(`${req.method} ${req.url} - ${res.statusCode}`);
+    });
+
+    next();
+  });
+
   // CORS - 환경변수 기반 설정
-  const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim());
+  const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',').map(origin =>
+    origin.trim(),
+  );
 
   app.enableCors({
-    origin: [
-      ...allowedOrigins
-    ],
+    origin: [...allowedOrigins],
     credentials: true,
   });
 
   // Swagger 설정
   const swaggerServerUrl = process.env.SWAGGER_SERVER_URL;
-  
+
   const config = new DocumentBuilder()
     .setTitle('COSS DGU Backend API Swagger')
     .setDescription(
       '동국대학교 COSS 지능IoT학과 홈페이지 백엔드 API 문서입니다. \n\n',
     )
     .setVersion('1.0.0') // 서버 버전 태그
-    .addServer(swaggerServerUrl, process.env.NODE_ENV === 'production' ? 'Production' : 'Development') // 서버 URL 설정
+    .addServer(
+      swaggerServerUrl,
+      process.env.NODE_ENV === 'production' ? 'Production' : 'Development',
+    ) // 서버 URL 설정
     // Bearer Auth 설정
     .addBearerAuth(
       {
@@ -67,7 +88,8 @@ async function bootstrap() {
 
   // Swagger 모듈 설정
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api-docs', app, document, { // api-docs 경로로 설정
+  SwaggerModule.setup('api-docs', app, document, {
+    // api-docs 경로로 설정
     swaggerOptions: {
       persistAuthorization: true,
     },
