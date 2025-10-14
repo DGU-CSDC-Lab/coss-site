@@ -51,12 +51,12 @@ export default function AdminPage() {
       setLoading(true)
       const [postsRes, schedulesRes, facultyRes, coursesRes, bannersRes, popupsRes] =
         await Promise.all([
-          postsApi.getAdminPosts({ size: 1 }),
-          schedulesApi.getSchedules({ size: 1 }),
-          facultyApi.getFaculty({ size: 1 }),
-          coursesApi.getCourses({ size: 1 }),
-          headerAssetsApi.getHeaderAssets({ size: 1 }),
-          popupsApi.getPopups({ size: 1 }),
+          postsApi.getAdminPosts({ page: 1, size: 1 }),
+          schedulesApi.getSchedules({ page: 1, size: 1 }),
+          facultyApi.getFaculty({ page: 1, size: 1 }),
+          coursesApi.getCourses({ page: 1, size: 1 }),
+          headerAssetsApi.getHeaderAssets({ page: 1, size: 1 }),
+          popupsApi.getPopups({ page: 1, size: 1 }),
         ])
 
       setStats({
