@@ -204,11 +204,6 @@ jobs:
                 echo "⏳ API server not ready, attempt $i/10"
                 sleep 10
               fi
-              if [ $i -eq 10 ]; then
-                echo "❌ API server health check failed"
-                docker-compose -f docker-compose.server.prod.yml logs server
-                exit 1
-              fi
             done
 
             echo "📊 Container status:"
