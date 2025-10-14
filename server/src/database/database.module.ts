@@ -44,7 +44,7 @@ import { HeaderAsset } from '@/header-asset/entities';
           HeaderAsset,
         ],
         synchronize: process.env.NODE_ENV !== 'production', // 개발환경에서만 사용
-        logging: true, // 쿼리 로깅 활성화
+        logging: process.env.NODE_ENV === 'production' ? ['error', 'warn'] : true, // 프로덕션에서는 에러/경고만
         dropSchema: false, // production에서는 false로 설정
       }),
     }),

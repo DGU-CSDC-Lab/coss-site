@@ -185,6 +185,7 @@ jobs:
             SMTP_USER=${{ secrets.SMTP_USER }}
             SMTP_PASS=${{ secrets.SMTP_PASS }}
             FROM_EMAIL=${{ secrets.FROM_EMAIL }}
+            LOG_LEVEL=warn
             EOF
 
             docker-compose -f docker-compose.server.prod.yml down || true
