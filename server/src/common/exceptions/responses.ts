@@ -160,12 +160,12 @@ export const CATEGORY_ERRORS = {
 export const POPUP_ERRORS = {
   POPUP_NOT_FOUND: {
     code: 'POPUP_NOT_FOUND',
-    message: 'Popup not found',
+    message: '팝업을 찾을 수 없습니다.',
     httpStatus: HttpStatus.NOT_FOUND,
   },
   POPUP_ALREADY_EXISTS: {
     code: 'POPUP_ALREADY_EXISTS',
-    message: 'Popup with this title already exists',
+    message: '이미 존재하는 팝업입니다.',
     httpStatus: HttpStatus.CONFLICT,
   },
 } as const;
@@ -218,7 +218,7 @@ export const FILE_ERRORS = {
 export const COURSE_ERRORS = {
   COURSE_NOT_FOUND: {
     code: 'COURSE_NOT_FOUND',
-    message: 'Course not found',
+    message: '해당하는 강의를 찾을 수 없습니다.',
     httpStatus: HttpStatus.NOT_FOUND,
   },
   AVAILABLE_ONLY_CSV_FORMAT: {
@@ -228,7 +228,7 @@ export const COURSE_ERRORS = {
   },
   MORE_THAN_ONE_HEADER_ROW: {
     code: 'MUST_BE_ONE_HEADER_ROW',
-    message: '헤더 행이 하나 이상이어야 합니다. 합니다.',
+    message: '헤더 행이 하나 이상이어야 합니다.',
     httpStatus: HttpStatus.BAD_REQUEST,
   },
 } as const;

@@ -48,9 +48,9 @@ class ApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
-      throw new Error(
-        `${errorData.message || 'Unknown error'}`
-      )
+      const error = new Error(errorData.message || 'Unknown error') as any
+      error.status = response.status
+      throw error
     }
 
     // 204 No Content 또는 빈 응답 처리
@@ -88,9 +88,9 @@ class ApiClient {
           ...options.headers,
         },
       })
-    } catch (error) {
-      // 401 에러 시 토큰 갱신 시도
-      if (error instanceof Error && error.message.includes('401')) {
+    } catch (error: any) {
+      // 401, 403 에러 시 토큰 갱신 시도
+      if (error.status === 401 || error.status === 403) {
         if (refreshToken) {
           try {
             const newTokens = await authApi.refresh({ refreshToken })
@@ -104,12 +104,9 @@ class ApiClient {
                 ...options.headers,
               },
             })
-          } catch (refreshError) {
-            // refresh API에서도 401 발생 시
-            if (
-              refreshError instanceof Error &&
-              refreshError.message.includes('401')
-            ) {
+          } catch (refreshError: any) {
+            // refresh API에서도 401, 403 발생 시
+            if (refreshError.status === 401 || refreshError.status === 403) {
               alert('재로그인이 필요합니다.')
               window.location.href = '/login'
             }

@@ -43,7 +43,6 @@ export default function PopupsPage() {
       })
       setPopups(response as PagedResponse<PopupResponse>)
     } catch (error) {
-      console.error('Failed to fetch popups:', error)
       alert.error('팝업 목록을 불러올 수 없습니다.')
     } finally {
       setLoading(false)
@@ -65,7 +64,6 @@ export default function PopupsPage() {
       setDeleteModal({ isOpen: false, popup: null })
       fetchPopups()
     } catch (error) {
-      console.error('Failed to delete popup:', error)
       alert.error('팝업 삭제 중 오류가 발생했습니다.')
     } finally {
       setDeleteLoading(false)
@@ -78,7 +76,6 @@ export default function PopupsPage() {
       alert.success(`팝업이 ${!popup.isActive ? '활성화' : '비활성화'}되었습니다.`)
       fetchPopups()
     } catch (error) {
-      console.error('Failed to toggle popup:', error)
       alert.error('상태 변경 중 오류가 발생했습니다.')
     }
   }

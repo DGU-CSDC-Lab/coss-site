@@ -5,11 +5,13 @@ import { headerAssetsApi, HeaderAsset } from '@/lib/api/headerAssets'
 import { Link } from 'react-router-dom'
 import { PagedResponse } from '@/lib/apiClient'
 import EmptyState from '@/components/common/EmptyState'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function HeaderSlider() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [banners, setBanners] = useState<PagedResponse<HeaderAsset>>()
   const [loading, setLoading] = useState(true)
+  const alert = useAlert()
 
   useEffect(() => {
     fetchBanners()
@@ -34,7 +36,7 @@ export default function HeaderSlider() {
       })
       setBanners(data)
     } catch (error) {
-      console.error('Failed to fetch banners:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }

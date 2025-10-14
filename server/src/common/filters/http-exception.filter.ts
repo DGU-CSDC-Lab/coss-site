@@ -4,6 +4,7 @@ import {
   ArgumentsHost,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ErrorResponse } from '@/common/dto/response.dto';
@@ -18,12 +19,15 @@ import { ErrorResponse } from '@/common/dto/response.dto';
  */
 @Catch() // 모든 예외를 캐치
 export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
   /**
    * 예외 처리 메인 메서드
    * @param exception 발생한 예외 객체
    * @param host ArgumentsHost - 실행 컨텍스트 정보
    */
   catch(exception: unknown, host: ArgumentsHost) {
+    this.logger.debug('Exception caught by HttpExceptionFilter', { exception });
+    
     // HTTP 컨텍스트 추출
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -39,6 +43,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       // NestJS HttpException 처리
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
+
+      this.logger.warn(`HTTP Exception: ${status}`, { 
+        status, 
+        message: exception.message,
+        response: exceptionResponse 
+      });
 
       // 응답 형태에 따라 메시지와 에러 코드 추출
       if (typeof exceptionResponse === 'string') {
@@ -60,10 +70,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       // HttpException이 아닌 예상치 못한 에러 처리
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       errorCode = 'INTERNAL_SERVER_ERROR';
-      message = 'Internal server error';
+      message = '알 수 없는 서버 오류가 발생했습니다.';
       
       // 예상치 못한 에러는 콘솔에 로깅 (운영환경에서는 로거 사용 권장)
-      console.error('Unexpected error:', exception);
+      this.logger.error('Unexpected error occurred', exception);
     }
 
     // 에러 추적을 위한 고유 ID 생성
@@ -76,7 +86,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       details,
       traceId,
     );
-
+    
+    this.logger.log(`Error response sent: ${errorCode}`, { traceId, status });
+    
     // HTTP 상태 코드와 함께 에러 응답 반환
     response.status(status).json(errorResponse);
   }

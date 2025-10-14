@@ -70,7 +70,6 @@ export default function AdminPopupsCreatePage() {
       //   setImageUrl(popupData.imageUrl)
       // }
     } catch (error) {
-      console.error('Failed to fetch popup:', error)
       alert.error('팝업 정보를 불러올 수 없습니다.')
       navigate('/admin/popups')
     } finally {
@@ -151,7 +150,6 @@ export default function AdminPopupsCreatePage() {
       }
       navigate('/admin/popups')
     } catch (error) {
-      console.error(`Failed to ${isEdit ? 'update' : 'create'} popup:`, error)
       alert.error(`팝업 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다.`)
     } finally {
       setLoading(false)

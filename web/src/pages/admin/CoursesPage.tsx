@@ -7,6 +7,7 @@ import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<PagedResponse<Course> | null>(null)
@@ -15,6 +16,8 @@ export default function CoursesPage() {
   const [selectedSemester, setSelectedSemester] = useState('1학기')
   const [keyword, setKeyword] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+
+  const alert = useAlert()
 
   const semesterOptions = [
     { value: '1학기', label: '1학기' },
@@ -44,7 +47,7 @@ export default function CoursesPage() {
       })
       setCourses(response)
     } catch (error) {
-      console.error('Failed to fetch courses:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }
@@ -60,11 +63,10 @@ export default function CoursesPage() {
 
     try {
       await coursesApi.deleteCourse(id)
-      alert('과목이 삭제되었습니다.')
+      alert.success('과목이 삭제되었습니다.')
       fetchCourses()
     } catch (error) {
-      console.error('Failed to delete course:', error)
-      alert('삭제 중 오류가 발생했습니다.')
+      alert.error('삭제 중 오류가 발생했습니다.')
     }
   }
 

@@ -41,7 +41,6 @@ export default function HeaderAssetsPage() {
       })
       setAssets(response)
     } catch (error) {
-      console.error('Failed to fetch assets:', error)
       alert.error('헤더 배너 목록을 불러올 수 없습니다.')
     } finally {
       setLoading(false)
@@ -58,7 +57,6 @@ export default function HeaderAssetsPage() {
       setDeleteModal({ isOpen: false, asset: null })
       fetchAssets()
     } catch (error) {
-      console.error('Failed to delete asset:', error)
       alert.error('헤더 배너 삭제 중 오류가 발생했습니다.')
     } finally {
       setDeleteLoading(false)
@@ -71,7 +69,6 @@ export default function HeaderAssetsPage() {
       alert.success(`헤더 배너가 ${!asset.isActive ? '활성화' : '비활성화'}되었습니다.`)
       fetchAssets()
     } catch (error) {
-      console.error('Failed to toggle asset:', error)
       alert.error('상태 변경 중 오류가 발생했습니다.')
     }
   }

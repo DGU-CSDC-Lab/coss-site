@@ -62,9 +62,7 @@ export const filesApi = {
     })
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Upload error:', errorText)
-      throw new Error(`Upload failed: ${response.status}`)
+      throw new Error(`파일 업로드에 실패 하였습니다. ${response.status}`)
     }
   },
 

@@ -4,11 +4,14 @@ import { Link } from 'react-router-dom'
 import { schedulesApi, Schedule } from '@/lib/api/schedules'
 import Button from '@/components/common/Button'
 import EmptyState from '@/components/common/EmptyState'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function CalendarSection() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
   const [monthEvents, setMonthEvents] = useState<Schedule[]>([])
+
+  const alert = useAlert()
 
   useEffect(() => {
     fetchMonthEvents()
@@ -24,7 +27,7 @@ export default function CalendarSection() {
       })
       setMonthEvents(response.items)
     } catch (error) {
-      console.error('Failed to fetch events:', error)
+      alert.error((error as Error).message)
     }
   }
 

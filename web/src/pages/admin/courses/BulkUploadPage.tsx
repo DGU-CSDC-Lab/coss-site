@@ -43,6 +43,7 @@ export default function AdminCoursesBulkUploadPage() {
 
   const semesterOptions = [
     { value: '1학기', label: '1학기' },
+    { value: '1학기', label: '1학기' },
     { value: '2학기', label: '2학기' },
     { value: '여름학기', label: '여름학기' },
     { value: '겨울학기', label: '겨울학기' },
@@ -99,7 +100,6 @@ export default function AdminCoursesBulkUploadPage() {
       setPreviewData(courses)
       setShowPreview(true)
     } catch (error) {
-      console.error('Excel 파일 읽기 실패:', error)
       alert.error('Excel 파일을 읽는 중 오류가 발생했습니다.')
     }
   }
@@ -119,7 +119,6 @@ export default function AdminCoursesBulkUploadPage() {
       alert.error(
         `필수 필드가 누락된 과목이 ${invalidCourses.length}개 있습니다. (학과, 교과목코드, 교과목명은 필수입니다)`
       )
-      console.log('Invalid courses:', invalidCourses)
       return
     }
 
@@ -127,11 +126,6 @@ export default function AdminCoursesBulkUploadPage() {
   }
 
   const handleConfirmSubmit = async () => {
-    console.log('API 요청 시작:', {
-      year,
-      semester,
-      coursesCount: previewData.length,
-    })
     setLoading(true)
     setShowConfirmModal(false)
 
@@ -142,24 +136,20 @@ export default function AdminCoursesBulkUploadPage() {
         courses: previewData,
       }
 
-      console.log('API 요청 데이터:', JSON.stringify(requestData, null, 2))
-      console.log('첫 번째 course 샘플:', previewData[0])
-      console.log('courses 배열 길이:', previewData.length)
-
       const result = await coursesApi.bulkInit(requestData)
-      console.log('API 응답:', result)
 
       if (result.failureCount > 0) {
         alert.error(
           `등록 완료!\n성공: ${result.successCount}건\n실패: ${result.failureCount}건\n\n오류:\n${result.errors.join('\n')}`
         )
       } else {
-        alert.success(`${result.successCount}건의 과목이 성공적으로 등록되었습니다.`)
+        alert.success(
+          `${result.successCount}건의 과목이 성공적으로 등록되었습니다.`
+        )
       }
 
       navigate('/admin/courses')
     } catch (error) {
-      console.error('과목 등록 실패:', error)
       alert.error('과목 등록 중 오류가 발생했습니다.')
     } finally {
       setLoading(false)

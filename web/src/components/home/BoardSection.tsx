@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom'
 import { postsApi, Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
 import EmptyState from '@/components/common/EmptyState'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function BoardSection() {
   const [posts, setPosts] = useState<Post[]>([])
+  const alert = useAlert()
 
   useEffect(() => {
     fetchPosts()
@@ -16,10 +18,12 @@ export default function BoardSection() {
     try {
       const response = await postsApi.getPosts({ size: 20 })
       // 뉴스 카테고리를 제외한 게시물만 필터링
-      const filteredPosts = response.items.filter(post => post.categoryName !== '뉴스').slice(0, 4)
+      const filteredPosts = response.items
+        .filter(post => post.categoryName !== '뉴스')
+        .slice(0, 4)
       setPosts(filteredPosts)
     } catch (error) {
-      console.error('Failed to fetch posts:', error)
+      alert.error((error as Error).message)
     }
   }
 

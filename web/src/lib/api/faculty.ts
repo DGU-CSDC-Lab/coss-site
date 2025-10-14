@@ -9,7 +9,7 @@ export interface Faculty {
   email?: string
   phoneNumber?: string
   office?: string
-  profileImage?: string
+  profileImageUrl?: string
   researchAreas?: string[]
   biography?: string[]
   publications?: string[]

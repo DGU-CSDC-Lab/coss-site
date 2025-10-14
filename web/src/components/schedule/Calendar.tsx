@@ -6,11 +6,11 @@ import {
 } from '@heroicons/react/24/solid'
 import { schedulesApi, Schedule } from '@/lib/api/schedules'
 import Button from '@/components/common/Button'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function Calendar() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [schedules, setSchedules] = useState<Schedule[]>([])
-  const [loading, setLoading] = useState(false)
   const [hoveredDate, setHoveredDate] = useState<number | null>(null)
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
 
@@ -18,20 +18,19 @@ export default function Calendar() {
   const month = currentDate.getMonth()
   const today = new Date()
 
+  const alert = useAlert()
+
   useEffect(() => {
     fetchSchedules()
   }, [currentDate])
 
   const fetchSchedules = async () => {
     try {
-      setLoading(true)
       const monthStr = `${year}-${String(month + 1).padStart(2, '0')}`
       const response = await schedulesApi.getSchedules({ month: monthStr })
       setSchedules(response.items)
     } catch (error) {
-      console.error('Failed to fetch schedules:', error)
-    } finally {
-      setLoading(false)
+      alert.error((error as Error).message)
     }
   }
 

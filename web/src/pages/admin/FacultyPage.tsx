@@ -5,11 +5,15 @@ import { PagedResponse } from '@/lib/apiClient'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function AdminFacultyPage() {
   const [faculty, setFaculty] = useState<PagedResponse<Faculty> | null>(null)
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
+
+  const alert = useAlert()
+
   const size = 10
 
   useEffect(() => {
@@ -22,7 +26,7 @@ export default function AdminFacultyPage() {
       const response = await facultyApi.getFaculty({ page, size })
       setFaculty(response)
     } catch (error) {
-      console.error('Failed to fetch faculty:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }
@@ -33,11 +37,10 @@ export default function AdminFacultyPage() {
 
     try {
       await facultyApi.deleteFaculty(id)
-      alert('교원이 삭제되었습니다.')
+      alert.success('교원이 삭제되었습니다.')
       fetchFaculty()
     } catch (error) {
-      console.error('Failed to delete faculty:', error)
-      alert('삭제 중 오류가 발생했습니다.')
+      alert.error('삭제 중 오류가 발생했습니다.')
     }
   }
 
@@ -110,9 +113,9 @@ export default function AdminFacultyPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-12 h-12 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
-                        {member.profileImage ? (
+                        {member.profileImageUrl ? (
                           <img
-                            src={member.profileImage}
+                            src={member.profileImageUrl}
                             alt={member.name}
                             className="w-full h-full object-cover"
                           />

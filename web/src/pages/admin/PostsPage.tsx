@@ -22,7 +22,10 @@ export default function AdminPostsPage() {
   const [status, setStatus] = useState('')
   const [sort, setSort] = useState('latest')
   const [currentPage, setCurrentPage] = useState(1)
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; post: Post | null }>({
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    post: Post | null
+  }>({
     isOpen: false,
     post: null,
   })
@@ -45,7 +48,7 @@ export default function AdminPostsPage() {
       const response = await categoriesApi.getCategories()
       setCategories(response)
     } catch (error) {
-      console.error('Failed to fetch categories:', error)
+      alert.error((error as Error).message)
     }
   }
 
@@ -63,7 +66,7 @@ export default function AdminPostsPage() {
       })
       setPosts(response)
     } catch (error) {
-      console.error('Failed to fetch posts:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }
@@ -94,7 +97,6 @@ export default function AdminPostsPage() {
       setDeleteModal({ isOpen: false, post: null })
       fetchPosts()
     } catch (error) {
-      console.error('Failed to delete post:', error)
       alert.error('삭제 중 오류가 발생했습니다.')
     } finally {
       setDeleteLoading(false)
@@ -125,7 +127,9 @@ export default function AdminPostsPage() {
       <div className="flex justify-between items-center mb-6">
         <div className="font-body-18-medium text-gray-900">
           전체{' '}
-          <span className="text-pri-500">{posts?.meta?.totalElements || 0}</span>{' '}
+          <span className="text-pri-500">
+            {posts?.meta?.totalElements || 0}
+          </span>{' '}
           건
         </div>
 
@@ -134,6 +138,7 @@ export default function AdminPostsPage() {
             value={searchType}
             onChange={setSearchType}
             options={[
+              { value: 'title', label: '제목' },
               { value: 'title', label: '제목' },
               { value: 'author', label: '작성자' },
             ]}
@@ -149,7 +154,7 @@ export default function AdminPostsPage() {
             }
             value={keyword}
             onChange={setKeyword}
-            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            onKeyPress={e => e.key === 'Enter' && handleSearch()}
             className="w-full sm:w-60"
             size="md"
           />
@@ -180,6 +185,7 @@ export default function AdminPostsPage() {
             value={sort}
             onChange={setSort}
             options={[
+              { value: 'latest', label: '최신순' },
               { value: 'latest', label: '최신순' },
               { value: 'popular', label: '인기순' },
             ]}

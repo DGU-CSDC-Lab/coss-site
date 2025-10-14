@@ -158,14 +158,14 @@ export class PostUpdateRequest {
   category?: Category['slug'];
 
   @ApiProperty({
-    description: '게시글 상태 (임시저장은 생성 시에만 가능)',
-    enum: [PostStatus.PUBLIC, PostStatus.PRIVATE],
+    description: '게시글 상태',
+    enum: PostStatus,
     example: PostStatus.PUBLIC,
     required: false,
   })
   @IsOptional()
-  @IsEnum([PostStatus.PUBLIC, PostStatus.PRIVATE])
-  status?: PostStatus.PUBLIC | PostStatus.PRIVATE;
+  @IsEnum(PostStatus)
+  status?: PostStatus;
 
   @ApiProperty({
     description: '썸네일 이미지 URL',

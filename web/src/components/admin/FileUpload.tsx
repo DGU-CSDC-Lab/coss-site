@@ -6,6 +6,7 @@ import {
   formatFileSize,
 } from '@/utils/fileUpload'
 import Button from '@/components/common/Button'
+import { useAlert } from '@/hooks/useAlert'
 
 interface FileUploadProps {
   onFilesChange: (files: UploadResult[]) => void
@@ -31,20 +32,19 @@ export default function FileUpload({
   const [progress, setProgress] = useState(0)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const alert = useAlert()
 
   // initialFiles가 변경되면 files 상태 업데이트 (빈 배열로는 덮어쓰지 않음)
   useEffect(() => {
-    console.log('FileUpload useEffect - initialFiles:', initialFiles, 'current files:', files)
     // initialFiles가 비어있지 않을 때만 업데이트
     if (initialFiles.length > 0 && JSON.stringify(files) !== JSON.stringify(initialFiles)) {
-      console.log('Updating files state with initialFiles')
       setFiles(initialFiles)
     }
   }, [initialFiles, files])
 
   const handleFileSelect = async (selectedFiles: FileList) => {
     if (files.length + selectedFiles.length > maxFiles) {
-      alert(`최대 ${maxFiles}개의 파일만 업로드할 수 있습니다.`)
+      alert.error(`최대 ${maxFiles}개의 파일만 업로드할 수 있습니다.`)
       return
     }
 
@@ -58,7 +58,6 @@ export default function FileUpload({
         const file = selectedFiles[i]
 
         try {
-          console.log('Uploading file:', file.name, file.type, file.size)
           const result = await uploadFile(file, {
             maxSize,
             onProgress: fileProgress => {
@@ -70,23 +69,18 @@ export default function FileUpload({
             ownerId,
           })
 
-          console.log('Upload result:', result)
           newFiles.push(result)
         } catch (error) {
-          console.error('Upload error:', error)
           if (error instanceof FileUploadError) {
-            alert(`${file.name}: ${error.message}`)
+            alert.error(`${file.name}: ${error.message}`)
           } else {
-            alert(`${file.name}: 업로드 실패`)
+            alert.error(`${file.name}: 업로드 실패`)
           }
         }
       }
 
       const updatedFiles = [...files, ...newFiles]
-      console.log('Updated files:', updatedFiles)
-      console.log('Current files state before setFiles:', files)
       setFiles(updatedFiles)
-      console.log('Calling onFilesChange with:', updatedFiles)
       onFilesChange(updatedFiles)
     } finally {
       setUploading(false)

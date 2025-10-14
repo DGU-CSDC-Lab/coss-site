@@ -67,7 +67,6 @@ export default function AdminFacultyCreatePage() {
       setFormData(data)
       setOriginalData(data)
     } catch (error) {
-      console.error('Failed to fetch faculty:', error)
       alert.error('교원 정보를 불러올 수 없습니다.')
       navigate('/admin/faculty')
     } finally {
@@ -83,7 +82,7 @@ export default function AdminFacultyCreatePage() {
     handleImageChange,
   } = useImageUpload({
     onError: (error) => {
-      console.error('Image upload failed:', error)
+      alert.error((error as Error).message)
     }
   })
 
@@ -163,7 +162,6 @@ export default function AdminFacultyCreatePage() {
       }
       navigate('/admin/faculty')
     } catch (error) {
-      console.error(`Failed to ${isEdit ? 'update' : 'create'} faculty:`, error)
       alert.error(
         `교원 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다. \n ${error instanceof Error ? error.message : ''}`
       )

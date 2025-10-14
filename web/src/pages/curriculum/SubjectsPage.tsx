@@ -8,11 +8,14 @@ import Dropdown from '@/components/common/Dropdown'
 import Title from '@/components/common/title/Title'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function SubjectsPage() {
   const [courses, setCourses] = useState<PagedResponse<Course> | null>(null)
   const [loading, setLoading] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
+
+  const alert = useAlert()
 
   // 검색 조건
   const [selectedYear, setSelectedYear] = useState('2025')
@@ -36,7 +39,7 @@ export default function SubjectsPage() {
       })
       setCourses(response)
     } catch (error) {
-      console.error('Failed to fetch courses:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }
@@ -59,12 +62,14 @@ export default function SubjectsPage() {
 
   const yearSemesterOptions = [
     { value: '2025-1학기', label: '2025년 1학기' },
+    { value: '2025-1학기', label: '2025년 1학기' },
     { value: '2025-2학기', label: '2025년 2학기' },
     { value: '2024-1학기', label: '2024년 1학기' },
     { value: '2024-2학기', label: '2024년 2학기' },
   ]
 
   const searchTypeOptions = [
+    { value: 'name', label: '과목명' },
     { value: 'name', label: '과목명' },
     { value: 'department', label: '학과' },
     { value: 'code', label: '학수번호' },

@@ -3,6 +3,7 @@ import { PaperClipIcon } from '@heroicons/react/24/outline'
 import { PostDetail, PostFile } from '@/lib/api/posts'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
+import { useAlert } from '@/hooks/useAlert'
 
 interface NewsDetailProps {
   post: PostDetail | null
@@ -15,11 +16,13 @@ export default function NewsDetail({
   loading,
   backPath,
 }: NewsDetailProps) {
+  const alert = useAlert()
+
   const handleFileDownload = async (file: PostFile) => {
     try {
       const response = await fetch(file.downloadUrl)
       const blob = await response.blob()
-      
+
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
@@ -29,7 +32,7 @@ export default function NewsDetail({
       document.body.removeChild(link)
       window.URL.revokeObjectURL(url)
     } catch (error) {
-      console.error('Download failed:', error)
+      alert.error((error as Error).message)
       // 실패 시 직접 링크로 이동
       window.open(file.downloadUrl, '_blank')
     }

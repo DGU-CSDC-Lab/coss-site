@@ -3,6 +3,8 @@ import { SoftDeleteEntity } from '@/common/entities';
 
 export enum OwnerType {
   POST = 'post',
+  POPUP = 'popup',
+  FACULTY = 'faculty',
 }
 
 export enum FileStatus {

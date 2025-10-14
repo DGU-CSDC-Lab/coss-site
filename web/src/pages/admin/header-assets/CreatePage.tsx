@@ -55,7 +55,6 @@ export default function AdminHeaderAssetsCreatePage() {
       setFormData(data)
       setOriginalData(data)
     } catch (error) {
-      console.error('Failed to fetch header asset:', error)
       alert.error('헤더 자산 정보를 불러올 수 없습니다.')
       navigate('/admin/header-assets')
     } finally {
@@ -117,7 +116,6 @@ export default function AdminHeaderAssetsCreatePage() {
       }
       navigate('/admin/header-assets')
     } catch (error) {
-      console.error(`Failed to ${isEdit ? 'update' : 'create'} header asset:`, error)
       alert.error(`헤더 에셋 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다.`)
     } finally {
       setLoading(false)

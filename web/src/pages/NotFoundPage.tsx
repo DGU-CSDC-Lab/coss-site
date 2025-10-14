@@ -5,11 +5,14 @@ import NewsDetail from '@/components/news/NewsDetail'
 import { PostDetail, postsApi } from '@/lib/api/posts'
 import EmptyState from '@/components/common/EmptyState'
 import { categoryNameToKey } from '@/config/categoryConfig'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function NotFoundPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const [mounted, setMounted] = useState(false)
+
+  const alert = useAlert()
 
   useEffect(() => {
     setMounted(true)
@@ -37,7 +40,7 @@ export default function NotFoundPage() {
             const response = await postsApi.getPost(id)
             setPost(response)
           } catch (error) {
-            console.error('Failed to fetch post:', error)
+            alert.error((error as Error).message)
           } finally {
             setLoading(false)
           }

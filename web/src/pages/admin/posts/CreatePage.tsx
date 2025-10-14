@@ -51,7 +51,7 @@ export default function AdminPostsCreatePage() {
   const fetchPost = async (id: string) => {
     try {
       setInitialLoading(true)
-      const postData = await postsApi.getPostById(id)
+      const postData = await postsApi.getAdminPost(id)
       setPost(postData)
       setFormData({
         title: postData.title,
@@ -63,7 +63,6 @@ export default function AdminPostsCreatePage() {
         setThumbnailFileName('기존 썸네일')
       }
     } catch (error) {
-      console.error('Failed to fetch post:', error)
       alert.error('게시글 정보를 불러올 수 없습니다.')
       navigate('/admin/posts')
     } finally {
@@ -177,7 +176,6 @@ export default function AdminPostsCreatePage() {
       }
       navigate('/admin/posts')
     } catch (error) {
-      console.error(`Failed to ${isEdit ? 'update' : 'create'} post:`, error)
       alert.error(`게시글 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다.`)
     } finally {
       setLoading(false)

@@ -1,14 +1,15 @@
-
-
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 import { postsApi, Post } from '@/lib/api/posts'
 import Button from '@/components/common/Button'
 import EmptyState from '@/components/common/EmptyState'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function NewsSection() {
   const [news, setNews] = useState<Post[]>([])
+
+  const alert = useAlert()
 
   useEffect(() => {
     fetchNews()
@@ -23,7 +24,7 @@ export default function NewsSection() {
       })
       setNews(response.items)
     } catch (error) {
-      console.error('Failed to fetch news:', error)
+      alert.error((error as Error).message)
     }
   }
 
@@ -43,7 +44,11 @@ export default function NewsSection() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {news.length > 0 ? (
           news.map(item => (
-            <Link key={item.id} to={`/news/${item.categorySlug || item.categoryName}/${item.id}`} className="group">
+            <Link
+              key={item.id}
+              to={`/news/${item.categorySlug || item.categoryName}/${item.id}`}
+              className="group"
+            >
               <div className="bg-white rounded-lg overflow-hidden rounded-lg">
                 <div className="aspect-video bg-gray-200 relative overflow-hidden">
                   {item.thumbnailUrl ? (

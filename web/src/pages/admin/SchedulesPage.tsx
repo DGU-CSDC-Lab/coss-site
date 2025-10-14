@@ -6,6 +6,7 @@ import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import { useAlert } from '@/hooks/useAlert'
 
 export default function AdminSchedulesPage() {
   const [schedules, setSchedules] = useState<PagedResponse<Schedule> | null>(null)
@@ -16,6 +17,8 @@ export default function AdminSchedulesPage() {
   const [selectedMonth, setSelectedMonth] = useState('')
   const [selectedDay, setSelectedDay] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+
+  const alert = useAlert()
 
   const categoryOptions = [
     { value: '', label: '전체 카테고리' },
@@ -71,7 +74,7 @@ export default function AdminSchedulesPage() {
       const response = await schedulesApi.getSchedules(params)
       setSchedules(response)
     } catch (error) {
-      console.error('Failed to fetch schedules:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }
@@ -96,11 +99,10 @@ export default function AdminSchedulesPage() {
 
     try {
       await schedulesApi.deleteSchedule(id)
-      alert('일정이 삭제되었습니다.')
+      alert.success('일정이 삭제되었습니다.')
       fetchSchedules()
     } catch (error) {
-      console.error('Failed to delete schedule:', error)
-      alert('삭제 중 오류가 발생했습니다.')
+      alert.error('삭제 중 오류가 발생했습니다.')
     }
   }
 

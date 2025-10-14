@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { popupsApi, PopupResponse } from '@/lib/api/popups'
+import { useAlert } from './useAlert'
 
 const POPUP_STORAGE_KEY = 'hiddenPopups'
 const POPUP_HIDE_DURATION = 7 * 24 * 60 * 60 * 1000 // 7일
@@ -15,27 +16,32 @@ export const usePopups = () => {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
 
+  const alert = useAlert()
+
   // 숨겨진 팝업 목록 가져오기
   const getHiddenPopups = (): HiddenPopup[] => {
     if (typeof window === 'undefined') return []
-    
+
     try {
       const stored = localStorage.getItem(POPUP_STORAGE_KEY)
       if (!stored) return []
-      
+
       const hiddenPopups: HiddenPopup[] = JSON.parse(stored)
       const now = Date.now()
-      
+
       // 7일이 지난 항목들 제거
       const validHiddenPopups = hiddenPopups.filter(
         item => now - item.hiddenAt < POPUP_HIDE_DURATION
       )
-      
+
       // 변경된 경우 저장
       if (validHiddenPopups.length !== hiddenPopups.length) {
-        localStorage.setItem(POPUP_STORAGE_KEY, JSON.stringify(validHiddenPopups))
+        localStorage.setItem(
+          POPUP_STORAGE_KEY,
+          JSON.stringify(validHiddenPopups)
+        )
       }
-      
+
       return validHiddenPopups
     } catch {
       return []
@@ -47,16 +53,16 @@ export const usePopups = () => {
     const hiddenPopups = getHiddenPopups()
     const newHiddenPopup: HiddenPopup = {
       id: popupId,
-      hiddenAt: Date.now()
+      hiddenAt: Date.now(),
     }
-    
+
     const updatedHiddenPopups = [
       ...hiddenPopups.filter(item => item.id !== popupId),
-      newHiddenPopup
+      newHiddenPopup,
     ]
-    
+
     localStorage.setItem(POPUP_STORAGE_KEY, JSON.stringify(updatedHiddenPopups))
-    
+
     // 현재 보이는 팝업에서 제거
     setVisiblePopups(prev => prev.filter(popup => popup.id !== popupId))
   }
@@ -66,10 +72,12 @@ export const usePopups = () => {
     try {
       setLoading(true)
       const response = await popupsApi.getActivePopups()
-      
+
       // SuccessResponse에서 data 추출
-      const activePopups = Array.isArray(response) ? response : (response as any).data || response
-      
+      const activePopups = Array.isArray(response)
+        ? response
+        : (response as any).data || response
+
       // 현재 날짜에 해당하는 팝업만 필터링
       const now = new Date()
       const currentPopups = activePopups.filter((popup: any) => {
@@ -77,18 +85,20 @@ export const usePopups = () => {
         const endDate = new Date(popup.endDate)
         return now >= startDate && now <= endDate
       })
-      
+
       setPopups(currentPopups)
-      
+
       // 숨겨진 팝업 제외
       const hiddenPopups = getHiddenPopups()
       const hiddenIds = hiddenPopups.map(item => item.id)
-      const visiblePopups = currentPopups.filter((popup: any) => !hiddenIds.includes(popup.id))
-      
+      const visiblePopups = currentPopups.filter(
+        (popup: any) => !hiddenIds.includes(popup.id)
+      )
+
       setVisiblePopups(visiblePopups)
       setShowModal(visiblePopups.length > 0)
     } catch (error) {
-      console.error('Failed to load popups:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }
@@ -105,6 +115,6 @@ export const usePopups = () => {
     showModal,
     setShowModal,
     hidePopup,
-    refreshPopups: loadActivePopups
+    refreshPopups: loadActivePopups,
   }
 }

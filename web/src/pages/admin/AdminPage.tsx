@@ -18,6 +18,7 @@ import { popupsApi } from '@/lib/api/popups'
 import Information from '@/components/common/Information'
 import Title from '@/components/common/title/Title'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import { useAlert } from '@/hooks/useAlert'
 
 interface DashboardStats {
   posts: number
@@ -38,6 +39,8 @@ export default function AdminPage() {
     popups: 0,
   })
   const [loading, setLoading] = useState(true)
+
+  const alert = useAlert()
 
   useEffect(() => {
     fetchStats()
@@ -65,7 +68,7 @@ export default function AdminPage() {
         popups: (popupsRes as any).meta.totalElements,
       })
     } catch (error) {
-      console.error('Failed to fetch stats:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }

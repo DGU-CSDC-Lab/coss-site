@@ -4,14 +4,15 @@ import { PaginatedResponse } from '@/lib/apiClient'
 import { postsApi, Post } from '@/lib/api/posts'
 import NewsList from '@/components/news/NewsList'
 import Tabs from '@/components/tabs/Tabs'
+import { useAlert } from '@/hooks/useAlert'
 
 const categoryMap: Record<string, { id: string; title: string }> = {
   'scholarship-info': { id: 'scholarship-info', title: '장학정보' },
-  'news': { id: 'news', title: '뉴스' },
-  'resources': { id: 'resources', title: '자료실' },
-  'notices': { id: 'notices', title: '공지사항' },
-  'contest': { id: 'contest', title: '공모전 정보' },
-  'activities': { id: 'activities', title: '교육/활동/취업 정보' },
+  news: { id: 'news', title: '뉴스' },
+  resources: { id: 'resources', title: '자료실' },
+  notices: { id: 'notices', title: '공지사항' },
+  contest: { id: 'contest', title: '공모전 정보' },
+  activities: { id: 'activities', title: '교육/활동/취업 정보' },
 }
 
 export default function NewsPage() {
@@ -28,6 +29,8 @@ export default function NewsPage() {
 
   const categoryInfo = categoryMap[category] || categoryMap['news']
 
+  const alert = useAlert()
+
   useEffect(() => {
     fetchPosts()
   }, [currentPage, category])
@@ -43,7 +46,7 @@ export default function NewsPage() {
       })
       setPosts(response)
     } catch (error) {
-      console.error('Failed to fetch posts:', error)
+      alert.error((error as Error).message)
     } finally {
       setLoading(false)
     }

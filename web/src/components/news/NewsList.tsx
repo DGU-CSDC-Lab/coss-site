@@ -48,6 +48,7 @@ export default function NewsList({
 
   const searchTypeOptions = [
     { value: 'title', label: '제목' },
+    { value: 'title', label: '제목' },
     { value: 'author', label: '작성자' },
   ]
 
@@ -123,9 +124,13 @@ export default function NewsList({
               key={post.id}
               to={`${basePath}/${post.categorySlug || post.categoryName}/${post.id}`}
             >
-              <div className={`flex gap-4 p-4 hover:bg-gray-100 transition-colors ${
-                post.categoryName === '뉴스' && post.thumbnailUrl ? 'items-start' : 'items-center'
-              }`}>
+              <div
+                className={`flex gap-4 p-4 hover:bg-gray-100 transition-colors ${
+                  post.categoryName === '뉴스' && post.thumbnailUrl
+                    ? 'items-start'
+                    : 'items-center'
+                }`}
+              >
                 <div className="w-8 text-caption-14 text-point-1 text-center">
                   {(currentPage - 1) * 10 + index + 1}
                 </div>

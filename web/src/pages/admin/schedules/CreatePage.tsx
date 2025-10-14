@@ -65,7 +65,6 @@ export default function AdminSchedulesCreatePage() {
       setFormData(data)
       setOriginalData(data)
     } catch (error) {
-      console.error('Failed to fetch schedule:', error)
       alert.error('일정 정보를 불러올 수 없습니다.')
       navigate('/admin/schedules')
     } finally {
@@ -128,7 +127,6 @@ export default function AdminSchedulesCreatePage() {
       }
       navigate('/admin/schedules')
     } catch (error) {
-      console.error(`Failed to ${isEdit ? 'update' : 'create'} schedule:`, error)
       alert.error(
         `일정 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다. \n${(error as Error).message}`
       )

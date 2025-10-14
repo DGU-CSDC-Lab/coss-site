@@ -99,6 +99,11 @@ export class AuthService {
     } catch (error) {
       this.logger.error(
         `Register failed for ${request.email}: ${error.message}`,
+        {
+          error: error.message,
+          stack: error.stack,
+          originalError: error
+        }
       );
       throw CommonException.internalServerError(error.message);
     }
@@ -467,7 +472,12 @@ export class AuthService {
     } catch (error) {
       this.logger.error(
         `Failed to send verification email: ${email}`,
-        error.stack,
+        {
+          message: error.message,
+          command: error.command,
+          response: error.response,
+          stack: error.stack
+        }
       );
       throw AuthException.failedCodeSend(email, error.message);
     }

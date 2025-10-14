@@ -10,15 +10,18 @@ import { useAlert } from '@/hooks/useAlert'
 import { OwnerData } from '@/lib/api'
 
 // 에디터에 이미지 삽입 함수
-const insertImageToEditor = (editorRef: React.RefObject<HTMLDivElement>, imageResult: UploadResult) => {
+const insertImageToEditor = (
+  editorRef: React.RefObject<HTMLDivElement>,
+  imageResult: UploadResult
+) => {
   if (!editorRef.current) return
-  
+
   const img = document.createElement('img')
   img.src = imageResult.publicUrl || ''
   img.alt = imageResult.originalName
   img.style.maxWidth = '100%'
   img.style.height = 'auto'
-  
+
   const selection = window.getSelection()
   if (selection && selection.rangeCount > 0) {
     const range = selection.getRangeAt(0)
@@ -76,12 +79,16 @@ export default function HtmlEditor({
     if (!file) return
 
     try {
-      const imageResult = await uploadImageToS3Only(file, ownerData.ownerType, ownerData.ownerId)
-      
+      const imageResult = await uploadImageToS3Only(
+        file,
+        ownerData.ownerType,
+        ownerData.ownerId
+      )
+
       // 에디터에 포커스를 주고 잠시 기다린 후 이미지 삽입
       if (editorRef.current) {
         editorRef.current.focus()
-        
+
         setTimeout(() => {
           // 저장된 커서 위치가 있으면 복원
           if (savedRange) {
@@ -89,17 +96,14 @@ export default function HtmlEditor({
             selection?.removeAllRanges()
             selection?.addRange(savedRange)
           }
-          
+
           insertImageToEditor(editorRef, imageResult)
           handleInput() // 변경사항 반영
           setSavedRange(null)
         }, 50)
       }
     } catch (error) {
-      console.error('Image upload failed:', error)
-      alert.error(
-        `이미지 업로드 중 오류가 발생했습니다. \n${(error as Error).message}`
-      )
+      alert.error(`${(error as Error).message}`)
     }
   }
 
@@ -179,14 +183,15 @@ export default function HtmlEditor({
   // 이미지 파일 처리 (업로드 + 삽입)
   const handleImageFile = async (file: File) => {
     try {
-      const imageResult = await uploadImageToS3Only(file, ownerData.ownerType, ownerData.ownerId)
+      const imageResult = await uploadImageToS3Only(
+        file,
+        ownerData.ownerType,
+        ownerData.ownerId
+      )
       insertImageToEditor(editorRef, imageResult)
       handleInput() // 변경사항 반영
     } catch (error) {
-      console.error('Image upload failed:', error)
-      alert.error(
-        `이미지 업로드 중 오류가 발생했습니다. \n${(error as Error).message}`
-      )
+      alert.error((error as Error).message)
     }
   }
 
@@ -263,20 +268,20 @@ export default function HtmlEditor({
       // 에디터에 포커스를 주고 저장된 커서 위치 복원
       if (editorRef.current) {
         editorRef.current.focus()
-        
+
         if (savedRange) {
           const selection = window.getSelection()
           selection?.removeAllRanges()
           selection?.addRange(savedRange)
         }
-        
+
         document.execCommand(
           'insertHTML',
           false,
           `<a to="${linkData.url}" target="_blank">${linkData.name}</a>`
         )
       }
-      
+
       setLinkData({ name: '', url: '' })
       setShowLinkModal(false)
       setSavedRange(null)
@@ -305,7 +310,6 @@ export default function HtmlEditor({
   const checkFormatState = (tagName: string): boolean => {
     const selection = window.getSelection()
     if (!selection || selection.rangeCount === 0) {
-      console.log(`checkFormatState(${tagName}): No selection`)
       return false
     }
 
@@ -316,24 +320,15 @@ export default function HtmlEditor({
       element = element.parentNode!
     }
 
-    console.log(`checkFormatState(${tagName}): Starting from element:`, element)
-
     // 상위 요소들을 검사하여 해당 태그가 있는지 확인
     while (element && element !== editorRef.current) {
       const currentTagName = (element as Element).tagName?.toLowerCase()
-      console.log(
-        `checkFormatState(${tagName}): Checking element:`,
-        currentTagName
-      )
 
       if (currentTagName === tagName.toLowerCase()) {
-        console.log(`checkFormatState(${tagName}): Found match!`)
         return true
       }
       element = element.parentNode!
     }
-
-    console.log(`checkFormatState(${tagName}): No match found`)
     return false
   }
 
@@ -370,8 +365,6 @@ export default function HtmlEditor({
       insertUnorderedList: checkFormatState('ul'),
       insertOrderedList: checkFormatState('ol'),
     }
-
-    console.log('Format states updated:', formatStates)
     setActiveFormats(formatStates)
   }
 
@@ -425,58 +418,70 @@ export default function HtmlEditor({
         const selection = window.getSelection()
         if (selection && selection.rangeCount > 0) {
           const range = selection.getRangeAt(0)
-          
+
           // 선택된 범위 내의 모든 블록 요소 찾기
           const startContainer = range.startContainer
           const endContainer = range.endContainer
-          
+
           // 선택 범위의 모든 블록 요소 수집
           const blockElements: HTMLElement[] = []
-          
+
           // 시작 지점의 블록 요소 찾기
-          let startBlock = startContainer.nodeType === Node.TEXT_NODE 
-            ? startContainer.parentElement 
-            : startContainer as HTMLElement
-            
+          let startBlock =
+            startContainer.nodeType === Node.TEXT_NODE
+              ? startContainer.parentElement
+              : (startContainer as HTMLElement)
+
           while (startBlock && startBlock !== editor) {
             const tagName = startBlock.tagName?.toLowerCase()
-            if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div'].includes(tagName)) {
+            if (
+              ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div'].includes(tagName)
+            ) {
               break
             }
             startBlock = startBlock.parentElement
           }
-          
+
           if (startBlock && startBlock !== editor) {
             blockElements.push(startBlock)
-            
+
             // 다중 라인 선택인 경우 중간 블록들도 포함
             let currentBlock = startBlock.nextElementSibling as HTMLElement
             while (currentBlock && range.intersectsNode(currentBlock)) {
               const tagName = currentBlock.tagName?.toLowerCase()
-              if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div'].includes(tagName)) {
+              if (
+                ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div'].includes(
+                  tagName
+                )
+              ) {
                 blockElements.push(currentBlock)
               }
               currentBlock = currentBlock.nextElementSibling as HTMLElement
             }
           }
-          
+
           // 각 블록 요소를 새로운 태그로 변환
           if (blockElements.length > 0) {
             blockElements.forEach(element => {
               const newElement = document.createElement(value || 'p')
               newElement.innerHTML = element.innerHTML
-              
+
               // 기존 클래스나 스타일 유지 (placeholder 제외)
-              if (element.className && !element.className.includes('text-gray-600')) {
+              if (
+                element.className &&
+                !element.className.includes('text-gray-600')
+              ) {
                 newElement.className = element.className
               }
-              
+
               element.parentNode?.replaceChild(newElement, element)
             })
-            
+
             // 선택 영역 복원
             const newRange = document.createRange()
-            const firstNewElement = blockElements[0].parentNode?.querySelector(`${value || 'p'}`)
+            const firstNewElement = blockElements[0].parentNode?.querySelector(
+              `${value || 'p'}`
+            )
             if (firstNewElement) {
               newRange.selectNodeContents(firstNewElement)
               newRange.collapse(false)
@@ -534,7 +539,7 @@ export default function HtmlEditor({
         updateCurrentFormat()
       }, 0)
     } catch (error) {
-      console.error('Command execution failed:', error)
+      alert.error((error as Error).message)
     }
   }
 
@@ -542,27 +547,27 @@ export default function HtmlEditor({
     <div
       className={`bg-white rounded-md overflow-hidden ${showToolbar ? 'h-full flex flex-col' : 'h-full'}`}
     >
-      <style dangerouslySetInnerHTML={{
-        __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           [contenteditable]:empty:before {
             content: attr(data-placeholder);
             color: #6b7280;
             pointer-events: none;
           }
-        `
-      }} />
+        `,
+        }}
+      />
       {/* 툴바 - 조건부 렌더링 */}
       {showToolbar && (
         <div className="bg-gray-50 p-2 flex gap-1 flex-wrap flex-shrink-0">
           <button
             type="button"
             onClick={() => {
-              console.log('Bold button clicked')
               execCommand('bold')
               setTimeout(() => {
                 const boldState =
                   checkFormatState('b') || checkFormatState('strong')
-                console.log('Bold state after click:', boldState)
                 setActiveFormats(prev => ({
                   ...prev,
                   bold: boldState,
@@ -579,12 +584,10 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => {
-              console.log('Italic button clicked')
               execCommand('italic')
               setTimeout(() => {
                 const italicState =
                   checkFormatState('i') || checkFormatState('em')
-                console.log('Italic state after click:', italicState)
                 setActiveFormats(prev => ({
                   ...prev,
                   italic: italicState,
@@ -601,11 +604,9 @@ export default function HtmlEditor({
           <button
             type="button"
             onClick={() => {
-              console.log('Underline button clicked')
               execCommand('underline')
               setTimeout(() => {
                 const underlineState = checkFormatState('u')
-                console.log('Underline state after click:', underlineState)
                 setActiveFormats(prev => ({
                   ...prev,
                   underline: underlineState,

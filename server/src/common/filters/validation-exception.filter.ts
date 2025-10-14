@@ -3,6 +3,7 @@ import {
   Catch,
   ArgumentsHost,
   BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ErrorResponse } from '@/common/dto/response.dto';
@@ -17,12 +18,17 @@ import { ErrorResponse } from '@/common/dto/response.dto';
  */
 @Catch(BadRequestException) // BadRequestException만 캐치
 export class ValidationExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(ValidationExceptionFilter.name);
   /**
    * 유효성 검사 예외 처리 메서드
    * @param exception BadRequestException 객체
    * @param host ArgumentsHost - 실행 컨텍스트 정보
    */
   catch(exception: BadRequestException, host: ArgumentsHost) {
+    this.logger.debug('Validation exception caught', {
+      exception: exception.getResponse(),
+    });
+
     // HTTP 컨텍스트 추출
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -40,6 +46,11 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       const structuredErrors = this.parseValidationErrors(
         exceptionResponse.message,
       );
+
+      this.logger.warn('Validation failed', {
+        errorCount: Object.keys(structuredErrors).length,
+        fields: Object.keys(structuredErrors),
+      });
 
       details = {
         validationErrors: structuredErrors,
@@ -63,6 +74,8 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       message,
       details,
     );
+
+    this.logger.log('Validation error response sent', { message });
 
     // 422 Unprocessable Entity 상태 코드로 응답
     // 400 Bad Request 대신 422를 사용하여 유효성 검사 실패임을 명확히 표시
@@ -106,23 +119,26 @@ export class ValidationExceptionFilter implements ExceptionFilter {
   private getErrorType(errorMessage: string): string {
     // 이메일 형식 검증
     if (errorMessage.includes('must be a valid email')) return 'format';
-    
+
     // 날짜 형식 검증
-    if (errorMessage.includes('must be a valid ISO 8601 date string')) return 'format';
-    
+    if (errorMessage.includes('must be a valid ISO 8601 date string'))
+      return 'format';
+
     // 길이 검증 (@MinLength, @MaxLength, @Length)
     if (
       errorMessage.includes('must be longer than') ||
       errorMessage.includes('must be shorter than') ||
       errorMessage.includes('must be exactly')
-    ) return 'length';
-    
+    )
+      return 'length';
+
     // 숫자 범위 검증 (@Min, @Max)
     if (
       errorMessage.includes('must not be less than') ||
       errorMessage.includes('must not be greater than')
-    ) return 'range';
-    
+    )
+      return 'range';
+
     // 타입 검증 (@IsString, @IsNumber, @IsInt, @IsBoolean, @IsArray)
     if (
       errorMessage.includes('must be a number') ||
@@ -130,30 +146,34 @@ export class ValidationExceptionFilter implements ExceptionFilter {
       errorMessage.includes('must be an integer') ||
       errorMessage.includes('must be a boolean') ||
       errorMessage.includes('must be an array')
-    ) return 'type';
-    
+    )
+      return 'type';
+
     // Enum 검증 (@IsEnum)
     if (
       errorMessage.includes('must be one of the following values') ||
       errorMessage.includes('must be a valid enum value')
-    ) return 'enum';
-    
+    )
+      return 'enum';
+
     // 필수값 검증
     if (
       errorMessage.includes('should not be empty') ||
       errorMessage.includes('must be defined') ||
       errorMessage.includes('should not be null or undefined')
-    ) return 'required';
-    
+    )
+      return 'required';
+
     // 패턴 검증 (@Matches)
     if (errorMessage.includes('must match')) return 'pattern';
-    
+
     // 배열 검증
     if (
       errorMessage.includes('each value in') ||
       errorMessage.includes('must contain')
-    ) return 'array';
-    
+    )
+      return 'array';
+
     // 기본값
     return 'validation';
   }
