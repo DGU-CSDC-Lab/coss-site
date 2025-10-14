@@ -38,10 +38,6 @@ stop: ## Stop all running development servers
 	@rm -f server/server.log || echo "No log file to remove"
 	@echo "✅ All processes stopped"
 
-dev: ## Start local environment
-	docker-compose up --build
-	docker-compose up
-
 # Clean up
 stop: ## Clean containers and volumes
 	docker-compose -f docker-compose.local.yml down -v --remove-orphans
