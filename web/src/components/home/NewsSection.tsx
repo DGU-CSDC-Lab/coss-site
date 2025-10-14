@@ -19,7 +19,7 @@ export default function NewsSection() {
   const fetchNews = async () => {
     try {
       const response = await postsApi.getPosts({
-        categorySlug: 'news',
+        category: 'department-news',
         size: 4,
       })
       setNews(response.items)

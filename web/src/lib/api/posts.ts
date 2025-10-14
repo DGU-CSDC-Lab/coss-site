@@ -41,7 +41,7 @@ export interface PostDetail extends Omit<Post, 'hasFiles' | 'fileCount'> {
 }
 
 export interface PostsQuery {
-  categorySlug?: string
+  category?: string
   keyword?: string
   searchType?: 'title' | 'author'
   page?: number

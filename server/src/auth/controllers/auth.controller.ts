@@ -36,7 +36,8 @@ export class AuthController {
   @Post('register')
   @ApiOperation({
     summary: '회원가입 - 인증 이메일 발송',
-    description: '이메일과 비밀번호로 회원가입을 요청하고 인증 이메일을 발송합니다.',
+    description:
+      '이메일과 비밀번호로 회원가입을 요청하고 인증 이메일을 발송합니다.',
   })
   @ApiBody({ type: RegisterRequest })
   @ApiResponse({
@@ -45,9 +46,12 @@ export class AuthController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: '인증 이메일이 발송되었습니다. 이메일을 확인해주세요.' }
-      }
-    }
+        message: {
+          type: 'string',
+          example: '인증 이메일이 발송되었습니다. 이메일을 확인해주세요.',
+        },
+      },
+    },
   })
   @ApiResponse({ status: 400, description: '잘못된 요청' })
   @ApiResponse({ status: 409, description: '이미 존재하는 이메일' })
@@ -68,11 +72,16 @@ export class AuthController {
     description: '이메일 인증 및 회원가입 완료',
     type: UserInfoResponse,
   })
-  @ApiResponse({ status: 400, description: '잘못된 인증 코드 또는 만료된 코드' })
+  @ApiResponse({
+    status: 400,
+    description: '잘못된 인증 코드 또는 만료된 코드',
+  })
   @ApiResponse({ status: 404, description: '인증 요청을 찾을 수 없음' })
   @ApiResponse({ status: 500, description: '서버 내부 오류' })
   @HttpCode(HttpStatus.CREATED)
-  async verifyEmail(@Body() request: VerifyEmailRequest): Promise<UserInfoResponse> {
+  async verifyEmail(
+    @Body() request: VerifyEmailRequest,
+  ): Promise<UserInfoResponse> {
     return this.service.verifyEmail(request);
   }
 
@@ -86,14 +95,11 @@ export class AuthController {
     status: 200,
     description: '로그인 성공',
     schema: {
-      allOf: [
-        { $ref: '#/components/schemas/SuccessResponse' },
-        {
-          properties: {
-            data: { $ref: '#/components/schemas/LoginResponse' },
-          },
-        },
-      ],
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: '로그인 성공' },
+        data: { $ref: '#/components/schemas/LoginResponse' },
+      },
     },
   })
   @ApiResponse({ status: 400, description: '잘못된 요청' })

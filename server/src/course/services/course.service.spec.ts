@@ -100,7 +100,7 @@ describe('CourseService', () => {
     it('should throw CourseException when course not found', async () => {
       courseRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow('Course not found');
+      await expect(service.findOne('nonexistent')).rejects.toThrow('해당하는 강의를 찾을 수 없습니다.');
     });
 
     it('should throw CommonException when database error occurs', async () => {
@@ -162,7 +162,7 @@ describe('CourseService', () => {
     it('should throw CourseException when course not found', async () => {
       courseRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', {})).rejects.toThrow('Course not found');
+      await expect(service.update('nonexistent', {})).rejects.toThrow('해당하는 강의를 찾을 수 없습니다.');
     });
 
     it('should throw CommonException when database error occurs', async () => {
@@ -185,7 +185,7 @@ describe('CourseService', () => {
     it('should throw CourseException when course not found', async () => {
       courseRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow('Course not found');
+      await expect(service.delete('nonexistent')).rejects.toThrow('해당하는 강의를 찾을 수 없습니다.');
     });
 
     it('should throw CommonException when database error occurs', async () => {

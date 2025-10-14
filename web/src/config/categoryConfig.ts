@@ -7,42 +7,34 @@ export interface CategoryConfig {
 
 export const CATEGORIES: CategoryConfig[] = [
   // 공지사항
+  { key: 'select', label: '카테고리 선택', slug: 'select' },
   { key: 'notices', label: '공지사항', slug: 'notices' },
 
   // 소식 (상위)
-  { key: 'announcements', label: '소식', slug: 'announcements' },
   {
     key: 'scholarships',
     label: '장학정보',
-    slug: 'scholarships',
-    parent: 'announcements',
+    slug: 'scholarships'
   },
   {
     key: 'department-news',
     label: '뉴스',
-    slug: 'department-news',
-    parent: 'announcements',
+    slug: 'department-news'
   },
   {
     key: 'resources',
     label: '자료실',
-    slug: 'resources',
-    parent: 'announcements',
+    slug: 'resources'
   },
-
-  // 공모전/채용 정보 (상위)
-  { key: 'contest-jobs', label: '공모전/채용 정보', slug: 'contest-jobs' },
   {
     key: 'contest',
     label: '공모전 정보',
     slug: 'contest',
-    parent: 'contest-jobs',
   },
   {
     key: 'activities',
     label: '교육/활동/취업 정보',
     slug: 'activities',
-    parent: 'contest-jobs',
   },
 ]
 

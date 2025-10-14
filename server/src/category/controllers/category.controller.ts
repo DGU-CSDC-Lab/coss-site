@@ -22,7 +22,6 @@ import {
 } from '@nestjs/swagger';
 import { CategoryService } from '@/category/services/category.service';
 import { AdminGuard } from '@/auth/guards/admin.guard';
-import { SuccessResponse } from '@/common/dto/response.dto';
 import {
   CategoryCreate,
   CategoryUpdate,

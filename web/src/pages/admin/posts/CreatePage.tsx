@@ -1,7 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline'
-import { postsApi, CreatePostRequest, UpdatePostRequest, Post } from '@/lib/api/posts'
+import {
+  postsApi,
+  CreatePostRequest,
+  UpdatePostRequest,
+  Post,
+} from '@/lib/api/posts'
 import { UploadResult } from '@/utils/fileUpload'
 import { useImageUpload } from '@/hooks/useImageUpload'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
@@ -34,7 +39,7 @@ export default function AdminPostsCreatePage() {
   const [thumbnailFileName, setThumbnailFileName] = useState('')
   const [formData, setFormData] = useState({
     title: '',
-    categoryId: 'announcements',
+    categoryId: '',
     contentHtml: '',
   })
   const [files, setFiles] = useState<UploadResult[]>([])
@@ -75,16 +80,21 @@ export default function AdminPostsCreatePage() {
     uploading: thumbnailUploading,
     handleImageChange: handleThumbnailChange,
   } = useImageUpload({
-    onError: (error) => {
+    onError: error => {
       alert.error('썸네일 업로드 중 오류가 발생했습니다.')
     },
     onSuccess: (result, file) => {
       setThumbnailFileName(file.name)
-    }
+    },
   })
 
   // Check if there are unsaved changes
-  const hasChanges = !!(formData.title.trim() || formData.contentHtml.trim() || files.length > 0 || thumbnailUrl)
+  const hasChanges = !!(
+    formData.title.trim() ||
+    formData.contentHtml.trim() ||
+    files.length > 0 ||
+    thumbnailUrl
+  )
 
   const {
     showExitModal,
@@ -98,7 +108,7 @@ export default function AdminPostsCreatePage() {
       if (formData.title.trim()) {
         await handleSubmit(true)
       }
-    }
+    },
   })
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -123,17 +133,29 @@ export default function AdminPostsCreatePage() {
   }
 
   const handleSubmit = async (isDraft = false) => {
-    if (formData.categoryId === 'department-news' && !thumbnailUrl && !post?.thumbnailUrl) {
+    if (
+      formData.categoryId === 'department-news' &&
+      !thumbnailUrl &&
+      !post?.thumbnailUrl
+    ) {
       alert.error('뉴스 카테고리는 썸네일 이미지가 필수입니다.')
       return
     }
-    
+
+    if (!isDraft) {
+      if (formData.categoryId.trim() === 'select' || !formData.categoryId) {
+        alert.error('카테고리를 선택해주세요.')
+        return
+      }
+    }
+
     setLoading(true)
 
     try {
-      const editorImageFileKeys = getEditorImageFileKeys && typeof getEditorImageFileKeys === 'function' 
-        ? getEditorImageFileKeys() 
-        : []
+      const editorImageFileKeys =
+        getEditorImageFileKeys && typeof getEditorImageFileKeys === 'function'
+          ? getEditorImageFileKeys()
+          : []
       const allFiles = [
         ...files.map(file => ({
           fileKey: file.fileKey,
@@ -160,7 +182,9 @@ export default function AdminPostsCreatePage() {
         }
 
         await postsApi.updatePost(params.id, postData)
-        alert.success(isDraft ? '임시저장 되었습니다.' : '게시글이 수정되었습니다.')
+        alert.success(
+          isDraft ? '임시저장 되었습니다.' : '게시글이 수정되었습니다.'
+        )
       } else {
         const postData: CreatePostRequest = {
           title: formData.title,
@@ -172,7 +196,9 @@ export default function AdminPostsCreatePage() {
         }
 
         await postsApi.createPost(postData)
-        alert.success(isDraft ? '임시저장 되었습니다.' : '게시글이 생성되었습니다.')
+        alert.success(
+          isDraft ? '임시저장 되었습니다.' : '게시글이 생성되었습니다.'
+        )
       }
       navigate('/admin/posts')
     } catch (error) {
@@ -196,9 +222,9 @@ export default function AdminPostsCreatePage() {
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b flex-shrink-0">
         <div className="flex items-center gap-4">
-          <Button 
-            variant="delete" 
-            size="md" 
+          <Button
+            variant="delete"
+            size="md"
             radius="md"
             onClick={() => handleExit(() => navigate('/admin/posts'))}
           >
@@ -233,7 +259,7 @@ export default function AdminPostsCreatePage() {
             }`}
             style={{
               height: showTitle ? 'auto' : '0px',
-              overflow: showTitle ? 'visible' : 'hidden'
+              overflow: showTitle ? 'visible' : 'hidden',
             }}
           >
             <Input
@@ -241,7 +267,9 @@ export default function AdminPostsCreatePage() {
               size="lg"
               type="text"
               value={formData.title}
-              onChange={value => setFormData(prev => ({ ...prev, title: value }))}
+              onChange={value =>
+                setFormData(prev => ({ ...prev, title: value }))
+              }
               placeholder="제목을 입력하세요"
             />
             <div className="w-24 h-2 my-4 bg-point-1"></div>

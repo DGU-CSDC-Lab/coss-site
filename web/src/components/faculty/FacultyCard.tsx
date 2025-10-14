@@ -11,9 +11,9 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
     <div className="transition-all flex gap-6 items-start">
       {/* 프로필 이미지 */}
       <div className="flex-shrink-0 aspect-[3/4] w-48 bg-gray-100 relative overflow-hidden self-start">
-        {faculty.profileImage ? (
+        {faculty.profileImageUrl ? (
           <img
-            src={faculty.profileImage}
+            src={faculty.profileImageUrl}
             alt={faculty.name}
             className="absolute inset-0 w-full h-full object-cover"
           />

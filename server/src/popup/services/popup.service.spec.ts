@@ -198,7 +198,7 @@ describe('PopupService', () => {
     it('should throw PopupException when popup not found', async () => {
       popupRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent')).rejects.toThrow('Popup not found');
+      await expect(service.findOne('nonexistent')).rejects.toThrow('팝업을 찾을 수 없습니다.');
     });
 
     it('should throw CommonException when database error occurs', async () => {
@@ -305,7 +305,7 @@ describe('PopupService', () => {
     it('should throw PopupException when popup not found', async () => {
       popupRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', {})).rejects.toThrow('Popup not found');
+      await expect(service.update('nonexistent', {})).rejects.toThrow('팝업을 찾을 수 없습니다.');
     });
 
     it('should throw CommonException when database error occurs', async () => {
@@ -329,7 +329,7 @@ describe('PopupService', () => {
     it('should throw PopupException when popup not found', async () => {
       popupRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.delete('nonexistent')).rejects.toThrow('Popup not found');
+      await expect(service.delete('nonexistent')).rejects.toThrow('팝업을 찾을 수 없습니다.');
     });
 
     it('should throw CommonException when database error occurs', async () => {

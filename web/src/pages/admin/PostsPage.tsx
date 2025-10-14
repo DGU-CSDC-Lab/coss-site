@@ -58,7 +58,7 @@ export default function AdminPostsPage() {
       const response = await postsApi.getAdminPosts({
         keyword: keyword || undefined,
         searchType: searchType as 'title' | 'author',
-        categorySlug: categorySlug || undefined,
+        category: categorySlug || undefined,
         status: (status as 'draft' | 'private' | 'public') || undefined,
         sort: sort as 'latest' | 'popular',
         page: currentPage,

@@ -39,7 +39,7 @@ export default function NewsPage() {
     try {
       setLoading(true)
       const response = await postsApi.getPosts({
-        categorySlug: categoryInfo.id,
+        category: categoryInfo.id,
         keyword: keyword || undefined,
         page: currentPage,
         size: 5,

@@ -97,7 +97,9 @@ export class DatabaseSeeder implements OnModuleInit {
     // 이미 카테고리가 존재하는지 확인
     const existingCategories = await categoryRepository.count();
     if (existingCategories > 0) {
-      this.logger.log(`Categories already exist (${existingCategories} found), skipping creation`);
+      this.logger.log(
+        `Categories already exist (${existingCategories} found), skipping creation`,
+      );
       return;
     }
 
@@ -182,6 +184,16 @@ export class DatabaseSeeder implements OnModuleInit {
         order: 2,
       },
     ];
+
+    // 임시
+    const draft = categoryRepository.create({
+      name: '임시',
+      slug: 'draft',
+      description: '임시 게시판',
+      order: 1,
+    });
+    const savedDraft = await categoryRepository.save(draft);
+    this.logger.debug(`Created category: ${savedDraft.name}`);
 
     for (const subCat of contestSubCategories) {
       const created = await categoryRepository.save(
