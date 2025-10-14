@@ -70,6 +70,7 @@ describe('BoardService', () => {
         {
           provide: getRepositoryToken(File),
           useValue: {
+            find: jest.fn(),
             count: jest.fn(),
             create: jest.fn(),
             save: jest.fn(),
@@ -318,6 +319,7 @@ describe('BoardService', () => {
         ...mockPost,
         viewCount: 11,
       } as BoardPost);
+      fileRepository.find.mockResolvedValue([mockFile]);
       s3Service.getFileUrl.mockReturnValue('https://example.com/download');
 
       const result = await service.findOne('post-1');
@@ -351,6 +353,7 @@ describe('BoardService', () => {
       postRepository.createQueryBuilder
         .mockReturnValueOnce(mockQueryBuilder as any)
         .mockReturnValue(mockPrevNextQueryBuilder as any);
+      fileRepository.find.mockResolvedValue([mockFile]);
 
       const result = await service.findOne('post-1', true);
 

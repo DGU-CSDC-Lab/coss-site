@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '@/auth/services/auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User, Account, UserRole } from '@/auth/entities';
+import { User, Account, UserRole, PendingUser } from '@/auth/entities';
 import { VerificationCodeService } from '@/auth/services/verification-code.service';
 import { AuthException, DatabaseException } from '@/common/exceptions';
 import * as bcrypt from 'bcrypt';
@@ -16,6 +16,7 @@ describe('AuthService', () => {
   let jwtService: JwtService;
   let userRepository: any;
   let accountRepository: any;
+  let pendingUserRepository: any;
   let verificationCodeService: any;
 
   const mockUserRepository = {
@@ -61,6 +62,15 @@ describe('AuthService', () => {
           useValue: mockAccountRepository,
         },
         {
+          provide: getRepositoryToken(PendingUser),
+          useValue: {
+            delete: jest.fn(),
+            save: jest.fn(),
+            findOne: jest.fn(),
+            create: jest.fn(),
+          },
+        },
+        {
           provide: JwtService,
           useValue: mockJwtService,
         },
@@ -75,6 +85,7 @@ describe('AuthService', () => {
     jwtService = module.get<JwtService>(JwtService);
     userRepository = module.get(getRepositoryToken(User));
     accountRepository = module.get(getRepositoryToken(Account));
+    pendingUserRepository = module.get(getRepositoryToken(PendingUser));
     verificationCodeService = module.get<VerificationCodeService>(VerificationCodeService);
   });
 
@@ -89,14 +100,17 @@ describe('AuthService', () => {
     };
 
     it('should register successfully', async () => {
-      const mockUser = { id: 'user-id', username: 'user-1234', role: UserRole.USER };
-      const mockAccount = { id: 'account-id', email: registerRequest.email, passwordHash: 'hashed-password', user: mockUser };
+      const mockPendingUser = { 
+        id: 'pending-id', 
+        email: registerRequest.email, 
+        passwordHash: 'hashed-password',
+        verificationCode: '123456',
+        expiresAt: new Date()
+      };
 
       mockAccountRepository.findOne.mockResolvedValue(null);
-      mockUserRepository.create.mockReturnValue(mockUser);
-      mockUserRepository.save.mockResolvedValue(mockUser);
-      mockAccountRepository.create.mockReturnValue(mockAccount);
-      mockAccountRepository.save.mockResolvedValue(mockAccount);
+      pendingUserRepository.create.mockReturnValue(mockPendingUser);
+      pendingUserRepository.save.mockResolvedValue(mockPendingUser);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-password');
 
       await service.register(registerRequest);
@@ -104,8 +118,8 @@ describe('AuthService', () => {
       expect(accountRepository.findOne).toHaveBeenCalledWith({
         where: { email: registerRequest.email },
       });
-      expect(userRepository.create).toHaveBeenCalled();
-      expect(accountRepository.create).toHaveBeenCalled();
+      expect(pendingUserRepository.create).toHaveBeenCalled();
+      expect(pendingUserRepository.save).toHaveBeenCalled();
     });
 
     it('should throw when email already exists', async () => {
