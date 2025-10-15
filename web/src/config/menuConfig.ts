@@ -65,7 +65,7 @@ const menuConfig = [
     children: [
       {
         name: '소식',
-        path: `/news?category=${getCategoryKey('소식')}`,
+        path: `/news?category=${getCategoryKey('장학정보')}`,
         children: [
           { name: '장학정보', path: `/news?category=${getCategoryKey('장학정보')}` },
           { name: '뉴스', path: `/news?category=${getCategoryKey('뉴스')}` },
@@ -75,7 +75,7 @@ const menuConfig = [
       { name: '공지사항', path: `/news?category=${getCategoryKey('공지사항')}` },
       {
         name: '공모전/채용 정보',
-        path: `/news?category=${getCategoryKey('공모전/채용 정보')}`,
+        path: `/news?category=${getCategoryKey('공모전 정보')}`,
         children: [
           { name: '공모전 정보', path: `/news?category=${getCategoryKey('공모전 정보')}` },
           { name: '교육/활동/취업 정보', path: `/news?category=${getCategoryKey('교육/활동/취업 정보')}` },
