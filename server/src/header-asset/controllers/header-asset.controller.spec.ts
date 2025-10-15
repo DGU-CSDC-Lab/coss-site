@@ -48,7 +48,7 @@ describe('HeaderAssetController', () => {
   describe('getHeaderAsset', () => {
     it('should return header asset by id', async () => {
       const id = '1';
-      const result = { id: '1', title: 'Test Asset', imageUrl: '/test.jpg', linkUrl: '/', isActive: true };
+      const result = { id: '1', title: 'Test Asset', imageUrl: '/test.jpg', linkUrl: '/', createdAt: new Date(), isActive: true };
       service.findOne.mockResolvedValue(result);
 
       expect(await controller.getHeaderAsset(id)).toBe(result);
