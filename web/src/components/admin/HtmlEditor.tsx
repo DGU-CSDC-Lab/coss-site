@@ -81,7 +81,7 @@ export default function HtmlEditor({
     try {
       const imageResult = await uploadImageToS3Only(
         file,
-        ownerData.ownerType,
+        'post-content' as any, // 에디터 이미지는 post-content 타입
         ownerData.ownerId
       )
 
@@ -185,7 +185,7 @@ export default function HtmlEditor({
     try {
       const imageResult = await uploadImageToS3Only(
         file,
-        ownerData.ownerType,
+        'post-content' as any, // 에디터 이미지는 post-content 타입
         ownerData.ownerId
       )
       insertImageToEditor(editorRef, imageResult)

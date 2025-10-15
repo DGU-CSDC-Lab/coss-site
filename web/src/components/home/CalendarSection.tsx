@@ -17,6 +17,13 @@ export default function CalendarSection() {
     fetchMonthEvents()
   }, [currentDate])
 
+  // 오늘 날짜로 selectedDate 초기화 (monthEvents 로드 후)
+  useEffect(() => {
+    if (monthEvents.length > 0) {
+      setSelectedDate(new Date())
+    }
+  }, [monthEvents])
+
   const fetchMonthEvents = async () => {
     try {
       const year = currentDate.getFullYear()

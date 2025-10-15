@@ -11,6 +11,7 @@ import {
 import { PagedResponse } from '@/common/dto/response.dto';
 import { CommonException, HeaderAssetException } from '@/common/exceptions';
 import { FileService } from '@/file/services/file.service';
+import { S3Service } from '@/file/services/s3.service';
 import { OwnerType } from '@/file/entities';
 
 /**
@@ -31,6 +32,7 @@ export class HeaderAssetService {
     @InjectRepository(HeaderAsset)
     private headerAssetRepository: Repository<HeaderAsset>,
     private fileService: FileService,
+    private s3Service: S3Service,
   ) {}
 
   /**
@@ -75,7 +77,7 @@ export class HeaderAssetService {
       );
 
       // 엔티티를 응답 DTO로 변환하고 페이지네이션 정보와 함께 반환
-      const items = assets.map(this.toResponse);
+      const items = assets.map(asset => this.toResponse(asset));
       return new PagedResponse(items, page, size, totalElements);
     } catch (error) {
       this.logger.error('Error finding header assets', error.stack);
@@ -286,7 +288,7 @@ export class HeaderAssetService {
     return {
       id: asset.id,
       title: asset.title, // 헤더 에셋 제목
-      imageUrl: asset.imageUrl, // 표시할 이미지 URL
+      imageUrl: asset.imageUrl ? this.s3Service.getFileUrl(asset.imageUrl) : null, // CloudFront URL로 변환
       linkUrl: asset.linkUrl, // 클릭 시 이동할 링크 URL (선택사항)
       isActive: asset.isActive, // 활성화 상태
     };

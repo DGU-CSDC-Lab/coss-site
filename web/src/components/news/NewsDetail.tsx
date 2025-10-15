@@ -84,6 +84,18 @@ export default function NewsDetail({
           <hr className="border-surface border-1 border-gray-500" />
         </div>
       </div>
+
+      {/* 썸네일 영역 - department-news 카테고리만 */}
+      {post.categorySlug === 'department-news' && post.thumbnailUrl && (
+        <div className="mb-6">
+          <img
+            src={post.thumbnailUrl}
+            alt={post.title}
+            className="w-full max-w-2xl mx-auto rounded-lg shadow-sm"
+          />
+        </div>
+      )}
+
       {/* 본문 영역 */}
       <div
         className="py-8 prose max-w-none text-body-14-regular leading-relaxed"
@@ -122,7 +134,7 @@ export default function NewsDetail({
           <>
             <hr className="border-surface border-1 border-gray-700" />
             <Link
-              to={`${backPath}/${post.prevPost.id}`}
+              to={`/news/${post.categorySlug}/${post.prevPost.id}`}
               className="flex items-center gap-3 px-2 py-4 hover:bg-gray-100 rounded-md transition-colors"
             >
               <span className="px-2 py-1 text-caption-12 text-white rounded-full bg-info-600">
@@ -138,7 +150,7 @@ export default function NewsDetail({
           <>
             <hr className="border-surface border-1 border-gray-700" />
             <Link
-              to={`${backPath}/${post.nextPost.id}`}
+              to={`/news/${post.categorySlug}/${post.nextPost.id}`}
               className="flex items-center gap-3 px-2 py-4 hover:bg-gray-100 rounded-md transition-colors"
             >
               <span className="px-2 py-1 text-caption-12 text-white rounded-full bg-info-600">

@@ -93,6 +93,7 @@ describe('BoardService', () => {
           provide: FileService,
           useValue: {
             updateOwner: jest.fn(),
+            getFileUrl: jest.fn((fileKey) => `https://iotcoss.org/${fileKey}`),
           },
         },
       ],

@@ -299,4 +299,10 @@ export class FileService {
     const dot = fileName.lastIndexOf('.');
     return dot !== -1 ? fileName.substring(dot) : '';
   }
+
+  // 파일 키를 CloudFront URL로 변환
+  getFileUrl(fileKey: string): string {
+    if (!fileKey) return null;
+    return this.s3Service.getFileUrl(fileKey);
+  }
 }

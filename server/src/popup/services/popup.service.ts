@@ -11,6 +11,7 @@ import {
 import { PagedResponse } from '@/common/dto/response.dto';
 import { CommonException, PopupException } from '@/common/exceptions';
 import { FileService } from '@/file/services/file.service';
+import { S3Service } from '@/file/services/s3.service';
 import { OwnerType } from '@/file/entities';
 
 /**
@@ -30,6 +31,7 @@ export class PopupService {
   constructor(
     @InjectRepository(Popup) private popupRepository: Repository<Popup>,
     private fileService: FileService,
+    private s3Service: S3Service,
   ) {}
 
   /**
@@ -72,7 +74,7 @@ export class PopupService {
       );
 
       // 엔티티를 응답 DTO로 변환하고 페이지네이션 정보와 함께 반환
-      const items = popups.map(this.toResponse);
+      const items = popups.map(popup => this.toResponse(popup));
       return new PagedResponse(items, page, size, totalElements);
     } catch (error) {
       this.logger.error('Error finding popups', error.stack);
@@ -115,7 +117,7 @@ export class PopupService {
         this.logger.debug(`Active popup titles: ${titles}`);
       }
 
-      return popups.map(this.toResponse);
+      return popups.map(popup => this.toResponse(popup));
     } catch (error) {
       this.logger.error('Error finding active popups', error.stack);
       throw CommonException.internalServerError(error.message);
@@ -326,7 +328,7 @@ export class PopupService {
       id: popup.id,
       title: popup.title, // 팝업 제목
       content: popup.content, // 팝업 내용
-      imageUrl: popup.imageUrl, // 팝업 이미지 URL
+      imageUrl: popup.imageUrl ? this.s3Service.getFileUrl(popup.imageUrl) : null, // 팝업 이미지 URL
       linkUrl: popup.linkUrl, // 클릭 시 이동할 링크 URL
       startDate: popup.startDate, // 팝업 시작일
       endDate: popup.endDate, // 팝업 종료일

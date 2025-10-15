@@ -251,7 +251,7 @@ export default function AdminPostsPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Link
-                        to={`/news/${post.categoryId}/${post.id}`}
+                        to={`/news/${post.categorySlug}/${post.id}`}
                         className="font-body-14-medium text-gray-600 hover:text-gray-900 line-clamp-1"
                       >
                         {post.title}

@@ -14,6 +14,7 @@ import {
 import { PagedResponse } from '@/common/dto/response.dto';
 import { CommonException, FacultyException } from '@/common/exceptions';
 import { FileService } from '@/file/services/file.service';
+import { S3Service } from '@/file/services/s3.service';
 import { OwnerType } from '@/file/entities';
 
 /**
@@ -33,6 +34,7 @@ export class FacultyService {
     @InjectRepository(FacultyMember)
     private facultyRepository: Repository<FacultyMember>,
     private fileService: FileService,
+    private s3Service: S3Service,
   ) {}
 
   /**
@@ -82,7 +84,7 @@ export class FacultyService {
       );
 
       // 엔티티를 응답 DTO로 변환하고 페이지네이션 정보와 함께 반환
-      const items = faculty.map(this.toResponse);
+      const items = faculty.map(member => this.toResponse(member));
       return new PagedResponse(items, page, size, totalElements);
     } catch (error) {
       this.logger.error('Error finding faculty members', error.stack);
@@ -251,7 +253,7 @@ export class FacultyService {
       email: faculty.email, // 이메일 주소
       phoneNumber: faculty.phoneNumber, // 전화번호
       office: faculty.office, // 연구실/사무실 위치
-      profileImageUrl: faculty.profileImageUrl, // 프로필 사진 URL
+      profileImageUrl: faculty.profileImageUrl ? this.s3Service.getFileUrl(faculty.profileImageUrl) : null, // 프로필 사진 URL
       department: faculty.department, // 소속 학과
       researchAreas: faculty.researchAreas, // 연구 분야
       biography: faculty.biography, // 약력/소개

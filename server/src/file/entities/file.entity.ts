@@ -3,6 +3,7 @@ import { SoftDeleteEntity } from '@/common/entities';
 
 export enum OwnerType {
   POST = 'post',
+  POST_CONTENT = 'post-content', // 에디터 이미지용
   POPUP = 'popup',
   FACULTY = 'faculty',
   HEADER = 'header',

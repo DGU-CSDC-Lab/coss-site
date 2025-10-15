@@ -364,27 +364,31 @@ export class BoardService {
       const saved = await this.postRepository.save(post);
       this.logger.log(`Post created successfully: ${saved.id}`);
 
-      // temp 파일들을 실제 post ID로 업데이트
-      await this.fileService.updateOwner('temp', saved.id, OwnerType.POST);
-
       if (createDto.files && createDto.files.length > 0) {
-        const fileCount = Math.min(createDto.files.length, 10);
-        this.logger.debug(`Processing ${fileCount} files (max 10)`);
-
-        const files = createDto.files.slice(0, 10).map((fileDto, index) =>
-          this.fileRepository.create({
-            ownerId: saved.id,
-            ownerType: OwnerType.POST,
-            fileKey: fileDto.fileKey,
-            fileName: fileDto.originalName,
-            fileSize: fileDto.fileSize,
-            mimeType: fileDto.mimeType,
-            displayOrder: index,
-            createdById: authorId,
-          }),
+        // 다운로드 파일만 필터링 (originalName이 'editor-image'가 아닌 것들)
+        const downloadFiles = createDto.files.filter(
+          file => file.originalName !== 'editor-image'
         );
-        await this.fileRepository.save(files);
-        this.logger.log(`Saved ${files.length} files for post: ${saved.id}`);
+        
+        if (downloadFiles.length > 0) {
+          const fileCount = Math.min(downloadFiles.length, 10);
+          this.logger.debug(`Processing ${fileCount} download files (max 10)`);
+
+          const files = downloadFiles.slice(0, 10).map((fileDto, index) =>
+            this.fileRepository.create({
+              ownerId: saved.id,
+              ownerType: OwnerType.POST,
+              fileKey: fileDto.fileKey,
+              fileName: fileDto.originalName,
+              fileSize: fileDto.fileSize,
+              mimeType: fileDto.mimeType,
+              displayOrder: index,
+              createdById: authorId,
+            }),
+          );
+          await this.fileRepository.save(files);
+          this.logger.log(`Saved ${files.length} download files for post: ${saved.id}`);
+        }
       }
 
       this.logger.log(
@@ -511,7 +515,7 @@ export class BoardService {
       author: authorName,
       viewCount: post.viewCount,
       status: post.status,
-      thumbnailUrl: post.thumbnailUrl,
+      thumbnailUrl: post.thumbnailUrl ? this.s3Service.getFileUrl(post.thumbnailUrl) : null,
       hasFiles: post.files ? post.files.length > 0 : false,
       fileCount: post.files ? post.files.length : 0,
       createdAt: post.createdAt,
@@ -544,7 +548,7 @@ export class BoardService {
       author: authorName,
       viewCount: post.viewCount,
       status: post.status,
-      thumbnailUrl: post.thumbnailUrl,
+      thumbnailUrl: post.thumbnailUrl ? this.s3Service.getFileUrl(post.thumbnailUrl) : null,
       hasFiles: fileCount > 0,
       fileCount: fileCount,
       createdAt: post.createdAt,

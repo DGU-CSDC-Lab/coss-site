@@ -64,6 +64,7 @@ export interface CreatePostRequest {
   status: 'draft' | 'private' | 'public'
   thumbnailUrl?: string | null
   files?: CreatePostFile[]
+  editorImages?: CreatePostFile[] // 에디터 이미지 별도 필드
 }
 
 export interface UpdatePostRequest {
@@ -73,6 +74,7 @@ export interface UpdatePostRequest {
   status?: 'draft' | 'private' | 'public'
   thumbnailUrl?: string
   files?: CreatePostFile[]
+  editorImages?: CreatePostFile[] // 에디터 이미지 별도 필드
 }
 
 // 게시글 API 함수들

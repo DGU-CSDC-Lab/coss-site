@@ -152,10 +152,12 @@ export default function AdminPostsCreatePage() {
     setLoading(true)
 
     try {
+      // 모든 파일을 하나의 배열로 통합 (서버에서 ownerType으로 구분)
       const editorImageFileKeys =
         getEditorImageFileKeys && typeof getEditorImageFileKeys === 'function'
           ? getEditorImageFileKeys()
           : []
+
       const allFiles = [
         ...files.map(file => ({
           fileKey: file.fileKey,

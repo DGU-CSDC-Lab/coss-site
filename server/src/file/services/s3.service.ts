@@ -99,16 +99,23 @@ export class S3Service {
 
   // S3 객체 URL 생성
   getFileUrl(fileKey: string): string {
+    if (!fileKey) return null;
+    
+    // 이미 전체 URL인 경우 그대로 반환
+    if (fileKey.startsWith('http://') || fileKey.startsWith('https://')) {
+      return fileKey;
+    }
+    
     if (!this.isProduction) {
       // 로컬 MinIO URL
       const url = `${process.env.MINIO_ENDPOINT}/${this.bucketName}/${fileKey}`;
-      this.logger.debug(`Generated MinIO URL for file: ${fileKey}`);
+      this.logger.debug(`Generated MinIO URL for file: ${url}`);
       return url;
     }
 
-    // 프로덕션 S3 URL
+    // 프로덕션 CloudFront URL
     const url = `${process.env.DOMAIN_URL}/${fileKey}`;
-    this.logger.debug(`Generated S3 URL for file: ${fileKey}`);
+    this.logger.debug(`Generated CloudFront URL for file: ${url}`);
     return url;
   }
 }
