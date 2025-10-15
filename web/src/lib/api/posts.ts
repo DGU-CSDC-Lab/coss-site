@@ -4,7 +4,7 @@ import { cleanHtml, isHtmlTooLarge } from '@/utils/htmlUtils'
 
 export interface PostFile {
   id: string
-  originalName: string
+  fileName: string
   fileSize: number
   downloadUrl: string
 }

@@ -26,7 +26,7 @@ export default function NewsDetail({
       const url = window.URL.createObjectURL(blob)
       const link = document.createElement('a')
       link.href = url
-      link.download = file.originalName
+      link.download = file.fileName
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -116,7 +116,7 @@ export default function NewsDetail({
                   <PaperClipIcon className="w-4 h-4 text-white transition-colors" />
                 </div>
                 <span className="text-body-14-regular text-gray-900 truncate group-hover:text-info-600 transition-colors">
-                  {file.originalName}
+                  {file.fileName}
                 </span>
               </button>
               {index < post.files.length - 1 && (
