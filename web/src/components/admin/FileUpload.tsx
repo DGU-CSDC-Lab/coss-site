@@ -9,8 +9,8 @@ import Button from '@/components/common/Button'
 import { useAlert } from '@/hooks/useAlert'
 
 interface FileUploadProps {
+  initialFiles: UploadResult[]
   onFilesChange: (files: UploadResult[]) => void
-  initialFiles?: UploadResult[]
   maxFiles?: number
   accept?: string
   maxSize?: number
@@ -19,28 +19,28 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({
+  initialFiles,
   onFilesChange,
-  initialFiles = [],
   maxFiles = 5,
   accept = '*/*',
   maxSize = 10 * 1024 * 1024,
   ownerType,
   ownerId,
 }: FileUploadProps) {
-  const [files, setFiles] = useState<UploadResult[]>(initialFiles)
+  const [files, setFiles] = useState<UploadResult[]>(() => initialFiles)
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const alert = useAlert()
 
-  // initialFiles가 변경되면 files 상태 업데이트 (빈 배열로는 덮어쓰지 않음)
+  console.log('Initial files:', initialFiles)
+  
   useEffect(() => {
-    // initialFiles가 비어있지 않을 때만 업데이트
-    if (initialFiles.length > 0 && JSON.stringify(files) !== JSON.stringify(initialFiles)) {
+    if (initialFiles.length > 0) {
       setFiles(initialFiles)
     }
-  }, [initialFiles, files])
+  }, [initialFiles])
 
   const handleFileSelect = async (selectedFiles: FileList) => {
     if (files.length + selectedFiles.length > maxFiles) {
@@ -200,7 +200,7 @@ export default function FileUpload({
               >
                 <div className="flex-1">
                   <div className="text-caption-14 text-text">
-                    {file.originalName}
+                    {file.fileName}
                   </div>
                   <div className="text-caption-12 text-text-light">
                     {formatFileSize(file.fileSize)}

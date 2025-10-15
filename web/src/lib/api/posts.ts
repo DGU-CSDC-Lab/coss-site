@@ -4,6 +4,8 @@ import { cleanHtml, isHtmlTooLarge } from '@/utils/htmlUtils'
 
 export interface PostFile {
   id: string
+  fileKey: string
+  mimeType: string
   fileName: string
   fileSize: number
   downloadUrl: string
@@ -52,7 +54,7 @@ export interface PostsQuery {
 
 export interface CreatePostFile {
   fileKey: string
-  originalName: string
+  fileName: string
   fileSize: number
   mimeType: string
 }

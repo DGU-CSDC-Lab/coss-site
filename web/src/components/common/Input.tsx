@@ -1,5 +1,6 @@
 interface InputProps {
   value?: string
+  fileUrl?: string
   onChange?: (value: string) => void
   onFileChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
   placeholder?: string
@@ -27,6 +28,7 @@ interface InputProps {
 
 export default function Input({
   value = '',
+  fileUrl = '',
   onChange,
   onFileChange,
   placeholder = '',
@@ -83,8 +85,8 @@ export default function Input({
         <span className="text-body-14-regular text-gray-600">
           {value ? (
             <a
-              href={value.startsWith('http') ? value : `#`}
-              download={!value.startsWith('http') ? value : undefined}
+              href={fileUrl}
+              download
               className="text-info-600 hover:text-info-800 underline"
             >
               {value}

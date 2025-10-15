@@ -11,7 +11,7 @@ export interface UploadOptions {
 export interface UploadResult {
   fileKey: string
   fileId?: string // 등록 후 받는 DB ID
-  originalName: string
+  fileName: string
   fileSize: number
   mimeType: string
   publicUrl?: string
@@ -97,7 +97,7 @@ export const uploadFile = async (
     return {
       fileKey: presignData.fileKey,
       fileId: fileInfo.id,
-      originalName: file.name,
+      fileName: file.name,
       fileSize: file.size,
       mimeType: file.type,
       publicUrl: fileInfo.publicUrl,
@@ -211,7 +211,7 @@ export const uploadFileToS3Only = async (
 
     return {
       fileKey: presignData.fileKey,
-      originalName: file.name,
+      fileName: file.name,
       fileSize: file.size,
       mimeType: file.type,
       publicUrl: presignData.publicUrl,

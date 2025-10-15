@@ -67,6 +67,16 @@ export default function AdminPostsCreatePage() {
       if (postData.thumbnailUrl) {
         setThumbnailFileName('기존 썸네일')
       }
+      setFiles(
+        postData.files.map(file => ({
+          fileKey: file.fileKey,
+          fileId: file.id,
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+          mimeType: file.mimeType,
+          publicUrl: file.downloadUrl,
+        }))
+      )
     } catch (error) {
       alert.error('게시글 정보를 불러올 수 없습니다.')
       navigate('/admin/posts')
@@ -161,13 +171,13 @@ export default function AdminPostsCreatePage() {
       const allFiles = [
         ...files.map(file => ({
           fileKey: file.fileKey,
-          originalName: file.originalName,
+          fileName: file.fileName,
           fileSize: file.fileSize,
           mimeType: file.mimeType,
         })),
         ...editorImageFileKeys.map(fileKey => ({
           fileKey,
-          originalName: 'editor-image',
+          fileName: 'editor-image',
           fileSize: 0,
           mimeType: 'image/*',
         })),
@@ -344,6 +354,7 @@ export default function AdminPostsCreatePage() {
                   <Input
                     type="file"
                     accept="image/*"
+                    fileUrl={thumbnailUrl}
                     value={thumbnailFileName}
                     onChange={() => {}}
                     onFileChange={handleThumbnailChange}
@@ -398,6 +409,7 @@ export default function AdminPostsCreatePage() {
                     파일 등록
                   </Label>
                   <FileUpload
+                    initialFiles={files}
                     onFilesChange={setFiles}
                     maxFiles={5}
                     maxSize={10 * 1024 * 1024}

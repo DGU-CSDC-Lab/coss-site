@@ -574,6 +574,8 @@ export class BoardService {
 
     const fileResponses: PostFileResponse[] = files.map(file => ({
       id: file.id,
+      fileKey: file.fileKey,
+      mimeType: file.mimeType,
       fileName: file.fileName,
       fileSize: file.fileSize,
       downloadUrl: this.generateDownloadUrl(file.fileKey),

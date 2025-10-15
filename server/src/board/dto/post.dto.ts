@@ -52,6 +52,18 @@ export class PostFileResponse {
   id: string;
 
   @ApiProperty({
+    description: '파일 키 (S3 업로드 후 받은 fileKey)',
+    example: 'uploads/2024/03/15/uuid-1234-5678-9012.pdf',
+  })
+  fileKey: string;
+
+  @ApiProperty({
+    description: 'MIME 타입',
+    example: 'application/pdf',
+  })
+  mimeType: string;
+
+  @ApiProperty({
     description: '원본 파일명',
     example: 'document.pdf',
   })
