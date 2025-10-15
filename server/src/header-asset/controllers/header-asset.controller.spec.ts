@@ -58,7 +58,7 @@ describe('HeaderAssetController', () => {
 
   describe('createHeaderAsset', () => {
     it('should create new header asset', async () => {
-      const createDto = { title: 'Test Asset', imageUrl: '/test.jpg', linkUrl: '/', isActive: true };
+      const createDto = { title: 'Test Asset', imageUrl: '/test.jpg', linkUrl: '/', createdAt: new Date(), isActive: true };
       const req = { user: { id: 'user1' } };
       const result = { id: '1', ...createDto };
       service.create.mockResolvedValue(result);
@@ -72,7 +72,7 @@ describe('HeaderAssetController', () => {
     it('should update header asset', async () => {
       const id = '1';
       const updateDto = { title: 'Updated Asset' };
-      const result = { id, title: 'Updated Asset', imageUrl: '/test.jpg', linkUrl: '/', isActive: true };
+      const result = { id, title: 'Updated Asset', imageUrl: '/test.jpg', linkUrl: '/', createdAt: new Date(), isActive: true };
       service.update.mockResolvedValue(result);
 
       expect(await controller.updateHeaderAsset(id, updateDto)).toBe(result);

@@ -12,7 +12,6 @@ import { S3Service } from '@/file/services/s3.service';
 describe('HeaderAssetService', () => {
   let service: HeaderAssetService;
   let headerAssetRepository: jest.Mocked<Repository<HeaderAsset>>;
-  let fileService: any;
 
   const mockHeaderAsset = {
     id: 'asset-1',
@@ -54,13 +53,13 @@ describe('HeaderAssetService', () => {
           provide: FileService,
           useValue: {
             updateOwner: jest.fn(),
-            getFileUrl: jest.fn((fileKey) => `https://iotcoss.org/${fileKey}`),
+            getFileUrl: jest.fn(fileKey => `https://iotcoss.org/${fileKey}`),
           },
         },
         {
           provide: S3Service,
           useValue: {
-            getFileUrl: jest.fn((fileKey) => {
+            getFileUrl: jest.fn(fileKey => {
               if (!fileKey) return null;
               if (fileKey.startsWith('http')) return fileKey;
               return `https://iotcoss.org/${fileKey}`;
@@ -72,7 +71,6 @@ describe('HeaderAssetService', () => {
 
     service = module.get<HeaderAssetService>(HeaderAssetService);
     headerAssetRepository = module.get(getRepositoryToken(HeaderAsset));
-    fileService = module.get<FileService>(FileService);
 
     jest.clearAllMocks();
 

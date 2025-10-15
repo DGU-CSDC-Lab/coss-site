@@ -290,6 +290,7 @@ export class HeaderAssetService {
       title: asset.title, // 헤더 에셋 제목
       imageUrl: asset.imageUrl ? this.s3Service.getFileUrl(asset.imageUrl) : null, // CloudFront URL로 변환
       linkUrl: asset.linkUrl, // 클릭 시 이동할 링크 URL (선택사항)
+      createdAt: asset.createdAt, // 생성일
       isActive: asset.isActive, // 활성화 상태
     };
   }

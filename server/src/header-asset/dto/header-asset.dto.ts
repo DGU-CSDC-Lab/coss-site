@@ -1,8 +1,4 @@
-import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-} from 'class-validator';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -115,6 +111,12 @@ export class HeaderAssetResponse {
     example: '/',
   })
   linkUrl: string;
+
+  @ApiProperty({
+    description: '팝업 생성일',
+    example: '2024-02-15T12:34:56.000Z',
+  })
+  createdAt: Date;
 
   @ApiProperty({
     description: '활성 상태',
