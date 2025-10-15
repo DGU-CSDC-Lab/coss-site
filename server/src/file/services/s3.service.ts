@@ -101,7 +101,12 @@ export class S3Service {
   getFileUrl(fileKey: string): string {
     if (!fileKey) return null;
     
-    // 이미 전체 URL인 경우 그대로 반환
+    // S3 전체 URL을 객체 키로 변환
+    if (fileKey.startsWith('https://coss-site-assets-2.s3.ap-northeast-2.amazonaws.com/')) {
+      fileKey = fileKey.replace('https://coss-site-assets-2.s3.ap-northeast-2.amazonaws.com/', '');
+    }
+    
+    // 이미 전체 URL인 경우 (다른 도메인) 그대로 반환
     if (fileKey.startsWith('http://') || fileKey.startsWith('https://')) {
       return fileKey;
     }
