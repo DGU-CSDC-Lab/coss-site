@@ -91,7 +91,7 @@ export default function NewsDetail({
           <img
             src={post.thumbnailUrl}
             alt={post.title}
-            className="w-full max-w-2xl mx-auto rounded-lg shadow-sm"
+            className="w-full max-w-2xl mx-auto"
           />
         </div>
       )}

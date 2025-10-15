@@ -19,9 +19,7 @@ export default function CalendarSection() {
 
   // 오늘 날짜로 selectedDate 초기화 (monthEvents 로드 후)
   useEffect(() => {
-    if (monthEvents.length > 0) {
-      setSelectedDate(new Date())
-    }
+    setSelectedDate(new Date())
   }, [monthEvents])
 
   const fetchMonthEvents = async () => {
@@ -50,8 +48,13 @@ export default function CalendarSection() {
   }
 
   const getEventsAfterDate = (date: Date) => {
+    const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
     return monthEvents
-      .filter(event => new Date(event.startDate) >= date)
+      .filter(event => {
+        const eventDate = new Date(event.startDate)
+        const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate())
+        return eventDateOnly >= targetDate
+      })
       .sort(
         (a, b) =>
           new Date(a.startDate).getTime() - new Date(b.startDate).getTime()

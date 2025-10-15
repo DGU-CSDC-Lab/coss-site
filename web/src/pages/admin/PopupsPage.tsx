@@ -192,7 +192,7 @@ export default function PopupsPage() {
                     <div className="flex gap-2 justify-center">
                       <button
                         onClick={() => toggleActive(popup)}
-                        className={`px-2 py-1 text-xs rounded ${
+                        className={`px-2 py-1 text-xs rounded whitespace-nowrap ${
                           popup.isActive
                             ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
                             : 'bg-green-100 text-green-800 hover:bg-green-200'

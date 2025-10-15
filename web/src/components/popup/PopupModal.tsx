@@ -52,13 +52,13 @@ export default function PopupModal({
       <div className="max-w-xl w-full mx-4 overflow-hidden relative">
         {/* X Button at top of modal */}
         <div className="flex w-full items-center justify-end">
-        <Button
-          onClick={handleClose}
-          iconOnly
-          icon={<XMarkIcon className="w-8 h-8" />}
-          variant="custom"
-          className="text-white text-opacity-60 hover:text-opacity-80 p-2"
-        />
+          <Button
+            onClick={handleClose}
+            iconOnly
+            icon={<XMarkIcon className="w-8 h-8" />}
+            variant="custom"
+            className="text-white text-opacity-60 hover:text-opacity-80 p-2"
+          />
         </div>
 
         {/* Large Image Area */}
@@ -74,24 +74,27 @@ export default function PopupModal({
           {/* Navigation buttons for multiple popups */}
           {popups.length > 1 && (
             <>
-              <Button
-                onClick={handlePrev}
-                disabled={currentIndex === 0}
-                iconOnly
-                icon={<ChevronLeftIcon className="w-6 h-6" />}
-                variant="unstyled"
-                className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white hover:bg-opacity-70 disabled:opacity-30 disabled:cursor-not-allowed"
-              />
-              <Button
-                onClick={handleNext}
-                disabled={currentIndex === popups.length - 1}
-                iconOnly
-                icon={<ChevronRightIcon className="w-6 h-6" />}
-                variant="unstyled"
-                className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white hover:bg-opacity-70 disabled:opacity-30 disabled:cursor-not-allowed"
-              />
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-50 text-white px-3 py-1 rounded-full text-sm">
-                {currentIndex + 1} / {popups.length}
+              {/* 버튼을 감싸는 flex 컨테이너 */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-black bg-opacity-10 px-4 py-2 rounded-full text-white">
+                <Button
+                  onClick={handlePrev}
+                  disabled={currentIndex === 0}
+                  iconOnly
+                  icon={<ChevronLeftIcon className="w-6 h-6" />}
+                  variant="unstyled"
+                  className="text-white bg-opacity-50 hover:bg-opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                />
+                <div className="text-sm">
+                  {currentIndex + 1} / {popups.length}
+                </div>
+                <Button
+                  onClick={handleNext}
+                  disabled={currentIndex === popups.length - 1}
+                  iconOnly
+                  icon={<ChevronRightIcon className="w-6 h-6" />}
+                  variant="unstyled"
+                  className="text-white bg-opacity-50 hover:bg-opacity-100 disabled:opacity-30 disabled:cursor-not-allowed"
+                />
               </div>
             </>
           )}
@@ -100,9 +103,7 @@ export default function PopupModal({
         {/* Minimal Text Area */}
         <div className="bg-white p-4">
           <div className="text-caption-14 text-gray-600">
-            <p className="whitespace-pre-wrap">
-              {currentPopup.content}
-            </p>
+            <p className="whitespace-pre-wrap">{currentPopup.content}</p>
           </div>
         </div>
 

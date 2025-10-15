@@ -103,7 +103,7 @@ export class PopupService {
       const popups = await this.popupRepository
         .createQueryBuilder('popup')
         .where('popup.deletedAt IS NULL') // 소프트 삭제되지 않은 항목
-        .andWhere('popup.isActive = :active', { active: true }) // 활성화된 항목
+        .andWhere('popup.isActive = :isActive', { isActive: true }) // 활성화된 항목
         .andWhere('popup.startDate <= :now', { now }) // 시작일이 현재 시점 이전
         .andWhere('popup.endDate >= :now', { now }) // 종료일이 현재 시점 이후
         .orderBy('popup.priority', 'DESC') // 높은 우선순위가 먼저 표시

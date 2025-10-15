@@ -26,7 +26,7 @@ import {
   PopupResponse,
   PopupQuery,
 } from '@/popup/dto/popup.dto';
-import { PagedResponse, SuccessResponse } from '@/common/dto/response.dto';
+import { PagedResponse } from '@/common/dto/response.dto';
 
 @ApiTags('Popups')
 @Controller()
