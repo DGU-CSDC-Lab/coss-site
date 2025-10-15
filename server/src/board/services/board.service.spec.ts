@@ -432,7 +432,7 @@ describe('BoardService', () => {
         files: [
           {
             fileKey: 'file-key-1',
-            originalName: 'test.pdf',
+            fileName: 'test.pdf',
             fileSize: 1024,
             mimeType: 'application/pdf',
           },

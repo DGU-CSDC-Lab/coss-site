@@ -18,7 +18,7 @@ const insertImageToEditor = (
 
   const img = document.createElement('img')
   img.src = imageResult.publicUrl || ''
-  img.alt = imageResult.originalName
+  img.alt = imageResult.fileName
   img.style.maxWidth = '100%'
   img.style.height = 'auto'
 

@@ -367,7 +367,7 @@ export class BoardService {
       if (createDto.files && createDto.files.length > 0) {
         // 다운로드 파일만 필터링 (originalName이 'editor-image'가 아닌 것들)
         const downloadFiles = createDto.files.filter(
-          file => file.originalName !== 'editor-image'
+          file => file.fileName !== 'editor-image'
         );
         
         if (downloadFiles.length > 0) {
@@ -379,7 +379,7 @@ export class BoardService {
               ownerId: saved.id,
               ownerType: OwnerType.POST,
               fileKey: fileDto.fileKey,
-              fileName: fileDto.originalName,
+              fileName: fileDto.fileName,
               fileSize: fileDto.fileSize,
               mimeType: fileDto.mimeType,
               displayOrder: index,

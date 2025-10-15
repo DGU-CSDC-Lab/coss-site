@@ -269,6 +269,6 @@ export class CourseController {
   async uploadCourses(
     @UploadedFile() file: Express.Multer.File,
   ): Promise<CourseUploadResult> {
-    return this.courseService.uploadFromFile(file.buffer, file.originalname);
+    return this.courseService.uploadFromFile(file.buffer, file.filename);
   }
 }

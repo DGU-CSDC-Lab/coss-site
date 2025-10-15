@@ -24,7 +24,7 @@ export class PostFileDto {
     example: 'document.pdf',
   })
   @IsString()
-  originalName: string;
+  fileName: string;
 
   @ApiProperty({
     description: '파일 크기 (bytes)',

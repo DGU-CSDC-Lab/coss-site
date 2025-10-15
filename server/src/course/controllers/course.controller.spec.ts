@@ -156,7 +156,7 @@ describe('CourseController', () => {
     it('should upload courses from file', async () => {
       const mockFile = {
         buffer: Buffer.from('test csv content'),
-        originalname: 'courses.csv',
+        filename: 'courses.csv',
       } as Express.Multer.File;
 
       courseService.uploadFromFile.mockResolvedValue(mockUploadResult);
@@ -164,7 +164,7 @@ describe('CourseController', () => {
       const result = await controller.uploadCourses(mockFile);
 
       expect(result).toBe(mockUploadResult);
-      expect(courseService.uploadFromFile).toHaveBeenCalledWith(mockFile.buffer, mockFile.originalname);
+      expect(courseService.uploadFromFile).toHaveBeenCalledWith(mockFile.buffer, mockFile.filename);
     });
   });
 });
