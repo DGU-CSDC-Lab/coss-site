@@ -127,6 +127,16 @@ export default function AdminCoursesCreatePage() {
       return
     }
 
+    if (!formData.grade.trim()) {
+      alert.error('수강학년을 선택해주세요.')
+      return
+    }
+
+    if (!formData.courseType.trim()) {
+      alert.error('과목유형을 선택해주세요.')
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -218,7 +228,7 @@ export default function AdminCoursesCreatePage() {
                 </div>
 
                 <div>
-                  <Label className="mb-2">영문명</Label>
+                  <Label className="mb-2" optional={true}>영문명</Label>
                   <Input
                     type="text"
                     value={formData.englishName}
@@ -251,7 +261,7 @@ export default function AdminCoursesCreatePage() {
                 </div>
 
                 <div>
-                  <Label className="mb-2">학과</Label>
+                  <Label className="mb-2" optional={true}>학과</Label>
                   <Input
                     type="text"
                     value={formData.department}
@@ -267,7 +277,7 @@ export default function AdminCoursesCreatePage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div>
-                  <Label className="mb-2">년도</Label>
+                  <Label className="mb-2" required={true}>년도</Label>
                   <Input
                     type="number"
                     value={formData.year.toString()}
@@ -285,7 +295,7 @@ export default function AdminCoursesCreatePage() {
                 </div>
 
                 <div>
-                  <Label className="mb-2">학기</Label>
+                  <Label className="mb-2" required={true}>학기</Label>
                   <Dropdown
                     options={semesterOptions}
                     value={formData.semester}
@@ -298,7 +308,7 @@ export default function AdminCoursesCreatePage() {
                 </div>
 
                 <div>
-                  <Label className="mb-2">학점</Label>
+                  <Label className="mb-2" required={true}>학점</Label>
                   <Input
                     type="number"
                     value={formData.credit.toString()}
@@ -309,8 +319,8 @@ export default function AdminCoursesCreatePage() {
                       })
                     }
                     min="0"
-                    max="10"
-                    step="0.5"
+                    max="9"
+                    step="1"
                     className="w-full"
                     size="lg"
                   />
@@ -319,7 +329,7 @@ export default function AdminCoursesCreatePage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <Label className="mb-2">수강학년</Label>
+                  <Label className="mb-2" required={true}>수강학년</Label>
                   <Dropdown
                     options={gradeOptions}
                     value={formData.grade}
@@ -333,7 +343,7 @@ export default function AdminCoursesCreatePage() {
                 </div>
 
                 <div>
-                  <Label className="mb-2">과목유형</Label>
+                  <Label className="mb-2" required={true}>과목유형</Label>
                   <Dropdown
                     options={courseTypeOptions}
                     value={formData.courseType}
@@ -349,7 +359,7 @@ export default function AdminCoursesCreatePage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div>
-                  <Label className="mb-2">담당교수</Label>
+                  <Label className="mb-2" optional={true}>담당교수</Label>
                   <Input
                     type="text"
                     value={formData.instructor}
@@ -363,7 +373,7 @@ export default function AdminCoursesCreatePage() {
                 </div>
 
                 <div>
-                  <Label className="mb-2">강의실</Label>
+                  <Label className="mb-2" optional={true}>강의실</Label>
                   <Input
                     type="text"
                     value={formData.classroom}

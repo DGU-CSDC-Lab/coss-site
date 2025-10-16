@@ -300,7 +300,7 @@ export default function AdminFacultyCreatePage() {
                   onChange={value =>
                     setFormData({ ...formData, researchAreas: value })
                   }
-                  placeholder="연구 분야를 쉼표로 구분하여 입력하세요"
+                  placeholder="연구 분야를 쉼표(,)로 구분하여 입력하세요"
                   className="w-full"
                   size="lg"
                 />

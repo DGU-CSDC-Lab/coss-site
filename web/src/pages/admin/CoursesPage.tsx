@@ -21,6 +21,7 @@ export default function CoursesPage() {
 
   const semesterOptions = [
     { value: '1학기', label: '1학기' },
+    { value: '1학기', label: '1학기' },
     { value: '2학기', label: '2학기' },
     { value: '여름학기', label: '여름학기' },
     { value: '겨울학기', label: '겨울학기' },

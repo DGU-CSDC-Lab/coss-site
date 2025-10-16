@@ -185,7 +185,7 @@ export default function PopupsPage() {
                       {popup.isActive ? '활성' : '비활성'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 font-caption-14 text-gray-600 whitespace-nowrap">
                     {new Date(popup.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">

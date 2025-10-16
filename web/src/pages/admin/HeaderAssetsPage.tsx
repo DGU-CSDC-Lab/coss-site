@@ -106,22 +106,22 @@ export default function HeaderAssetsPage() {
         <table className="w-full min-w-[800px]">
           <thead className="bg-info-50 border-b border-info-100">
             <tr>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 whitespace-nowrap">
                 미리보기
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 whitespace-nowrap">
                 제목
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 whitespace-nowrap">
                 링크 URL
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 whitespace-nowrap">
                 상태
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 whitespace-nowrap">
                 생성일
               </th>
-              <th className="px-4 py-3 text-center font-body-18-medium text-gray-900">
+              <th className="px-4 py-3 text-center font-body-18-medium text-gray-900 whitespace-nowrap">
                 관리
               </th>
             </tr>
@@ -169,7 +169,7 @@ export default function HeaderAssetsPage() {
                       {asset.isActive ? '활성' : '비활성'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 font-caption-14 text-gray-600 whitespace-nowrap">
                     {new Date(asset.createdAt).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-4 py-3">
