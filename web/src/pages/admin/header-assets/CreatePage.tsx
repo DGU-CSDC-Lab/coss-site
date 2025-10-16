@@ -212,7 +212,7 @@ export default function AdminHeaderAssetsCreatePage() {
                 )}
               </div>
 
-              <div className="flex items-center pt-8">
+              <div className="flex items-center pt-8 whitespace-nowrap">
                 <Checkbox
                   checked={formData.isActive}
                   onChange={checked =>

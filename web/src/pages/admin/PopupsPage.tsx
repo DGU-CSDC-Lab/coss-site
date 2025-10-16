@@ -176,7 +176,7 @@ export default function PopupsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <span
-                      className={`px-2 py-1 text-xs rounded-full ${
+                      className={`px-2 py-1 text-xs rounded-full whitespace-nowrap ${
                         popup.isActive
                           ? 'bg-green-100 text-green-800'
                           : 'bg-gray-100 text-gray-800'
