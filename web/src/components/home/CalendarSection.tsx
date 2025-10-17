@@ -38,21 +38,41 @@ export default function CalendarSection() {
 
   const getEventsForDate = (date: Date) => {
     return monthEvents.filter(event => {
-      const eventDate = new Date(event.startDate)
-      return (
-        eventDate.getDate() === date.getDate() &&
-        eventDate.getMonth() === date.getMonth() &&
-        eventDate.getFullYear() === date.getFullYear()
+      const start = new Date(event.startDate)
+      const end = event.endDate ? new Date(event.endDate) : start
+
+      // 날짜 비교 시, 시간 제거 (00:00 기준)
+      const target = new Date(
+        date.getFullYear(),
+        date.getMonth(),
+        date.getDate()
       )
+      const startOnly = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate()
+      )
+      const endOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate())
+
+      // target이 start~end 범위 안에 있으면 true
+      return target >= startOnly && target <= endOnly
     })
   }
 
   const getEventsAfterDate = (date: Date) => {
-    const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    const targetDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    )
     return monthEvents
       .filter(event => {
         const eventDate = new Date(event.startDate)
-        const eventDateOnly = new Date(eventDate.getFullYear(), eventDate.getMonth(), eventDate.getDate())
+        const eventDateOnly = new Date(
+          eventDate.getFullYear(),
+          eventDate.getMonth(),
+          eventDate.getDate()
+        )
         return eventDateOnly >= targetDate
       })
       .sort(
@@ -159,7 +179,9 @@ export default function CalendarSection() {
   return (
     <div className="bg-white flex flex-col gap-3 rounded-lg p-4">
       <div className="flex justify-between items-center">
-        <h2 className="text-body-20-medium text-gray-900 select-none">학사일정</h2>
+        <h2 className="text-body-20-medium text-gray-900 select-none">
+          학사일정
+        </h2>
         <Link to="/about/schedule">
           <Button radius="md" size="sm" variant="point_2">
             더보기
