@@ -65,15 +65,25 @@ export default function CalendarSection() {
       date.getMonth(),
       date.getDate()
     )
+
     return monthEvents
       .filter(event => {
-        const eventDate = new Date(event.startDate)
-        const eventDateOnly = new Date(
-          eventDate.getFullYear(),
-          eventDate.getMonth(),
-          eventDate.getDate()
+        const start = new Date(event.startDate)
+        const end = event.endDate ? new Date(event.endDate) : start
+
+        const startOnly = new Date(
+          start.getFullYear(),
+          start.getMonth(),
+          start.getDate()
         )
-        return eventDateOnly >= targetDate
+        const endOnly = new Date(
+          end.getFullYear(),
+          end.getMonth(),
+          end.getDate()
+        )
+
+        // 선택된 날짜 이후에 아직 진행 중이거나 예정된 이벤트만 표시
+        return endOnly >= targetDate
       })
       .sort(
         (a, b) =>
