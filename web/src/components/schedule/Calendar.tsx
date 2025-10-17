@@ -79,15 +79,23 @@ export default function Calendar() {
     return days
   }
 
-  // 해당 날짜의 일정들 반환
+  // 해당 날짜의 일정들 반환 (startDate ~ endDate 포함)
   const getSchedulesForDate = (date: number) => {
     return schedules.filter(schedule => {
-      const scheduleDate = new Date(schedule.startDate)
-      return (
-        scheduleDate.getDate() === date &&
-        scheduleDate.getMonth() === month &&
-        scheduleDate.getFullYear() === year
+      const start = new Date(schedule.startDate)
+      const end = schedule.endDate ? new Date(schedule.endDate) : start
+
+      const target = new Date(year, month, date)
+
+      // 시간 제거 (자정 기준 비교)
+      const startOnly = new Date(
+        start.getFullYear(),
+        start.getMonth(),
+        start.getDate()
       )
+      const endOnly = new Date(end.getFullYear(), end.getMonth(), end.getDate())
+
+      return target >= startOnly && target <= endOnly
     })
   }
 
