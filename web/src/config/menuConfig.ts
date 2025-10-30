@@ -19,22 +19,25 @@ const menuConfig = [
       {
         name: '전공교육과정',
         path: '/curriculum/major',
-        children: [
-          { name: '마이크로디그리', path: '/curriculum/major/microdegree' },
-          { name: '지능IoT학과', path: '/curriculum/major/iot' },
-        ],
+      },
+      {
+        name: '마이크로디그리',
+        path: '/curriculum/microdegree',
       },
       {
         name: '이수체계도',
         path: '/curriculum/courses',
-        children: [
-          { name: '마이크로디그리', path: '/curriculum/courses/microdegree' },
-          { name: '지능IoT학과', path: '/curriculum/courses/iot' },
-        ],
       },
       {
         name: '개설과목',
         path: '/curriculum/subjects',
+        children: [
+          { name: '전체 운영 과목', path: '/curriculum/subjects/offered' },
+          {
+            name: '학기별 개설 과목',
+            path: '/curriculum/subjects/single-semester',
+          },
+        ],
       },
     ],
   },
@@ -67,18 +70,33 @@ const menuConfig = [
         name: '소식',
         path: `/news?category=${getCategoryKey('장학정보')}`,
         children: [
-          { name: '장학정보', path: `/news?category=${getCategoryKey('장학정보')}` },
+          {
+            name: '장학정보',
+            path: `/news?category=${getCategoryKey('장학정보')}`,
+          },
           { name: '뉴스', path: `/news?category=${getCategoryKey('뉴스')}` },
-          { name: '자료실', path: `/news?category=${getCategoryKey('자료실')}` },
+          {
+            name: '자료실',
+            path: `/news?category=${getCategoryKey('자료실')}`,
+          },
         ],
       },
-      { name: '공지사항', path: `/news?category=${getCategoryKey('공지사항')}` },
+      {
+        name: '공지사항',
+        path: `/news?category=${getCategoryKey('공지사항')}`,
+      },
       {
         name: '공모전/채용 정보',
         path: `/news?category=${getCategoryKey('공모전 정보')}`,
         children: [
-          { name: '공모전 정보', path: `/news?category=${getCategoryKey('공모전 정보')}` },
-          { name: '교육/활동/취업 정보', path: `/news?category=${getCategoryKey('교육/활동/취업 정보')}` },
+          {
+            name: '공모전 정보',
+            path: `/news?category=${getCategoryKey('공모전 정보')}`,
+          },
+          {
+            name: '교육/활동/취업 정보',
+            path: `/news?category=${getCategoryKey('교육/활동/취업 정보')}`,
+          },
         ],
       },
     ],

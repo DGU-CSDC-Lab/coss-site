@@ -76,7 +76,7 @@ export default function Dropdown({
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white ring-1 ring-gray-100 rounded-md ring-1 max-h-60 overflow-auto">
+        <div className="absolute z-50 w-full mt-1 bg-white ring-1 ring-gray-100 rounded-md ring-1 max-h-60 overflow-auto">
           {options.slice(1).map(option => (
             <button
               key={option.value}

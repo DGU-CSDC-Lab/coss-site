@@ -30,7 +30,7 @@ const Footer = () => {
             {/* 로고 영역 */}
             <div className="flex-shrink-0">
               <img
-                src="/assets/images/logo.png"
+                src="/assets/images/logo-footer.png"
                 alt="사물인터넷 혁신융합대학사업단"
                 width={100}
                 height={30}

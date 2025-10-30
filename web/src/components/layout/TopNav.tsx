@@ -38,7 +38,7 @@ export default function TopNav() {
           {/* 로고 */}
           <Link to="/" className="flex items-center">
             <img
-              src="/assets/images/logo.png"
+              src="/assets/images/logo-header.png"
               alt="사물인터넷 혁신융합대학사업단"
               width={200}
               height={50}

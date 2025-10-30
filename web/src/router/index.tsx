@@ -1,5 +1,4 @@
 import { createBrowserRouter } from 'react-router-dom'
-import Layout from '@/components/layout/Layout'
 import ConditionalLayout from '@/components/layout/ConditionalLayout'
 
 // Pages
@@ -15,13 +14,12 @@ import AboutFacultyPage from '@/pages/about/FacultyPage'
 import AboutSchedulePage from '@/pages/about/SchedulePage'
 
 // Curriculum pages
-import CurriculumMajorPage from '@/pages/curriculum/MajorPage'
-import CurriculumCoursesPage from '@/pages/curriculum/CoursesPage'
+import CurriculumSubjectsOfferedPage from '@/pages/curriculum/subjects/OfferedSubjectPage'
+import CurriculumSubjectsSemesterPage from '@/pages/curriculum/subjects/SemesterSubjectsPage'
 import CurriculumSubjectsPage from '@/pages/curriculum/SubjectsPage'
-import CurriculumMajorIotPage from '@/pages/curriculum/major/IotPage'
-import CurriculumMajorMicrodegreePage from '@/pages/curriculum/major/MicrodegreePage'
-import CurriculumCoursesIotPage from '@/pages/curriculum/courses/IotPage'
-import CurriculumCoursesMicrodegreePage from '@/pages/curriculum/courses/MicrodegreePage'
+import CurriculumMajorPage from '@/pages/curriculum/MajorPage'
+import CurriculumMicrodegreePage from '@/pages/curriculum/MicrodegreePage'
+import CurriculumCoursesPage from '@/pages/curriculum/CoursesPage'
 
 // News pages
 import NewsPage from '@/pages/news/NewsPage'
@@ -94,28 +92,24 @@ export const router = createBrowserRouter([
         element: <CurriculumMajorPage />,
       },
       {
-        path: 'curriculum/major/iot',
-        element: <CurriculumMajorIotPage />,
-      },
-      {
-        path: 'curriculum/major/microdegree',
-        element: <CurriculumMajorMicrodegreePage />,
+        path: 'curriculum/microdegree',
+        element: <CurriculumMicrodegreePage />,
       },
       {
         path: 'curriculum/courses',
         element: <CurriculumCoursesPage />,
       },
       {
-        path: 'curriculum/courses/iot',
-        element: <CurriculumCoursesIotPage />,
-      },
-      {
-        path: 'curriculum/courses/microdegree',
-        element: <CurriculumCoursesMicrodegreePage />,
-      },
-      {
         path: 'curriculum/subjects',
         element: <CurriculumSubjectsPage />,
+      },
+      {
+        path: 'curriculum/subjects/offered',
+        element: <CurriculumSubjectsOfferedPage />,
+      },
+      {
+        path: 'curriculum/subjects/single-semester',
+        element: <CurriculumSubjectsSemesterPage />,
       },
       // News routes
       {

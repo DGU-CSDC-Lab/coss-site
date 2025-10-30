@@ -3,7 +3,7 @@ import SubTitle from '@/components/common/title/SubTitle'
 import Title from '@/components/common/title/Title'
 import Tabs from '@/components/tabs/Tabs'
 
-export default function IotPage() {
+export default function CoursesRegacyPage() {
   return (
     <div className="w-full">
       <Tabs />
