@@ -91,17 +91,8 @@ export class CourseQuery extends PaginationQuery {
   sortOrder?: 'ASC' | 'DESC' = 'DESC';
 }
 
-// 교과목 생성 요청 DTO
-export class CourseCreate {
-  @ApiProperty({
-    description: '학년도',
-    example: 2024,
-    minimum: 2000,
-  })
-  @IsInt()
-  @Min(2000)
-  year: number;
-
+// 교과목 Master 생성 요청 DTO
+export class CourseMasterCreate {
   @ApiProperty({
     description: '학기',
     example: '1학기',
@@ -135,18 +126,24 @@ export class CourseCreate {
     example: 'IoT Fundamentals',
     required: false,
   })
-  @IsOptional()
   @IsString()
-  englishName?: string;
+  englishName: string;
+
+  @ApiProperty({
+    description: '교과목 설명',
+    example:
+      'This course provides an introduction to IoT concepts and applications.',
+  })
+  @IsString()
+  description: string;
 
   @ApiProperty({
     description: '학년',
     example: '1학년',
     required: false,
   })
-  @IsOptional()
   @IsString()
-  grade?: string;
+  grade: string;
 
   @ApiProperty({
     description: '학점',
@@ -154,10 +151,43 @@ export class CourseCreate {
     minimum: 0,
     required: false,
   })
-  @IsOptional()
   @IsNumber()
   @Min(0)
-  credit?: number;
+  credit: number;
+
+  @ApiProperty({
+    description: '강의유형',
+    example: '이론',
+    required: false,
+  })
+  @IsString()
+  courseType: string;
+}
+
+// 교과목 Offering 생성 요청 DTO
+export class CourseOfferingCreate {
+  @ApiProperty({
+    description: 'CourseMaster ID',
+    example: 'uuid-1234-5678-9012',
+  })
+  @IsString()
+  masterId: string; // CourseMaster ID 참조
+
+  @ApiProperty({
+    description: '학년도',
+    example: 2024,
+    minimum: 2000,
+  })
+  @IsInt()
+  @Min(2000)
+  year: number;
+
+  @ApiProperty({
+    description: '학기',
+    example: '1학기',
+  })
+  @IsString()
+  semester: string;
 
   @ApiProperty({
     description: '수업 시간',
@@ -187,15 +217,6 @@ export class CourseCreate {
   classroom?: string;
 
   @ApiProperty({
-    description: '강의유형',
-    example: '이론',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  courseType?: string;
-
-  @ApiProperty({
     description: '강의계획서 URL',
     example: 'https://example.com/syllabus.pdf',
     required: false,
@@ -205,19 +226,8 @@ export class CourseCreate {
   syllabusUrl?: string;
 }
 
-// 교과목 수정 요청 DTO
-export class CourseUpdate {
-  @ApiProperty({
-    description: '학년도',
-    example: 2024,
-    minimum: 2000,
-    required: false,
-  })
-  @IsOptional()
-  @IsInt()
-  @Min(2000)
-  year?: number;
-
+// Master 교과목 수정 요청 DTO
+export class CourseMasterUpdate {
   @ApiProperty({
     description: '학기',
     example: '1학기',
@@ -255,6 +265,25 @@ export class CourseUpdate {
   subjectName?: string;
 
   @ApiProperty({
+    description: '교과목 영문명',
+    example: 'IoT Fundamentals',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  englishName?: string;
+
+  @ApiProperty({
+    description: '교과목 설명',
+    example:
+      'This course provides an introduction to IoT concepts and applications.',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @ApiProperty({
     description: '학년',
     example: '1학년',
     required: false,
@@ -275,6 +304,38 @@ export class CourseUpdate {
   credit?: number;
 
   @ApiProperty({
+    description: '강의유형',
+    example: '이론',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  courseType?: string;
+}
+
+// Offering 교과목 수정 요청 DTO
+export class CourseOfferingUpdate {
+  @ApiProperty({
+    description: '학년도',
+    example: 2024,
+    minimum: 2000,
+    required: false,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(2000)
+  year?: number;
+
+  @ApiProperty({
+    description: '학기',
+    example: '1학기',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  semester?: string;
+
+  @ApiProperty({
     description: '수업 시간',
     example: '월 09:00-12:00',
     required: false,
@@ -282,15 +343,6 @@ export class CourseUpdate {
   @IsOptional()
   @IsString()
   classTime?: string;
-
-  @ApiProperty({
-    description: '교과목 영문명',
-    example: 'IoT Fundamentals',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  englishName?: string;
 
   @ApiProperty({
     description: '담당교원',
@@ -311,15 +363,6 @@ export class CourseUpdate {
   classroom?: string;
 
   @ApiProperty({
-    description: '강의유형',
-    example: '이론',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  courseType?: string;
-
-  @ApiProperty({
     description: '강의계획서 URL',
     example: 'https://example.com/syllabus.pdf',
     required: false,
@@ -330,18 +373,12 @@ export class CourseUpdate {
 }
 
 // 교과목 응답 DTO
-export class CourseResponse {
+export class CourseMasterResponse {
   @ApiProperty({
     description: '교과목 ID',
     example: 'uuid-1234-5678-9012',
   })
   id: string;
-
-  @ApiProperty({
-    description: '학년도',
-    example: 2024,
-  })
-  year: number;
 
   @ApiProperty({
     description: '학기',
@@ -372,21 +409,52 @@ export class CourseResponse {
     example: 'IoT Fundamentals',
     required: false,
   })
-  englishName?: string;
+  englishName: string;
+
+  @ApiProperty({
+    description: '교과목 설명',
+    example:
+      'This course provides an introduction to IoT concepts and applications.',
+    required: false,
+  })
+  @IsString()
+  description: string;
 
   @ApiProperty({
     description: '학년',
     example: '1학년',
     required: false,
   })
-  grade?: string;
+  grade: string;
 
   @ApiProperty({
     description: '학점',
     example: 3.0,
     required: false,
   })
-  credit?: number;
+  credit: number;
+
+  @ApiProperty({
+    description: '강의유형',
+    example: '이론',
+    required: false,
+  })
+  courseType?: string;
+}
+
+// 교과목 offering 응답 DTO
+export class CourseOfferingResponse extends CourseMasterResponse {
+  @ApiProperty({
+    description: '학년도',
+    example: 2024,
+  })
+  year: number;
+
+  @ApiProperty({
+    description: '학기',
+    example: '1학기',
+  })
+  semester: string;
 
   @ApiProperty({
     description: '수업 시간',
@@ -410,13 +478,6 @@ export class CourseResponse {
   classroom?: string;
 
   @ApiProperty({
-    description: '강의유형',
-    example: '이론',
-    required: false,
-  })
-  courseType?: string;
-
-  @ApiProperty({
     description: '강의계획서 URL',
     example: 'https://example.com/syllabus.pdf',
     required: false,
@@ -437,7 +498,7 @@ export class CourseResponse {
 }
 
 // 교과목 일괄 등록 요청 DTO
-export class CourseBulkInitRequest {
+export class CourseBulkInitMasterRequest {
   @ApiProperty({
     description: '학년도',
     example: 2025,
@@ -456,12 +517,40 @@ export class CourseBulkInitRequest {
 
   @ApiProperty({
     description: '교과목 목록',
-    type: [CourseCreate],
+    type: [CourseMasterCreate],
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => CourseCreate)
-  courses: CourseCreate[];
+  @Type(() => CourseMasterCreate)
+  courses: CourseMasterCreate[];
+}
+
+// 교과목 일괄 등록 요청 DTO
+export class CourseBulkInitOfferingRequest {
+  @ApiProperty({
+    description: '학년도',
+    example: 2025,
+    minimum: 2000,
+  })
+  @IsInt()
+  @Min(2000)
+  year: number;
+
+  @ApiProperty({
+    description: '학기',
+    example: '1학기',
+  })
+  @IsString()
+  semester: string;
+
+  @ApiProperty({
+    description: '교과목 목록',
+    type: [CourseOfferingCreate],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CourseOfferingCreate)
+  courses: CourseOfferingCreate[];
 }
 
 // 교과목 일괄 등록 결과 DTO

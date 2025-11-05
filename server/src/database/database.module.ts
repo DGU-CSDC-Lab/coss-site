@@ -11,7 +11,7 @@ import { File } from '@/file/entities';
 import { Popup } from '@/popup/entities';
 import { FacultyMember } from '@/faculty/entities';
 import { History } from '@/history/entities';
-import { Course } from '@/course/entities';
+import { CourseMaster, CourseOffering } from '@/course/entities';
 import { Category } from '@/category/entities';
 import { HeaderAsset } from '@/header-asset/entities';
 
@@ -39,7 +39,8 @@ import { HeaderAsset } from '@/header-asset/entities';
           Popup,
           FacultyMember,
           History,
-          Course,
+          CourseMaster,
+          CourseOffering,
           Category,
           HeaderAsset,
         ],
