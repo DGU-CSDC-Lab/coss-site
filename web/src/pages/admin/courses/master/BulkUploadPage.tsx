@@ -5,6 +5,7 @@ import { coursesApi } from '@/lib/api/courses'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import { useAlert } from '@/hooks/useAlert'
+import * as XLSX from 'xlsx'
 
 export default function AdminCourseMasterBulkUploadPage() {
   const navigate = useNavigate()
@@ -37,6 +38,19 @@ export default function AdminCourseMasterBulkUploadPage() {
     }
   }
 
+  const downloadTemplate = () => {
+    const templateData = [
+      ['학기', '학과', '교과목코드', '교과목명', '교과목영문명', '교과목설명', '수강학년', '학점', '강의유형'],
+      ['1학기', '지능IoT학과', 'IOT101', 'IoT 기초', 'IoT Fundamentals', 'IoT의 기본 개념과 원리를 학습합니다.', '1학년', 3, '이론'],
+      ['1학기', '지능IoT학과', 'IOT102', '프로그래밍 기초', 'Programming Fundamentals', '프로그래밍의 기본 개념을 학습합니다.', '1학년', 3, '실습'],
+    ]
+
+    const ws = XLSX.utils.aoa_to_sheet(templateData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '마스터교과목')
+    XLSX.writeFile(wb, '마스터교과목_업로드_양식.xlsx')
+  }
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -46,7 +60,21 @@ export default function AdminCourseMasterBulkUploadPage() {
         <Title className="mt-2">마스터 교과목 일괄 업로드</Title>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h3 className="font-medium text-blue-900 mb-2">업로드 안내</h3>
+          <p className="text-sm text-blue-700 mb-3">
+            Excel 파일을 업로드하여 마스터 교과목을 일괄 등록할 수 있습니다.
+          </p>
+          <Button
+            onClick={downloadTemplate}
+            variant="info"
+            size="sm"
+          >
+            📥 양식 다운로드
+          </Button>
+        </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Excel 파일 선택
