@@ -10,8 +10,8 @@ export class CourseMaster extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   department: string;
 
-  @Column({ type: 'varchar', length: 255 })
-  code: string;
+  @Column({ name: 'course_code', type: 'varchar', length: 255 })
+  courseCode: string;
 
   @Column({ name: 'subject_name', type: 'varchar', length: 255 })
   subjectName: string;

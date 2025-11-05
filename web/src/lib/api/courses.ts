@@ -5,8 +5,8 @@ export interface CourseMaster {
   id: string
   semester: string // 학기 (예: "1학기")
   department: string // 학과명
-  code: string // 교과목 코드 (예: IOT101)
-  name: string // 교과목명 (예: IoT 기초)
+  courseCode: string // 교과목 코드 (예: IOT101)
+  subjectName: string // 교과목명 (예: IoT 기초)
   englishName?: string // 교과목 영문명
   description: string // 교과목 설명
   grade?: string // 수강학년 (예: "1학년")
@@ -19,9 +19,16 @@ export interface CourseMaster {
 // 교과목 개설 정보 (특정 년도/학기 개설 정보)
 export interface CourseOffering {
   id: string
-  master: CourseMaster // 마스터 교과목 정보
   year: number // 개설년도
   semester: string // 학기
+  department: string // 학과명 (마스터에서 가져온 정보)
+  courseCode: string // 교과목 코드 (마스터에서 가져온 정보)
+  subjectName: string // 교과목명 (마스터에서 가져온 정보)
+  englishName?: string // 교과목 영문명 (마스터에서 가져온 정보)
+  description: string // 교과목 설명 (마스터에서 가져온 정보)
+  grade?: string // 수강학년 (마스터에서 가져온 정보)
+  credit?: number // 학점 (마스터에서 가져온 정보)
+  courseType?: string // 강의유형 (마스터에서 가져온 정보)
   classTime?: string // 수업 시간 (예: "월 09:00-12:00")
   instructor?: string // 담당교원
   classroom?: string // 강의실

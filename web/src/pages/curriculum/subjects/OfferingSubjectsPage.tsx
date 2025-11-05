@@ -180,19 +180,19 @@ export default function OfferingSubjectsPage() {
                         {course.semester}
                       </td>
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.master.department}
+                        {course.department}
                       </td>
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.master.code}
+                        {course.courseCode}
                       </td>
                       <td className="px-3 py-1 text-caption-14 text-gray-700 text-center truncate">
-                        {course.master.name}
+                        {course.subjectName}
                       </td>
                       <td className="px-1 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.master.grade || '-'}
+                        {course.grade || '-'}
                       </td>
                       <td className="px-1 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.master.credit || '-'}
+                        {course.credit || '-'}
                       </td>
                       <td className="px-4 py-1 text-caption-14 text-gray-700 text-center whitespace-pre-line">
                         {course.classTime || '-'}

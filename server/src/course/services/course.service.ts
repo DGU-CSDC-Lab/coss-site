@@ -274,7 +274,7 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course: ${course.master.subjectName} (${course.master.code})`,
+        `Found course: ${course.master.subjectName} (${course.master.courseCode})`,
       );
       return this.toResponseOffering(course);
     } catch (error) {
@@ -300,7 +300,7 @@ export class CourseService {
       const course = this.courseMasterRepository.create({
         semester: createDto.semester,
         department: createDto.department,
-        code: createDto.courseCode, // DTO의 courseCode -> 엔티티의 code
+        courseCode: createDto.courseCode, // DTO의 courseCode -> 엔티티의 code
         subjectName: createDto.subjectName, // DTO의 subjectName -> 엔티티의 name
         englishName: createDto.englishName,
         description: createDto.description,
@@ -383,7 +383,7 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course to update: ${course.subjectName} (${course.code})`,
+        `Found course to update: ${course.subjectName} (${course.courseCode})`,
       );
 
       // 변경사항 로깅
@@ -391,8 +391,8 @@ export class CourseService {
       if (updateDto.subjectName && updateDto.subjectName !== course.subjectName) {
         changes.push(`name: ${course.subjectName} → ${updateDto.subjectName}`);
       }
-      if (updateDto.courseCode && updateDto.courseCode !== course.code) {
-        changes.push(`code: ${course.code} → ${updateDto.courseCode}`);
+      if (updateDto.courseCode && updateDto.courseCode !== course.courseCode) {
+        changes.push(`code: ${course.courseCode} → ${updateDto.courseCode}`);
       }
       if (updateDto.semester && updateDto.semester !== course.semester) {
         changes.push(`semester: ${course.semester} → ${updateDto.semester}`);
@@ -414,7 +414,7 @@ export class CourseService {
       Object.assign(course, {
         semester: updateDto.semester ?? course.semester,
         department: updateDto.department ?? course.department,
-        code: updateDto.courseCode ?? course.code,
+        code: updateDto.courseCode ?? course.courseCode,
         subjectName: updateDto.subjectName ?? course.subjectName,
         englishName: updateDto.englishName ?? course.englishName,
         grade: updateDto.grade ?? course.grade,
@@ -460,7 +460,7 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course to update: ${course.master.subjectName} (${course.master.code})`,
+        `Found course to update: ${course.master.subjectName} (${course.master.courseCode})`,
       );
 
       // 변경사항 로깅
@@ -660,7 +660,7 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course to delete: ${course.subjectName} (${course.code})`,
+        `Found course to delete: ${course.subjectName} (${course.courseCode})`,
       );
 
       // 교과목 정보 삭제 (물리적 삭제)
@@ -905,7 +905,7 @@ export class CourseService {
       id: course.id,
       semester: course.semester, // 학기
       department: course.department, // 학과
-      courseCode: course.code, // 엔티티의 code -> DTO의 courseCode
+      courseCode: course.courseCode, // 엔티티의 code -> DTO의 courseCode
       subjectName: course.subjectName, // 엔티티의 name -> DTO의 subjectName
       englishName: course.englishName, // 영문 교과목명
       description: course.description, // 교과목 설명
@@ -928,7 +928,7 @@ export class CourseService {
       year: course.year, // 연도
       semester: course.semester, // 학기
       department: course.master.department, // 학과
-      courseCode: course.master.code, // 엔티티의 code -> DTO의 courseCode
+      courseCode: course.master.courseCode, // 엔티티의 code -> DTO의 courseCode
       subjectName: course.master.subjectName, // 엔티티의 name -> DTO의 subjectName
       englishName: course.master.englishName, // 영문 교과목명
       description: course.master.description, // 교과목 설명

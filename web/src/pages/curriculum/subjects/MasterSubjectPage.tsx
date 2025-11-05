@@ -163,13 +163,13 @@ export default function MasterSubjectPage() {
                   courses.items.map(course => (
                     <tr key={course.id} className="border-t border-info-100">
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.code}
+                        {course.courseCode}
                       </td>
                       <td 
                         className="px-3 py-1 text-caption-14 text-blue-600 text-center truncate cursor-pointer hover:underline"
                         onClick={() => handleCourseClick(course)}
                       >
-                        {course.name}
+                        {course.subjectName}
                       </td>
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
                         {course.department}
@@ -208,10 +208,10 @@ export default function MasterSubjectPage() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h2 className="text-xl font-semibold text-gray-900">
-                  {selectedCourse.name}
+                  {selectedCourse.subjectName}
                 </h2>
                 <p className="text-sm text-gray-600">
-                  {selectedCourse.code} | {selectedCourse.department}
+                  {selectedCourse.courseCode} | {selectedCourse.department}
                 </p>
               </div>
               <button
