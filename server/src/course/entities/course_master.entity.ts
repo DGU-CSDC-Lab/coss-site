@@ -5,9 +5,6 @@ import { CourseOffering } from './course_offering';
 @Entity('courses_masters')
 export class CourseMaster extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
-  id: string;
-  
-  @Column({ type: 'varchar', length: 255 })
   semester: string;
 
   @Column({ type: 'varchar', length: 255 })

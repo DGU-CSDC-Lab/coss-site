@@ -4,9 +4,6 @@ import { CourseMaster } from './course_master.entity';
 
 @Entity('course_offerings')
 export class CourseOffering extends BaseEntity {
-  @Column({ type: 'varchar', length: 255 })
-  id: string;
-
   @ManyToOne(() => CourseMaster, master => master.offerings, { eager: false })
   @JoinColumn({ name: 'master_id' })
   master: CourseMaster;
