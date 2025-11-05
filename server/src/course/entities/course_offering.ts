@@ -14,7 +14,7 @@ export class CourseOffering extends BaseEntity {
   @Column({ type: 'varchar', length: 255 })
   semester: string;
 
-  @Column({ type: 'varchar', nullable: true })
+  @Column({ name: 'class_time', type: 'varchar', nullable: true })
   classTime?: string;
 
   @Column({ type: 'varchar', nullable: true })
