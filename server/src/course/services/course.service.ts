@@ -104,7 +104,7 @@ export class CourseService {
       }
 
       // 정렬 조건 적용
-      const sortField = this.getSortField(sortBy);
+      const sortField = this.getMasterSortField(sortBy);
       queryBuilder.orderBy(sortField, sortOrder);
       this.logger.debug(`Applied sorting: ${sortField} ${sortOrder}`);
 
@@ -200,16 +200,9 @@ export class CourseService {
       }
 
       // 정렬 조건 적용
-      const sortField = this.getSortField(sortBy);
-
-      const mappedSortField = sortBy.startsWith('master.')
-        ? sortField
-        : sortField === 'name' || sortField === 'code'
-          ? `master.${sortField}`
-          : `offering.${sortField}`;
-
-      queryBuilder.orderBy(mappedSortField, sortOrder);
-      this.logger.debug(`Applied sorting: ${mappedSortField} ${sortOrder}`);
+      const sortField = this.getOfferingSortField(sortBy);
+      queryBuilder.orderBy(sortField, sortOrder);
+      this.logger.debug(`Applied sorting: ${sortField} ${sortOrder}`);
 
       // 페이지네이션 적용 및 결과 조회
       const [courses, totalElements] = await queryBuilder
@@ -231,22 +224,33 @@ export class CourseService {
   }
 
   /**
-   * 정렬 필드명을 실제 데이터베이스 컬럼명으로 매핑
-   *
-   * @param sortBy 클라이언트에서 요청한 정렬 필드명
-   * @returns 실제 데이터베이스 컬럼명 (테이블 별칭 포함)
-   * @private 내부에서만 사용하는 유틸리티 메서드
+   * Master 교과목용 정렬 필드명 매핑
    */
-  private getSortField(sortBy: string): string {
+  private getMasterSortField(sortBy: string): string {
     const fieldMap: { [key: string]: string } = {
       name: 'course.name',
       code: 'course.code',
-      department: 'course.department',
+      department: 'course.department', 
       grade: 'course.grade',
       credit: 'course.credit',
       createdAt: 'course.createdAt',
     };
     return fieldMap[sortBy] || 'course.createdAt';
+  }
+
+  /**
+   * Offering 교과목용 정렬 필드명 매핑
+   */
+  private getOfferingSortField(sortBy: string): string {
+    const fieldMap: { [key: string]: string } = {
+      name: 'master.name',
+      code: 'master.code',
+      department: 'master.department',
+      grade: 'master.grade', 
+      credit: 'master.credit',
+      createdAt: 'offering.createdAt',
+    };
+    return fieldMap[sortBy] || 'offering.createdAt';
   }
 
   /**
