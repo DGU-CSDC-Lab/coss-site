@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { coursesApi, Course } from '@/lib/api/courses'
+import { coursesApi, CourseOffering } from '@/lib/api/courses'
 import { PagedResponse } from '@/lib/apiClient'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
@@ -10,7 +10,7 @@ import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
 
 export default function CoursesPage() {
-  const [courses, setCourses] = useState<PagedResponse<Course> | null>(null)
+  const [courses, setCourses] = useState<PagedResponse<CourseOffering> | null>(null)
   const [loading, setLoading] = useState(true)
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedSemester, setSelectedSemester] = useState('1학기')
@@ -39,7 +39,7 @@ export default function CoursesPage() {
   const fetchCourses = async () => {
     try {
       setLoading(true)
-      const response = await coursesApi.getCourses({
+      const response = await coursesApi.getOfferings({
         year: selectedYear,
         semester: selectedSemester,
         name: keyword || undefined,
@@ -63,7 +63,7 @@ export default function CoursesPage() {
     if (!confirm(`"${name}" 과목을 삭제하시겠습니까?`)) return
 
     try {
-      await coursesApi.deleteCourse(id)
+      await coursesApi.deleteOffering(id)
       alert.success('과목이 삭제되었습니다.')
       fetchCourses()
     } catch (error) {
@@ -183,28 +183,28 @@ export default function CoursesPage() {
               courses?.items.map(course => (
                 <tr key={course.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                    {course.courseCode}
+                    {course.master.code}
                   </td>
                   <td className="px-4 py-3">
                     <div>
                       <div className="font-body-14-medium text-gray-900">
-                        {course.subjectName}
+                        {course.master.name}
                       </div>
-                      {course.englishName && (
+                      {course.master.englishName && (
                         <div className="font-caption-14 text-gray-600">
-                          {course.englishName}
+                          {course.master.englishName}
                         </div>
                       )}
                     </div>
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                    {course.department}
+                    {course.master.department}
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                    {course.grade || '-'}
+                    {course.master.grade || '-'}
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                    {course.credit || '-'}
+                    {course.master.credit || '-'}
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {course.instructor || '-'}
@@ -224,7 +224,7 @@ export default function CoursesPage() {
                         size="sm"
                         radius="md"
                         onClick={() =>
-                          handleDelete(course.id, course.subjectName)
+                          handleDelete(course.id, course.master.name)
                         }
                       >
                         삭제

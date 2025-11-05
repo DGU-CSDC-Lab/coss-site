@@ -54,7 +54,7 @@ export default function AdminPage() {
           postsApi.getAdminPosts({ page: 1, size: 1 }),
           schedulesApi.getSchedules({ page: 1, size: 1 }),
           facultyApi.getFaculty({ page: 1, size: 1 }),
-          coursesApi.getCourses({ page: 1, size: 1 }),
+          coursesApi.getOfferings({ page: 1, size: 1 }),
           headerAssetsApi.getHeaderAssets({ page: 1, size: 1 }),
           popupsApi.getPopups({ page: 1, size: 1 }),
         ])

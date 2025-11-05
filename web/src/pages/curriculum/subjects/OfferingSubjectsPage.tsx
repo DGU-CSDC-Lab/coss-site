@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { PagedResponse } from '@/lib/apiClient'
-import { coursesApi, Course } from '@/lib/api/courses'
+import { coursesApi, CourseOffering } from '@/lib/api/courses'
 import Tabs from '@/components/tabs/Tabs'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
@@ -10,8 +10,8 @@ import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
 import { useAlert } from '@/hooks/useAlert'
 
-export default function SemesterSubjectsPage() {
-  const [courses, setCourses] = useState<PagedResponse<Course> | null>(null)
+export default function OfferingSubjectsPage() {
+  const [courses, setCourses] = useState<PagedResponse<CourseOffering> | null>(null)
   const [loading, setLoading] = useState(false)
 
   const alert = useAlert()
@@ -28,7 +28,7 @@ export default function SemesterSubjectsPage() {
   const fetchCourses = async () => {
     try {
       setLoading(true)
-      const response = await coursesApi.getCourses({
+      const response = await coursesApi.getOfferings({
         year: parseInt(selectedYear),
         semester: selectedSemester,
         [searchType]: keyword || undefined,
@@ -63,7 +63,7 @@ export default function SemesterSubjectsPage() {
   const searchTypeOptions = [
     { value: 'name', label: '과목명' },
     { value: 'department', label: '학과' },
-    { value: 'code', label: '학수번호' },
+    { value: 'code', label: '교과목 코드' },
     { value: 'grade', label: '수강학년' },
   ]
 
@@ -133,7 +133,6 @@ export default function SemesterSubjectsPage() {
 
       <div className="rounded-lg border border-info-100 overflow-hidden">
         <div className="overflow-x-auto">
-          {/* 여기서 헤더(thea d)는 고정, tbody만 스크롤 */}
           <div className="max-h-[460px] overflow-y-auto">
             <table className="w-full border-collapse min-w-[1000px]">
               <thead className="bg-info-50 border-b border-info-100 sticky top-0 z-10">
@@ -148,7 +147,7 @@ export default function SemesterSubjectsPage() {
                     개설학과
                   </th>
                   <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
-                    학수번호
+                    교과목 코드
                   </th>
                   <th className="px-4 py-3 text-body-14-medium text-info-700 w-[160px]">
                     과목명
@@ -181,19 +180,19 @@ export default function SemesterSubjectsPage() {
                         {course.semester}
                       </td>
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.department}
+                        {course.master.department}
                       </td>
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.courseCode}
+                        {course.master.code}
                       </td>
                       <td className="px-3 py-1 text-caption-14 text-gray-700 text-center truncate">
-                        {course.subjectName}
+                        {course.master.name}
                       </td>
                       <td className="px-1 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.grade || '-'}
+                        {course.master.grade || '-'}
                       </td>
                       <td className="px-1 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.credit || '-'}
+                        {course.master.credit || '-'}
                       </td>
                       <td className="px-4 py-1 text-caption-14 text-gray-700 text-center whitespace-pre-line">
                         {course.classTime || '-'}
