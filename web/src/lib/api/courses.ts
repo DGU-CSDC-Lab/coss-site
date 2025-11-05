@@ -141,35 +141,35 @@ export const coursesApi = {
         searchParams.append(key, String(value))
       }
     })
-    return api.get(`/api/v1/courses/offering/search?${searchParams.toString()}`)
+    return api.get(`/courses/offering/search?${searchParams.toString()}`)
   },
 
   // 개설 교과목 상세 조회
   getOffering: (id: string): Promise<CourseOffering> => 
-    api.get(`/api/v1/courses/offering/${id}`),
+    api.get(`/courses/offering/${id}`),
 
   // 개설 교과목 생성 (관리자)
   createOffering: (data: CreateCourseOfferingRequest): Promise<CourseOffering> =>
-    api.auth.post('/api/v1/admin/courses/offering', data),
+    api.auth.post('/admin/courses/offering', data),
 
   // 개설 교과목 수정 (관리자)
   updateOffering: (id: string, data: UpdateCourseOfferingRequest): Promise<CourseOffering> =>
-    api.auth.put(`/api/v1/admin/courses/offering/${id}`, data),
+    api.auth.put(`/admin/courses/offering/${id}`, data),
 
   // 개설 교과목 삭제 (관리자)
   deleteOffering: (id: string): Promise<void> =>
-    api.auth.delete(`/api/v1/admin/courses/offering/${id}`),
+    api.auth.delete(`/admin/courses/offering/${id}`),
 
   // 개설 교과목 일괄 업로드 (관리자)
   uploadOfferingExcel: (file: File): Promise<CourseUploadResult> => {
     const formData = new FormData()
     formData.append('file', file)
-    return api.auth.post('/api/v1/admin/courses/offering/upload', formData)
+    return api.auth.post('/admin/courses/offering/upload', formData)
   },
 
   // 개설 교과목 일괄 초기화 (관리자)
   bulkInitOfferings: (data: CourseOfferingBulkInitRequest): Promise<CourseUploadResult> =>
-    api.auth.post('/api/v1/admin/courses/offering/bulk-init', data),
+    api.auth.post('/admin/courses/offering/bulk-init', data),
 
   // === 마스터 교과목 (Master) API ===
   
@@ -181,29 +181,29 @@ export const coursesApi = {
         searchParams.append(key, String(value))
       }
     })
-    return api.get(`/api/v1/courses/master/search?${searchParams.toString()}`)
+    return api.get(`/courses/master/search?${searchParams.toString()}`)
   },
 
   // 마스터 교과목 생성 (관리자)
   createMaster: (data: CreateCourseMasterRequest): Promise<CourseMaster> =>
-    api.auth.post('/api/v1/admin/courses/master', data),
+    api.auth.post('/admin/courses/master', data),
 
   // 마스터 교과목 수정 (관리자)
   updateMaster: (id: string, data: UpdateCourseMasterRequest): Promise<CourseMaster> =>
-    api.auth.put(`/api/v1/admin/courses/master/${id}`, data),
+    api.auth.put(`/admin/courses/master/${id}`, data),
 
   // 마스터 교과목 삭제 (관리자)
   deleteMaster: (id: string): Promise<void> =>
-    api.auth.delete(`/api/v1/admin/courses/master/${id}`),
+    api.auth.delete(`/admin/courses/master/${id}`),
 
   // 마스터 교과목 일괄 업로드 (관리자)
   uploadMasterExcel: (file: File): Promise<CourseUploadResult> => {
     const formData = new FormData()
     formData.append('file', file)
-    return api.auth.post('/api/v1/admin/courses/master/upload', formData)
+    return api.auth.post('/admin/courses/master/upload', formData)
   },
 
   // 마스터 교과목 일괄 초기화 (관리자)
   bulkInitMasters: (data: CourseMasterBulkInitRequest): Promise<CourseUploadResult> =>
-    api.auth.post('/api/v1/admin/courses/master/bulk-init', data),
+    api.auth.post('/admin/courses/master/bulk-init', data),
 }
