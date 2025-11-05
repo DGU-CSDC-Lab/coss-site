@@ -13,6 +13,8 @@ import { useAlert } from '@/hooks/useAlert'
 export default function MasterSubjectPage() {
   const [courses, setCourses] = useState<PagedResponse<CourseMaster> | null>(null)
   const [loading, setLoading] = useState(false)
+  const [selectedCourse, setSelectedCourse] = useState<CourseMaster | null>(null)
+  const [showModal, setShowModal] = useState(false)
 
   const alert = useAlert()
 
@@ -49,6 +51,11 @@ export default function MasterSubjectPage() {
     if (e.key === 'Enter') {
       handleSearch()
     }
+  }
+
+  const handleCourseClick = (course: CourseMaster) => {
+    setSelectedCourse(course)
+    setShowModal(true)
   }
 
   const semesterOptions = [
@@ -158,7 +165,10 @@ export default function MasterSubjectPage() {
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
                         {course.code}
                       </td>
-                      <td className="px-3 py-1 text-caption-14 text-gray-700 text-center truncate">
+                      <td 
+                        className="px-3 py-1 text-caption-14 text-blue-600 text-center truncate cursor-pointer hover:underline"
+                        onClick={() => handleCourseClick(course)}
+                      >
                         {course.name}
                       </td>
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
@@ -190,6 +200,67 @@ export default function MasterSubjectPage() {
           </div>
         </div>
       </div>
+
+      {/* Description Modal */}
+      {showModal && selectedCourse && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">
+                  {selectedCourse.name}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  {selectedCourse.code} | {selectedCourse.department}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="space-y-3">
+              <div>
+                <h3 className="font-medium text-gray-900 mb-2">교과목 설명</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {selectedCourse.description || '설명이 없습니다.'}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                <div>
+                  <span className="text-sm font-medium text-gray-500">학점:</span>
+                  <span className="ml-2 text-sm text-gray-900">{selectedCourse.credit || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">수강학년:</span>
+                  <span className="ml-2 text-sm text-gray-900">{selectedCourse.grade || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">강의유형:</span>
+                  <span className="ml-2 text-sm text-gray-900">{selectedCourse.courseType || '-'}</span>
+                </div>
+                <div>
+                  <span className="text-sm font-medium text-gray-500">학기:</span>
+                  <span className="ml-2 text-sm text-gray-900">{selectedCourse.semester}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-end mt-6">
+              <Button
+                onClick={() => setShowModal(false)}
+                variant="cancel"
+              >
+                닫기
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
