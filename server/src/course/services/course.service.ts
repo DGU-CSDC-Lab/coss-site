@@ -274,7 +274,7 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course: ${course.master.name} (${course.master.code})`,
+        `Found course: ${course.master.subjectName} (${course.master.code})`,
       );
       return this.toResponseOffering(course);
     } catch (error) {
@@ -301,7 +301,7 @@ export class CourseService {
         semester: createDto.semester,
         department: createDto.department,
         code: createDto.courseCode, // DTO의 courseCode -> 엔티티의 code
-        name: createDto.subjectName, // DTO의 subjectName -> 엔티티의 name
+        subjectName: createDto.subjectName, // DTO의 subjectName -> 엔티티의 name
         englishName: createDto.englishName,
         description: createDto.description,
         grade: createDto.grade,
@@ -312,7 +312,7 @@ export class CourseService {
       // 데이터베이스에 저장
       const saved = await this.courseMasterRepository.save(course);
       this.logger.log(
-        `Course created successfully: ${saved.name} (id: ${saved.id})`,
+        `Course created successfully: ${saved.subjectName} (id: ${saved.id})`,
       );
 
       return this.toResponseMaster(saved);
@@ -348,7 +348,7 @@ export class CourseService {
       // 데이터베이스에 저장
       const saved = await this.courseOfferingRepository.save(course);
       this.logger.log(
-        `Course created successfully: ${saved.master.name} (id: ${saved.id})`,
+        `Course created successfully: ${saved.master.subjectName} (id: ${saved.id})`,
       );
 
       return this.toResponseOffering(saved);
@@ -383,13 +383,13 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course to update: ${course.name} (${course.code})`,
+        `Found course to update: ${course.subjectName} (${course.code})`,
       );
 
       // 변경사항 로깅
       const changes: string[] = [];
-      if (updateDto.subjectName && updateDto.subjectName !== course.name) {
-        changes.push(`name: ${course.name} → ${updateDto.subjectName}`);
+      if (updateDto.subjectName && updateDto.subjectName !== course.subjectName) {
+        changes.push(`name: ${course.subjectName} → ${updateDto.subjectName}`);
       }
       if (updateDto.courseCode && updateDto.courseCode !== course.code) {
         changes.push(`code: ${course.code} → ${updateDto.courseCode}`);
@@ -415,7 +415,7 @@ export class CourseService {
         semester: updateDto.semester ?? course.semester,
         department: updateDto.department ?? course.department,
         code: updateDto.courseCode ?? course.code,
-        name: updateDto.subjectName ?? course.name,
+        subjectName: updateDto.subjectName ?? course.subjectName,
         englishName: updateDto.englishName ?? course.englishName,
         grade: updateDto.grade ?? course.grade,
         credit: updateDto.credit ?? course.credit,
@@ -425,7 +425,7 @@ export class CourseService {
       // 변경사항 저장
       const saved = await this.courseMasterRepository.save(course);
       this.logger.log(
-        `Course updated successfully: ${saved.name} (id: ${saved.id})`,
+        `Course updated successfully: ${saved.subjectName} (id: ${saved.id})`,
       );
 
       return this.toResponseMaster(saved);
@@ -460,7 +460,7 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course to update: ${course.master.name} (${course.master.code})`,
+        `Found course to update: ${course.master.subjectName} (${course.master.code})`,
       );
 
       // 변경사항 로깅
@@ -489,7 +489,7 @@ export class CourseService {
       // 변경사항 저장
       const saved = await this.courseOfferingRepository.save(course);
       this.logger.log(
-        `Course Offering updated successfully: Master: ${saved.master.name} (id: ${saved.id})`,
+        `Course Offering updated successfully: Master: ${saved.master.subjectName} (id: ${saved.id})`,
       );
 
       return this.toResponseOffering(saved);
@@ -660,14 +660,14 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course to delete: ${course.name} (${course.code})`,
+        `Found course to delete: ${course.subjectName} (${course.code})`,
       );
 
       // 교과목 정보 삭제 (물리적 삭제)
       await this.courseMasterRepository.remove(course);
 
       this.logger.log(
-        `Course deleted successfully: ${course.name} (id: ${id})`,
+        `Course deleted successfully: ${course.subjectName} (id: ${id})`,
       );
     } catch (error) {
       this.logger.error('Error deleting course', error.stack);
@@ -695,14 +695,14 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course to delete: ${course.master.name} (${course.instructor}, ${course.classTime})`,
+        `Found course to delete: ${course.master.subjectName} (${course.instructor}, ${course.classTime})`,
       );
 
       // 교과목 정보 삭제 (물리적 삭제)
       await this.courseOfferingRepository.remove(course);
 
       this.logger.log(
-        `Course deleted successfully: (id: ${id}) ${course.master.name} (${course.instructor}, ${course.classTime})`,
+        `Course deleted successfully: (id: ${id}) ${course.master.subjectName} (${course.instructor}, ${course.classTime})`,
       );
     } catch (error) {
       this.logger.error('Error deleting course', error.stack);
@@ -906,7 +906,7 @@ export class CourseService {
       semester: course.semester, // 학기
       department: course.department, // 학과
       courseCode: course.code, // 엔티티의 code -> DTO의 courseCode
-      subjectName: course.name, // 엔티티의 name -> DTO의 subjectName
+      subjectName: course.subjectName, // 엔티티의 name -> DTO의 subjectName
       englishName: course.englishName, // 영문 교과목명
       description: course.description, // 교과목 설명
       grade: course.grade, // 학년
@@ -929,7 +929,7 @@ export class CourseService {
       semester: course.semester, // 학기
       department: course.master.department, // 학과
       courseCode: course.master.code, // 엔티티의 code -> DTO의 courseCode
-      subjectName: course.master.name, // 엔티티의 name -> DTO의 subjectName
+      subjectName: course.master.subjectName, // 엔티티의 name -> DTO의 subjectName
       englishName: course.master.englishName, // 영문 교과목명
       description: course.master.description, // 교과목 설명
       grade: course.master.grade, // 학년

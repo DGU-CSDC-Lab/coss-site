@@ -14,7 +14,7 @@ export class CourseMaster extends BaseEntity {
   code: string;
 
   @Column({ type: 'varchar', length: 255 })
-  name: string;
+  subjectName: string;
 
   @Column({ name: 'english_name', type: 'varchar', nullable: true })
   englishName: string;
