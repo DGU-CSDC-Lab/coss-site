@@ -91,7 +91,7 @@ export default function AdminCourseOfferingCreatePage() {
               onChange={(value) => handleInputChange('masterId', value)}
               options={masters.map(master => ({
                 value: master.id,
-                label: `${master.code} - ${master.name}`,
+                label: `${master.courseCode} - ${master.subjectName}`,
               }))}
               placeholder="마스터 교과목을 선택하세요"
             />

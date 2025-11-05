@@ -183,28 +183,28 @@ export default function CoursesPage() {
               courses?.items.map(course => (
                 <tr key={course.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                    {course.master.code}
+                    {course.courseCode}
                   </td>
                   <td className="px-4 py-3">
                     <div>
                       <div className="font-body-14-medium text-gray-900">
-                        {course.master.name}
+                        {course.subjectName}
                       </div>
-                      {course.master.englishName && (
+                      {course.englishName && (
                         <div className="font-caption-14 text-gray-600">
-                          {course.master.englishName}
+                          {course.englishName}
                         </div>
                       )}
                     </div>
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                    {course.master.department}
+                    {course.department}
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                    {course.master.grade || '-'}
+                    {course.grade || '-'}
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                    {course.master.credit || '-'}
+                    {course.credit || '-'}
                   </td>
                   <td className="px-4 py-3 font-body-14-medium text-gray-600">
                     {course.instructor || '-'}
@@ -224,7 +224,7 @@ export default function CoursesPage() {
                         size="sm"
                         radius="md"
                         onClick={() =>
-                          handleDelete(course.id, course.master.name)
+                          handleDelete(course.id, course.subjectName)
                         }
                       >
                         삭제
