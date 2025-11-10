@@ -3,9 +3,26 @@ import { Link } from 'react-router-dom'
 import { coursesApi, CourseOffering, CoursesQuery } from '@/lib/api/courses'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
+import Input from '@/components/common/Input'
+import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import ConfirmModal from '@/components/common/ConfirmModal'
 import { useAlert } from '@/hooks/useAlert'
+
+const YEAR_SEMESTER_OPTIONS = [
+  { value: '', label: '전체 년도/학기' },
+  { value: '2025-1학기', label: '2025년 1학기' },
+  { value: '2025-2학기', label: '2025년 2학기' },
+  { value: '2024-1학기', label: '2024년 1학기' },
+  { value: '2024-2학기', label: '2024년 2학기' },
+]
+
+const SEARCH_TYPE_OPTIONS = [
+  { value: '', label: '전체' },
+  { value: 'name', label: '과목명' },
+  { value: 'department', label: '학과' },
+  { value: 'instructor', label: '담당교원' },
+]
 
 export default function CoursesOfferingPage() {
   const [courses, setCourses] = useState<CourseOffering[]>([])
@@ -13,11 +30,17 @@ export default function CoursesOfferingPage() {
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalElements, setTotalElements] = useState(0)
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; course: CourseOffering | null }>({
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    course: CourseOffering | null
+  }>({
     isOpen: false,
     course: null,
   })
   const [deleteLoading, setDeleteLoading] = useState(false)
+  const [selectedYearSemester, setSelectedYearSemester] = useState('')
+  const [searchType, setSearchType] = useState('')
+  const [keyword, setKeyword] = useState('')
   const [query, setQuery] = useState<CoursesQuery>({
     page: 1,
     size: 20,
@@ -46,6 +69,43 @@ export default function CoursesOfferingPage() {
     }
   }
 
+  const handleYearSemesterChange = (value: string) => {
+    setSelectedYearSemester(value)
+    if (value) {
+      const [year, semester] = value.split('-')
+      setQuery(prev => ({ ...prev, year: parseInt(year), semester, page: 1 }))
+    } else {
+      setQuery(prev => ({
+        ...prev,
+        year: undefined,
+        semester: undefined,
+        page: 1,
+      }))
+    }
+  }
+
+  const handleSearch = () => {
+    setQuery({
+      ...query,
+      page: 1,
+      [searchType]: keyword || undefined,
+    })
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch()
+    }
+  }
+
+  const getPlaceholder = () => {
+    const typeLabel = SEARCH_TYPE_OPTIONS.find(
+      opt => opt.value === searchType
+    )?.label
+    return typeLabel && typeLabel !== '전체'
+      ? `${typeLabel} 검색`
+      : '검색어 입력'
+  }
   const handleDelete = async () => {
     if (!deleteModal.course) return
 
@@ -82,6 +142,46 @@ export default function CoursesOfferingPage() {
               개별 등록
             </Button>
           </Link>
+        </div>
+      </div>
+
+      <div className="flex justify-between items-center mb-6">
+        <div className="font-body-18-medium text-gray-900">
+          전체 <span className="text-pri-500">{totalElements}</span> 건
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Dropdown
+            options={YEAR_SEMESTER_OPTIONS}
+            value={selectedYearSemester}
+            onChange={handleYearSemesterChange}
+            size="md"
+            className="w-40"
+          />
+          <Dropdown
+            options={SEARCH_TYPE_OPTIONS}
+            value={searchType}
+            onChange={setSearchType}
+            size="md"
+            className="w-24"
+          />
+          <Input
+            type="text"
+            placeholder={getPlaceholder()}
+            value={keyword}
+            onChange={setKeyword}
+            onKeyPress={handleKeyPress}
+            className="w-full sm:w-60"
+            size="md"
+          />
+          <Button
+            variant="point_2"
+            radius="md"
+            size="md"
+            onClick={handleSearch}
+          >
+            검색
+          </Button>
         </div>
       </div>
 
