@@ -180,8 +180,8 @@ export class HistoryService {
 
       this.logger.debug(`Found history to delete: ${history.title}`);
       
-      // 물리적 삭제 실행
-      await this.historyRepository.remove(history);
+      // 소프트 삭제 실행
+      await this.historyRepository.softRemove(history);
       this.logger.log(`History deleted successfully: ${id} - ${history.title}`);
     } catch (error) {
       this.logger.error(`Failed to delete history ${id}: ${error.message}`, error.stack);

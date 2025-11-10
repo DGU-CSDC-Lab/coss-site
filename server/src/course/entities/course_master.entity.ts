@@ -1,9 +1,9 @@
 import { Entity, Column, OneToMany } from 'typeorm';
-import { BaseEntity } from '@/common/entities';
+import { SoftDeleteEntity } from '@/common/entities';
 import { CourseOffering } from './course_offering';
 
 @Entity('courses_masters')
-export class CourseMaster extends BaseEntity {
+export class CourseMaster extends SoftDeleteEntity {
   @Column({ type: 'varchar', length: 255 })
   semester: string;
 

@@ -221,8 +221,8 @@ export class CategoryService {
         throw CategoryException.isExistingSubcategory();
       }
 
-      // 하위 카테고리가 없는 경우에만 삭제 실행
-      await this.categoryRepository.remove(category);
+      // 하위 카테고리가 없는 경우에만 소프트 삭제 실행
+      await this.categoryRepository.softRemove(category);
       this.logger.log(
         `Category deleted successfully: ${category.name} (id: ${id})`,
       );

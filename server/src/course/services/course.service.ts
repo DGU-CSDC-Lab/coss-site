@@ -696,8 +696,8 @@ export class CourseService {
         `Found course to delete: ${course.subjectName} (${course.courseCode})`,
       );
 
-      // 교과목 정보 삭제 (물리적 삭제)
-      await this.courseMasterRepository.remove(course);
+      // 교과목 정보 삭제 (소프트 삭제)
+      await this.courseMasterRepository.softRemove(course);
 
       this.logger.log(
         `Course deleted successfully: ${course.subjectName} (id: ${id})`,
@@ -732,8 +732,8 @@ export class CourseService {
         `Found course to delete: ${course.master.subjectName} (${course.instructor}, ${course.classTime})`,
       );
 
-      // 교과목 정보 삭제 (물리적 삭제)
-      await this.courseOfferingRepository.remove(course);
+      // 교과목 정보 삭제 (소프트 삭제)
+      await this.courseOfferingRepository.softRemove(course);
 
       this.logger.log(
         `Course deleted successfully: (id: ${id}) ${course.master.subjectName} (${course.instructor}, ${course.classTime})`,

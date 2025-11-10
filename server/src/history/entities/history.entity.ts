@@ -1,8 +1,8 @@
 import { Entity, Column } from 'typeorm';
-import { BaseEntity } from '@/common/entities';
+import { SoftDeleteEntity } from '@/common/entities';
 
 @Entity('histories')
-export class History extends BaseEntity {
+export class History extends SoftDeleteEntity {
   @Column({ type: 'int' })
   year: number;
 

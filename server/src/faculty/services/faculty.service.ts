@@ -226,8 +226,8 @@ export class FacultyService {
 
       this.logger.debug(`Found faculty member to delete: ${faculty.name}`);
 
-      // 교수진 정보 삭제 (물리적 삭제)
-      await this.facultyRepository.remove(faculty);
+      // 교수진 정보 삭제 (소프트 삭제)
+      await this.facultyRepository.softRemove(faculty);
 
       this.logger.log(
         `Faculty member deleted successfully: ${faculty.name} (id: ${id})`,

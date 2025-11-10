@@ -1,8 +1,8 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { BaseEntity } from '@/common/entities';
+import { SoftDeleteEntity } from '@/common/entities';
 
 @Entity('categories')
-export class Category extends BaseEntity {
+export class Category extends SoftDeleteEntity {
   @Column({ type: 'varchar', length: 255 })
   name: string;
 

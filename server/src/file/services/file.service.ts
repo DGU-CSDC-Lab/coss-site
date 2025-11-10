@@ -273,10 +273,9 @@ export class FileService {
       }
 
       this.logger.log(
-        `Marking file as deleted: ${file.fileKey}, id: ${file.id}`,
+        `Soft deleting file: ${file.fileKey}, id: ${file.id}`,
       );
-      file.status = FileStatus.DELETED;
-      await this.fileRepository.save(file);
+      await this.fileRepository.softRemove(file);
 
       try {
         await this.s3Service.deleteObject(file.fileKey);

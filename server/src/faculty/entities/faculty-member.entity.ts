@@ -1,8 +1,8 @@
 import { Entity, Column } from 'typeorm';
-import { BaseEntity } from '@/common/entities';
+import { SoftDeleteEntity } from '@/common/entities';
 
 @Entity('faculty_members')
-export class FacultyMember extends BaseEntity {
+export class FacultyMember extends SoftDeleteEntity {
   @Column({ type: 'varchar', length: 100 })
   name: string;
 

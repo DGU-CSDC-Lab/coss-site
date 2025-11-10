@@ -1,9 +1,9 @@
-import { BaseEntity } from '@/common';
+import { SoftDeleteEntity } from '@/common';
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { CourseMaster } from './course_master.entity';
 
 @Entity('course_offerings')
-export class CourseOffering extends BaseEntity {
+export class CourseOffering extends SoftDeleteEntity {
   @ManyToOne(() => CourseMaster, master => master.offerings, { eager: false })
   @JoinColumn({ name: 'master_id' })
   master: CourseMaster;

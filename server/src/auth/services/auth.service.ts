@@ -565,10 +565,10 @@ export class AuthService {
       const accountToDelete = target.account;
       target.account = null;
       await this.userRepository.save(target);
-      await this.userRepository.remove(target);
+      await this.userRepository.softRemove(target);
 
       if (accountToDelete) {
-        await this.accountRepository.remove(accountToDelete);
+        await this.accountRepository.softRemove(accountToDelete);
       }
 
       this.logger.log(`Sub admin deleted successfully: ${targetId}`);
