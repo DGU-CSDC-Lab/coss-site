@@ -13,6 +13,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
 import { postsApi } from '@/lib/api/posts'
+import { authApi, UserInfoResponse } from '@/lib/api/auth'
 import PasswordChangeModal from '@/components/admin/PasswordChangeModal'
 import { schedulesApi } from '@/lib/api/schedules'
 import { facultyApi } from '@/lib/api/faculty'
@@ -41,6 +42,7 @@ export default function AdminPage() {
   const { user, role } = useAuthStore()
   const isSuperAdmin = role === 'SUPER_ADMIN'
   const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
     posts: 0,
     schedules: 0,
@@ -57,6 +59,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     fetchStats()
+    fetchUserInfo()
   }, [])
 
   const fetchStats = async () => {
@@ -88,6 +91,15 @@ export default function AdminPage() {
       alert.error((error as Error).message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchUserInfo = async () => {
+    try {
+      const userInfoRes = await authApi.getUserInfo()
+      setUserInfo(userInfoRes)
+    } catch (error) {
+      alert.error('사용자 정보를 불러오는데 실패했습니다.')
     }
   }
 
@@ -309,16 +321,16 @@ export default function AdminPage() {
             <div className="space-y-3">
               <div className="p-3 bg-gray-50 rounded-md">
                 <div className="text-caption-12 text-gray-500 mb-1">이메일</div>
-                <div className="text-body-14-medium text-gray-900">{user?.email}</div>
+                <div className="text-body-14-medium text-gray-900">{userInfo?.email}</div>
               </div>
               <div className="p-3 bg-gray-50 rounded-md">
                 <div className="text-caption-12 text-gray-500 mb-1">사용자명</div>
-                <div className="text-body-14-medium text-gray-900">{user?.username || '사용자'}</div>
+                <div className="text-body-14-medium text-gray-900">{userInfo?.username || '사용자'}</div>
               </div>
               <div className="p-3 bg-gray-50 rounded-md">
                 <div className="text-caption-12 text-gray-500 mb-1">권한</div>
                 <div className="text-body-14-medium text-gray-900">
-                  {role === 'SUPER_ADMIN' ? '최고 관리자' : '관리자'}
+                  {userInfo?.role === 'SUPER_ADMIN' ? '최고 관리자' : '관리자'}
                 </div>
               </div>
               <button

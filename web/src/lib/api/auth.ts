@@ -28,6 +28,13 @@ export interface User {
   role: string
 }
 
+export interface UserInfoResponse {
+  id: string
+  username: string
+  role: string
+  email: string
+}
+
 export interface ForgotPasswordRequest {
   email: string
 }
@@ -57,6 +64,8 @@ export const authApi = {
     api.post('/auth/refresh', data),
 
   me: (): Promise<User> => api.auth.get('/auth/info'),
+
+  getUserInfo: (): Promise<UserInfoResponse> => api.auth.get('/auth/user/info'),
 
   forgotPassword: (data: ForgotPasswordRequest): Promise<void> =>
     api.post('/auth/forgot-password', data),
