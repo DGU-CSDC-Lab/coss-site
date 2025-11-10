@@ -26,6 +26,8 @@ import {
   HistoryQuery,
 } from '@/history/dto/history.dto';
 import { PagedResponse } from '@/common/dto/response.dto';
+import { Roles } from '@/auth/decorators/roles.decorator';
+import { UserRole } from '@/auth/entities';
 
 @ApiTags('History')
 @Controller()
@@ -47,6 +49,7 @@ export class HistoryController {
 
   @Post('api/v1/admin/history')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '연혁 생성' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -58,6 +61,7 @@ export class HistoryController {
 
   @Put('api/v1/admin/history/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '연혁 수정' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -72,6 +76,7 @@ export class HistoryController {
 
   @Delete('api/v1/admin/history/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '연혁 삭제' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })

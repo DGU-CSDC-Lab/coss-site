@@ -27,6 +27,8 @@ import {
   PopupQuery,
 } from '@/popup/dto/popup.dto';
 import { PagedResponse } from '@/common/dto/response.dto';
+import { Roles } from '@/auth/decorators/roles.decorator';
+import { UserRole } from '@/auth/entities';
 
 @ApiTags('Popups')
 @Controller()
@@ -54,6 +56,7 @@ export class PopupController {
 
   @Post('api/v1/admin/popups')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '팝업 생성' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -68,6 +71,7 @@ export class PopupController {
 
   @Put('api/v1/admin/popups/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '팝업 수정' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -82,6 +86,7 @@ export class PopupController {
 
   @Delete('api/v1/admin/popups/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '팝업 삭제' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })

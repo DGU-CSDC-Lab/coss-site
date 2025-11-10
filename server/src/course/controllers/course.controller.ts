@@ -36,6 +36,8 @@ import {
   CourseBulkInitOfferingRequest,
 } from '@/course/dto/course.dto';
 import { PagedResponse } from '@/common/dto/response.dto';
+import { Roles } from '@/auth/decorators/roles.decorator';
+import { UserRole } from '@/auth/entities';
 
 @ApiTags('Courses')
 @Controller()
@@ -63,6 +65,7 @@ export class CourseController {
 
   @Post('api/v1/admin/courses/master')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교과목 생성' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -74,6 +77,7 @@ export class CourseController {
 
   @Post('api/v1/admin/courses/offering')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: 'Offering 교과목 생성' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -85,6 +89,7 @@ export class CourseController {
 
   @Put('api/v1/admin/courses/master/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교과목 수정' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -99,6 +104,7 @@ export class CourseController {
 
   @Put('api/v1/admin/courses/offering/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교과목 수정' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -113,6 +119,7 @@ export class CourseController {
 
   @Delete('api/v1/admin/courses/master/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: 'Master 교과목 삭제' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -125,6 +132,7 @@ export class CourseController {
 
   @Delete('api/v1/admin/courses/offering/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: 'Offering 교과목 삭제' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -137,6 +145,7 @@ export class CourseController {
 
   @Post('api/v1/admin/courses/master/bulk-init')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '년도/학기별 교과목 초기화' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -148,6 +157,7 @@ export class CourseController {
 
   @Post('api/v1/admin/courses/offering/bulk-init')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '년도/학기별 교과목 초기화' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -159,6 +169,7 @@ export class CourseController {
 
   @Post('api/v1/admin/courses/master/upload')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교과목 일괄 업로드' })
   @ApiConsumes('multipart/form-data')
@@ -173,6 +184,7 @@ export class CourseController {
 
   @Post('api/v1/admin/courses/offering/upload')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교과목 일괄 업로드' })
   @ApiConsumes('multipart/form-data')

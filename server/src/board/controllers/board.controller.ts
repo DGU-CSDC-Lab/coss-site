@@ -90,6 +90,7 @@ export class BoardController {
 
   @Post('api/v1/admin/posts')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '게시글 생성' })
   @ApiResponse({ status: 401, description: '인증 필요' })

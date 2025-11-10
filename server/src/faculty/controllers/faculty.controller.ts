@@ -26,6 +26,8 @@ import {
   FacultyQuery,
 } from '@/faculty/dto/faculty.dto';
 import { PagedResponse } from '@/common/dto/response.dto';
+import { Roles } from '@/auth/decorators/roles.decorator';
+import { UserRole } from '@/auth/entities';
 
 @ApiTags('Faculty')
 @Controller()
@@ -47,6 +49,7 @@ export class FacultyController {
 
   @Post('api/v1/admin/faculty')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교수진 생성' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -58,6 +61,7 @@ export class FacultyController {
 
   @Put('api/v1/admin/faculty/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교수진 수정' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -72,6 +76,7 @@ export class FacultyController {
 
   @Delete('api/v1/admin/faculty/:id')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교수진 삭제' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })

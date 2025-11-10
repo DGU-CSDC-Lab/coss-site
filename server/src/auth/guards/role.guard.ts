@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { Injectable, CanActivate, ExecutionContext, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,6 +14,8 @@ export class RoleGuard implements CanActivate {
     @InjectRepository(User)
     private userRepository: Repository<User>,
   ) {}
+
+  private readonly logger = new Logger(RoleGuard.name);
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
@@ -36,11 +38,10 @@ export class RoleGuard implements CanActivate {
     });
 
     if (!user || !requiredRoles.includes(user.role)) {
-      throw CommonException.forbidden('Insufficient permissions');
+      throw CommonException.forbidden(`권한이 부족합니다. 당신의 현재 역할: ${user ? user.role : '없음'}`);
     }
-    console.log('RoleGuard: User role validated', user.role);
+    this.logger.log(`RoleGuard: User ${user.id} with role ${user.role} authorized`);
     request.user = user;
-    console.log('RoleGuard: User attached to request', request.user);
     return true;
   }
 
