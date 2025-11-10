@@ -12,11 +12,12 @@ import { useAlert } from '@/hooks/useAlert'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import ExitWarningModal from '@/components/common/ExitWarningModal'
 import { useAuthStore } from '@/store/auth.store'
+import { getRoleOptions } from '@/utils/roleDepth'
 
 export default function AdminUsersCreatePage() {
   const navigate = useNavigate()
   const alert = useAlert()
-  const { user: currentUser } = useAuthStore()
+  const { role } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
@@ -24,33 +25,13 @@ export default function AdminUsersCreatePage() {
     permission: '',
   })
 
-  // 권한에 따른 역할 옵션 설정
-  const getRoleOptions = () => {
-    const baseOptions = [{ value: '', label: '권한 선택' }]
-    
-    if (currentUser?.role === 'ADMINISTRATOR') {
-      return [
-        ...baseOptions,
-        { value: 'ADMIN', label: '관리자' },
-        { value: 'SUPER_ADMIN', label: '최고 관리자' },
-      ]
-    }
-    if (currentUser?.role === 'SUPER_ADMIN') {
-      return [
-        ...baseOptions,
-        { value: 'ADMIN', label: '관리자' },
-      ]
-    }
-    return baseOptions
-  }
-
   // 권한 체크
   useEffect(() => {
-    if (currentUser?.role === 'ADMIN') {
+    if (role === 'ADMIN') {
       alert.error('권한이 부족합니다.')
       navigate('/admin/users')
     }
-  }, [currentUser, navigate, alert])
+  }, [role, navigate, alert])
 
   const [originalData, setOriginalData] = useState(formData)
   const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData)
@@ -153,7 +134,7 @@ export default function AdminUsersCreatePage() {
                   권한
                 </Label>
                 <Dropdown
-                  options={getRoleOptions()}
+                  options={getRoleOptions(role || '')}
                   value={formData.permission}
                   onChange={value =>
                     setFormData({ ...formData, permission: value })
