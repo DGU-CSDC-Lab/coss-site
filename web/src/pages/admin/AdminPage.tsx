@@ -9,6 +9,8 @@ import {
   ChevronRightIcon,
   SpeakerWaveIcon,
   ClockIcon,
+  BookOpenIcon,
+  ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
 import { postsApi } from '@/lib/api/posts'
 import { schedulesApi } from '@/lib/api/schedules'
@@ -17,6 +19,7 @@ import { coursesApi } from '@/lib/api/courses'
 import { headerAssetsApi } from '@/lib/api/headerAssets'
 import { popupsApi } from '@/lib/api/popups'
 import { historyApi } from '@/lib/api/history'
+import { useAuthStore } from '@/store/auth.store'
 import Information from '@/components/common/Information'
 import Title from '@/components/common/title/Title'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
@@ -30,9 +33,12 @@ interface DashboardStats {
   banners: number
   popups: number
   history: number
+  masterCourses: number
 }
 
 export default function AdminPage() {
+  const { user, role } = useAuthStore()
+  const isSuperAdmin = role === 'SUPER_ADMIN'
   const [stats, setStats] = useState<DashboardStats>({
     posts: 0,
     schedules: 0,
@@ -41,6 +47,7 @@ export default function AdminPage() {
     banners: 0,
     popups: 0,
     history: 0,
+    masterCourses: 0,
   })
   const [loading, setLoading] = useState(true)
 
@@ -53,7 +60,7 @@ export default function AdminPage() {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const [postsRes, schedulesRes, facultyRes, coursesRes, bannersRes, popupsRes, historyRes] =
+      const [postsRes, schedulesRes, facultyRes, coursesRes, bannersRes, popupsRes, historyRes, masterCoursesRes] =
         await Promise.all([
           postsApi.getAdminPosts({ page: 1, size: 1 }),
           schedulesApi.getSchedules({ page: 1, size: 1 }),
@@ -62,6 +69,7 @@ export default function AdminPage() {
           headerAssetsApi.getHeaderAssets({ page: 1, size: 1 }),
           popupsApi.getPopups({ page: 1, size: 1 }),
           historyApi.getHistory({ page: 1, size: 1 }),
+          coursesApi.getMasters({ page: 1, size: 1 }),
         ])
 
       setStats({
@@ -72,6 +80,7 @@ export default function AdminPage() {
         banners: bannersRes.meta.totalElements,
         popups: (popupsRes as any).meta.totalElements,
         history: historyRes.meta.totalElements,
+        masterCourses: masterCoursesRes.meta.totalElements,
       })
     } catch (error) {
       alert.error((error as Error).message)
@@ -106,10 +115,28 @@ export default function AdminPage() {
       href: '/admin/popups/create',
     },
     {
+      title: '개설과목 등록',
+      description: '특정 년도/학기 개설과목을 등록합니다.',
+      icon: AcademicCapIcon,
+      href: '/admin/courses/offering/create',
+    },
+    {
+      title: '마스터과목 등록',
+      description: '기본 교과목 정보를 등록합니다.',
+      icon: BookOpenIcon,
+      href: '/admin/courses/master/create',
+    },
+    {
       title: '개설과목 일괄등록',
       description: 'Excel 파일로 개설과목을 일괄 등록합니다.',
       icon: AcademicCapIcon,
-      href: '/admin/courses/bulk-upload',
+      href: '/admin/courses/offering/bulk-upload',
+    },
+    {
+      title: '마스터과목 일괄등록',
+      description: 'Excel 파일로 마스터과목을 일괄 등록합니다.',
+      icon: BookOpenIcon,
+      href: '/admin/courses/master/bulk-upload',
     },
     {
       title: '연혁 등록',
@@ -172,13 +199,32 @@ export default function AdminPage() {
         },
         {
           name: '개설과목',
-          href: '/admin/courses',
+          href: '/admin/courses/offering',
           icon: AcademicCapIcon,
           count: stats.courses,
+        },
+        {
+          name: '마스터과목',
+          href: '/admin/courses/master',
+          icon: BookOpenIcon,
+          count: stats.masterCourses,
         },
       ],
     },
   ]
+
+  // SUPER_ADMIN 전용 관리 섹션
+  const superAdminSection = {
+    title: '시스템 관리',
+    items: [
+      {
+        name: '관리자 관리',
+        href: '/admin/users',
+        icon: ShieldCheckIcon,
+        count: 0, // 필요시 API로 가져올 수 있음
+      },
+    ],
+  }
 
   return (
     <div className="w-full">
@@ -252,6 +298,38 @@ export default function AdminPage() {
               </ul>
             </div>
           ))}
+          
+          {/* SUPER_ADMIN 전용 섹션 */}
+          {isSuperAdmin && (
+            <div className="bg-white border border-gray-100 rounded-md p-4">
+              <div className="text-body-18-medium">{superAdminSection.title}</div>
+              <div className="h-4"></div>
+              <hr className="border-t border-gray-200 mb-4" />
+              <ul className="space-y-3">
+                {superAdminSection.items.map(item => (
+                  <li key={item.name}>
+                    <Link
+                      to={item.href}
+                      className="flex items-center justify-between p-2 rounded hover:bg-gray-100 transition-colors w-full"
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon className="w-5 h-5 text-gray-400" />
+                        <span className="text-body-14-medium text-gray-700">
+                          {item.name}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-caption-14 text-pri-800 p-2">
+                          {item.count}
+                        </span>
+                        <ChevronRightIcon className="w-5 h-5 text-gray-400" />
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -44,13 +44,13 @@ export class CourseQuery extends PaginationQuery {
   department?: string;
 
   @ApiProperty({
-    description: '과목명 검색 (키워드)',
-    example: 'IoT',
+    description: '교과목명 검색',
+    example: 'IoT 기초',
     required: false,
   })
   @IsOptional()
   @IsString()
-  name?: string;
+  subjectName?: string;
 
   @ApiProperty({
     description: '학수번호 검색',

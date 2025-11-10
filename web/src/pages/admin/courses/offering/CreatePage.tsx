@@ -1,22 +1,37 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   coursesApi,
   CreateCourseOfferingRequest,
+  UpdateCourseOfferingRequest,
   CourseMaster,
+  CourseOffering,
 } from '@/lib/api/courses'
-import Title from '@/components/common/title/Title'
+import { SEMESTER_OPTIONS } from '@/config/courseConfig'
 import Button from '@/components/common/Button'
+import Title from '@/components/common/title/Title'
 import Input from '@/components/common/Input'
 import Dropdown from '@/components/common/Dropdown'
+import SearchableDropdown from '@/components/common/SearchableDropdown'
 import Label from '@/components/common/Label'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
+import { useFileUpload } from '@/hooks/useFileUpload'
+import ExitWarningModal from '@/components/common/ExitWarningModal'
 
 export default function AdminCourseOfferingCreatePage() {
   const navigate = useNavigate()
+  const params = useParams()
   const alert = useAlert()
   const [loading, setLoading] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(false)
+  const [course, setCourse] = useState<CourseOffering | null>(null)
   const [masters, setMasters] = useState<CourseMaster[]>([])
+  const [masterLoading, setMasterLoading] = useState(false)
+  const isEdit = !!params.id
+
   const [formData, setFormData] = useState({
     masterId: '',
     year: new Date().getFullYear(),
@@ -27,151 +42,308 @@ export default function AdminCourseOfferingCreatePage() {
     syllabusUrl: '',
   })
 
-  useEffect(() => {
-    fetchMasters()
-  }, [])
+  const [originalData, setOriginalData] = useState(formData)
+  const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData)
+  const exitWarning = useUnsavedChanges({ hasChanges })
 
-  const fetchMasters = async () => {
+  const { upload, uploading: fileUploading, result: fileResult, reset: resetFile } = useFileUpload({
+    ownerType: 'post', // 또는 새로운 타입 'course' 추가 필요
+    ownerId: params.id || 'temp',
+    uploadOptions: {
+      allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
+    },
+    onError: (error) => {
+      alert.error('파일 업로드 중 오류가 발생했습니다.')
+    }
+  })
+
+  useEffect(() => {
+    if (isEdit && params.id) {
+      fetchCourse(params.id)
+    }
+  }, [isEdit, params.id])
+
+  const searchMasters = async (query: string) => {
     try {
-      const response = await coursesApi.getMasters({ size: 1000 })
+      setMasterLoading(true)
+      const response = await coursesApi.getMasters({ 
+        subjectName: query || undefined,
+        page: 1, 
+        size: 10 
+      })
       setMasters(response.items)
     } catch (error) {
-      alert.error('마스터 교과목 목록을 불러올 수 없습니다.')
+      alert.error('마스터 교과목 검색에 실패했습니다.')
+    } finally {
+      setMasterLoading(false)
     }
   }
+
+  const fetchCourse = async (id: string) => {
+    try {
+      setInitialLoading(true)
+      const courseData = await coursesApi.getOffering(id)
+      setCourse(courseData)
+      
+      const data = {
+        masterId: '', // API에서 masterId를 제공하지 않는 경우 빈 값
+        year: courseData.year,
+        semester: courseData.semester,
+        classTime: courseData.classTime || '',
+        instructor: courseData.instructor || '',
+        classroom: courseData.classroom || '',
+        syllabusUrl: courseData.syllabusUrl || '',
+      }
+      
+      setFormData(data)
+      setOriginalData(data)
+    } catch (error) {
+      alert.error('개설 교과목 정보를 불러올 수 없습니다.')
+      navigate('/admin/courses/offering')
+    } finally {
+      setInitialLoading(false)
+    }
+  }
+
+  const semesterOptions = SEMESTER_OPTIONS
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!formData.masterId) {
+    if (!isEdit && !formData.masterId) {
       alert.error('마스터 교과목을 선택해주세요.')
       return
     }
 
     setLoading(true)
+
     try {
-      const courseData: CreateCourseOfferingRequest = {
-        masterId: formData.masterId,
-        year: formData.year,
-        semester: formData.semester,
-        classTime: formData.classTime || undefined,
-        instructor: formData.instructor || undefined,
-        classroom: formData.classroom || undefined,
-        syllabusUrl: formData.syllabusUrl || undefined,
+      if (isEdit && params.id) {
+        const courseData: UpdateCourseOfferingRequest = {
+          year: formData.year,
+          semester: formData.semester,
+          classTime: formData.classTime || undefined,
+          instructor: formData.instructor || undefined,
+          classroom: formData.classroom || undefined,
+          syllabusUrl: fileResult?.publicUrl || formData.syllabusUrl || undefined,
+        }
+
+        await coursesApi.updateOffering(params.id, courseData)
+        alert.success('개설 교과목이 수정되었습니다.')
+      } else {
+        const courseData: CreateCourseOfferingRequest = {
+          masterId: formData.masterId,
+          year: formData.year,
+          semester: formData.semester,
+          classTime: formData.classTime || undefined,
+          instructor: formData.instructor || undefined,
+          classroom: formData.classroom || undefined,
+          syllabusUrl: fileResult?.publicUrl || formData.syllabusUrl || undefined,
+        }
+
+        await coursesApi.createOffering(courseData)
+        alert.success('개설 교과목이 생성되었습니다.')
       }
-      await coursesApi.createOffering(courseData)
-      alert.success('개설 교과목이 생성되었습니다.')
-      navigate('/admin/courses')
+      navigate('/admin/courses/offering')
     } catch (error) {
-      alert.error('교과목 생성에 실패했습니다.')
+      alert.error(
+        `개설 교과목 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다. \n ${error instanceof Error ? error.message : ''}`
+      )
     } finally {
       setLoading(false)
     }
   }
 
-  const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+  const handleButtonSubmit = () => {
+    handleSubmit({ preventDefault: () => {} } as React.FormEvent)
+  }
+
+  if (initialLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    )
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <Link to="/admin/courses" className="text-blue-600 hover:underline">
-          ← 목록으로
-        </Link>
-        <Title className="mt-2">개설 교과목 생성</Title>
-      </div>
-
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label>마스터 교과목</Label>
-            <Dropdown
-              value={formData.masterId}
-              onChange={(value) => handleInputChange('masterId', value)}
-              options={masters.map(master => ({
-                value: master.id,
-                label: `${master.courseCode} - ${master.subjectName}`,
-              }))}
-              placeholder="마스터 교과목을 선택하세요"
-            />
-          </div>
-
-          <div>
-            <Label>개설년도</Label>
-            <Input
-              type="number"
-              value={formData.year.toString()}
-              onChange={(value) => handleInputChange('year', parseInt(value) || new Date().getFullYear())}
-            />
-          </div>
-
-          <div>
-            <Label>학기</Label>
-            <Dropdown
-              value={formData.semester}
-              onChange={(value) => handleInputChange('semester', value)}
-              options={[
-                { value: '1학기', label: '1학기' },
-                { value: '2학기', label: '2학기' },
-                { value: '여름학기', label: '여름학기' },
-                { value: '겨울학기', label: '겨울학기' },
-              ]}
-            />
-          </div>
-
-          <div>
-            <Label>수업시간</Label>
-            <Input
-              value={formData.classTime}
-              onChange={(value) => handleInputChange('classTime', value)}
-              placeholder="예: 월 09:00-12:00"
-            />
-          </div>
-
-          <div>
-            <Label>담당교원</Label>
-            <Input
-              value={formData.instructor}
-              onChange={(value) => handleInputChange('instructor', value)}
-              placeholder="담당교원명을 입력하세요"
-            />
-          </div>
-
-          <div>
-            <Label>강의실</Label>
-            <Input
-              value={formData.classroom}
-              onChange={(value) => handleInputChange('classroom', value)}
-              placeholder="강의실을 입력하세요"
-            />
-          </div>
+    <>
+      <div className="w-full h-screen flex flex-col">
+        <div className="flex items-center justify-between gap-4 p-6">
+          <Title>{isEdit ? '개설 교과목 수정' : '새 개설 교과목 추가'}</Title>
+          <Link to="/admin/courses/offering">
+            <Button variant="delete" size="md" radius="md">
+              나가기
+            </Button>
+          </Link>
         </div>
 
-        <div>
-          <Label>강의계획서 URL</Label>
-          <Input
-            type="url"
-            value={formData.syllabusUrl}
-            onChange={(value) => handleInputChange('syllabusUrl', value)}
-            placeholder="강의계획서 URL을 입력하세요"
-          />
+        <div className="flex-1 overflow-auto p-6 bg-gray-50">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {!isEdit && (
+                  <div>
+                    <Label required={true} className="mb-2">
+                      마스터 교과목
+                    </Label>
+                    <SearchableDropdown
+                      options={masters.map(master => ({
+                        value: master.id,
+                        label: `${master.courseCode} - ${master.subjectName}`,
+                      }))}
+                      value={formData.masterId}
+                      onChange={value =>
+                        setFormData({ ...formData, masterId: value })
+                      }
+                      onSearch={searchMasters}
+                      placeholder="교과목명 또는 코드로 검색하세요"
+                      loading={masterLoading}
+                      size="lg"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <Label required={true} className="mb-2">
+                    개설년도
+                  </Label>
+                  <Input
+                    type="number"
+                    value={formData.year.toString()}
+                    onChange={value =>
+                      setFormData({ ...formData, year: parseInt(value) || new Date().getFullYear() })
+                    }
+                    placeholder="개설년도를 입력하세요"
+                    className="w-full"
+                    size="lg"
+                  />
+                </div>
+
+                <div>
+                  <Label required={true} className="mb-2">
+                    학기
+                  </Label>
+                  <Dropdown
+                    options={semesterOptions}
+                    value={formData.semester}
+                    onChange={value =>
+                      setFormData({ ...formData, semester: value })
+                    }
+                    placeholder="학기를 선택해주세요."
+                    size="lg"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <Label className="mb-2" optional={true}>
+                    수업시간
+                  </Label>
+                  <Input
+                    type="text"
+                    value={formData.classTime}
+                    onChange={value =>
+                      setFormData({ ...formData, classTime: value })
+                    }
+                    placeholder="예: 월 09:00-12:00"
+                    className="w-full"
+                    size="lg"
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2" optional={true}>
+                    담당교원
+                  </Label>
+                  <Input
+                    type="text"
+                    value={formData.instructor}
+                    onChange={value => setFormData({ ...formData, instructor: value })}
+                    placeholder="담당교원명을 입력하세요"
+                    className="w-full"
+                    size="lg"
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2" optional={true}>
+                    강의실
+                  </Label>
+                  <Input
+                    type="text"
+                    value={formData.classroom}
+                    onChange={value =>
+                      setFormData({ ...formData, classroom: value })
+                    }
+                    placeholder="강의실을 입력하세요"
+                    className="w-full"
+                    size="lg"
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2" optional={true}>
+                    강의계획서 파일
+                  </Label>
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        try {
+                          const result = await upload(file, false) // S3만 업로드
+                          setFormData({ ...formData, syllabusUrl: result.publicUrl || '' })
+                        } catch (error) {
+                          // 에러는 useFileUpload에서 처리
+                        }
+                      }
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md text-body-14-regular text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
+                  />
+                  {fileUploading && (
+                    <p className="mt-2 text-caption-14 text-gray-600">
+                      업로드 중...
+                    </p>
+                  )}
+                  {fileResult?.publicUrl && (
+                    <p className="mt-2 text-caption-14 text-green-600">
+                      파일이 업로드되었습니다.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </form>
         </div>
 
-        <div className="flex space-x-3">
+        <div className="flex gap-4 justify-end p-6 bg-white flex-shrink-0">
+          <Link to="/admin/courses/offering">
+            <Button variant="cancel" size="lg" radius="md">
+              취소
+            </Button>
+          </Link>
           <Button
-            type="button"
-            onClick={() => navigate('/admin/courses')}
-            variant="cancel"
+            onClick={handleButtonSubmit}
+            variant="info"
+            size="lg"
+            radius="md"
             disabled={loading}
           >
-            취소
-          </Button>
-          <Button type="submit" disabled={loading}>
-            {loading ? '생성 중...' : '생성'}
+            {loading ? <LoadingSpinner size="md" /> : isEdit ? '개설 교과목 수정' : '개설 교과목 생성'}
           </Button>
         </div>
-      </form>
-    </div>
+      </div>
+
+      <ExitWarningModal
+        isOpen={exitWarning.showExitModal}
+        onClose={exitWarning.cancelExit}
+        onConfirmExit={exitWarning.confirmExit}
+        onSaveDraft={exitWarning.saveDraftAndExit}
+        showDraftOption={true}
+      />
+    </>
   )
 }

@@ -231,6 +231,11 @@ export const COURSE_ERRORS = {
     message: '해당하는 강의를 찾을 수 없습니다.',
     httpStatus: HttpStatus.NOT_FOUND,
   },
+  COURSE_MASTER_NOT_FOUND: {
+    code: 'COURSE_MASTER_NOT_FOUND',
+    message: '해당하는 마스터 교과목을 찾을 수 없습니다.',
+    httpStatus: HttpStatus.NOT_FOUND,
+  },
   AVAILABLE_ONLY_CSV_FORMAT: {
     code: 'AVAILABLE_ONLY_CSV_FORMAT',
     message: 'CSV 형식의 파일만 업로드할 수 있습니다.',

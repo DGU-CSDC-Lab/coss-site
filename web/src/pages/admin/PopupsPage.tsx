@@ -152,7 +152,7 @@ export default function PopupsPage() {
               <tr>
                 <td
                   colSpan={5}
-                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                  className="px-4 py-8 text-center text-caption-14 text-gray-600"
                 >
                   등록된 팝업이 없습니다.
                 </td>
@@ -165,12 +165,12 @@ export default function PopupsPage() {
                       {popup.title}
                     </div>
                     {popup.content && (
-                      <div className="font-caption-14 text-gray-600 line-clamp-1">
+                      <div className="text-caption-14 text-gray-600 line-clamp-1">
                         {popup.content}
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {new Date(popup.startDate).toLocaleDateString()} ~{' '}
                     {new Date(popup.endDate).toLocaleDateString()}
                   </td>
@@ -185,7 +185,7 @@ export default function PopupsPage() {
                       {popup.isActive ? '활성' : '비활성'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600 whitespace-nowrap">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600 whitespace-nowrap">
                     {new Date(popup.createdAt).toLocaleDateString()}
                   </td>
                   <td className="px-4 py-3">
@@ -245,7 +245,7 @@ export default function PopupsPage() {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-2 font-caption-14 rounded ${
+                  className={`px-3 py-2 text-caption-14 rounded ${
                     currentPage === pageNum
                       ? 'text-pri-500 font-semibold'
                       : 'text-gray-900 hover:text-pri-500'
@@ -262,7 +262,7 @@ export default function PopupsPage() {
               <span className="px-2 text-gray-900">...</span>
               <button
                 onClick={() => setCurrentPage(totalPages)}
-                className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+                className="px-3 py-2 text-caption-14 text-text hover:text-pri-500"
               >
                 {totalPages}
               </button>

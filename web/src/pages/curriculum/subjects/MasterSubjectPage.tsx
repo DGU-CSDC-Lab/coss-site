@@ -207,45 +207,38 @@ export default function MasterSubjectPage() {
           <div className="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-start mb-4">
               <div>
-                <h2 className="text-xl font-semibold text-gray-900">
+                <h2 className="text-body-18-medium text-gray-900">
                   {selectedCourse.subjectName}
                 </h2>
-                <p className="text-sm text-gray-600">
+                <p className="text-caption-14 text-gray-500">
                   {selectedCourse.courseCode} | {selectedCourse.department}
                 </p>
               </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                ✕
-              </button>
             </div>
             
             <div className="space-y-3">
               <div>
-                <h3 className="font-medium text-gray-900 mb-2">교과목 설명</h3>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-body-18-medium text-gray-900 leading-relaxed">
                   {selectedCourse.description || '설명이 없습니다.'}
                 </p>
               </div>
               
               <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                 <div>
-                  <span className="text-sm font-medium text-gray-500">학점:</span>
-                  <span className="ml-2 text-sm text-gray-900">{selectedCourse.credit || '-'}</span>
+                  <span className="text-caption-14 text-gray-500">학점:</span>
+                  <span className="ml-2 text-caption-14 text-gray-900">{selectedCourse.credit || '-'}</span>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-500">수강학년:</span>
-                  <span className="ml-2 text-sm text-gray-900">{selectedCourse.grade || '-'}</span>
+                  <span className="text-caption-14 text-gray-500">수강학년:</span>
+                  <span className="ml-2 text-caption-14 text-gray-900">{selectedCourse.grade || '-'}</span>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-500">강의유형:</span>
-                  <span className="ml-2 text-sm text-gray-900">{selectedCourse.courseType || '-'}</span>
+                  <span className="text-caption-14 text-gray-500">강의유형:</span>
+                  <span className="ml-2 text-caption-14 text-gray-900">{selectedCourse.courseType || '-'}</span>
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-500">학기:</span>
-                  <span className="ml-2 text-sm text-gray-900">{selectedCourse.semester}</span>
+                  <span className="text-caption-14 text-gray-500">학기:</span>
+                  <span className="ml-2 text-caption-14 text-gray-900">{selectedCourse.semester}</span>
                 </div>
               </div>
             </div>
@@ -254,6 +247,8 @@ export default function MasterSubjectPage() {
               <Button
                 onClick={() => setShowModal(false)}
                 variant="cancel"
+                size='md'
+                radius='md'
               >
                 닫기
               </Button>

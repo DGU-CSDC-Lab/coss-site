@@ -92,17 +92,17 @@ export class AuthController {
   }
 
   // 모든 관리자 유저 조회
-  @Get('/user/permissions')
+  @Get('admin/permissions')
   @UseGuards(RoleGuard)
   @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '모든 유저의 관리자 권한 조회' })
-  async getAllUserPermissions(@Request() auth): Promise<UserInfoResponse[]> {
+  async getAllUserPermissions(@Request() auth): Promise<(UserInfoResponse & { createdAt: Date })[]> {
     return this.service.getUserAdmin(auth.user.id)
   }
 
   // 서브 관리자 생성
-  @Post('create-sub-admin')
+  @Post('sub-admin/create')
   @UseGuards(RoleGuard)
   @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
@@ -116,7 +116,7 @@ export class AuthController {
   }
 
   // 관리자 권한 변경
-  @Put('user/permissions')
+  @Put('admin/permissions')
   @UseGuards(RoleGuard)
   @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
@@ -129,7 +129,7 @@ export class AuthController {
   }
 
   // 관리자 제거
-  @Delete('user/permissions/:id')
+  @Delete('admin/:id/permissions')
   @UseGuards(RoleGuard)
   @Roles(UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')

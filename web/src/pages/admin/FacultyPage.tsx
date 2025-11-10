@@ -103,7 +103,7 @@ export default function AdminFacultyPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                  className="px-4 py-8 text-center text-caption-14 text-gray-600"
                 >
                   등록된 교원이 없습니다.
                 </td>
@@ -122,7 +122,7 @@ export default function AdminFacultyPage() {
                           />
                         ) : (
                           <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                            <span className="font-caption-14 text-gray-600">
+                            <span className="text-caption-14 text-gray-600">
                               사진
                             </span>
                           </div>
@@ -133,16 +133,16 @@ export default function AdminFacultyPage() {
                       </span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {member.jobTitle || '-'}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {member.email || '-'}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {member.phoneNumber || '-'}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {member.office || '-'}
                   </td>
                   <td className="px-4 py-3">
@@ -191,7 +191,7 @@ export default function AdminFacultyPage() {
             <button
               key={pageNum}
               onClick={() => setPage(pageNum)}
-              className={`px-3 py-2 font-caption-14 rounded ${
+              className={`px-3 py-2 text-caption-14 rounded ${
                 page === pageNum
                   ? 'text-pri-500 font-semibold'
                   : 'text-gray-900 hover:text-pri-500'
@@ -208,7 +208,7 @@ export default function AdminFacultyPage() {
             <span className="px-2 text-gray-900">...</span>
             <button
               onClick={() => setPage(totalPages)}
-              className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+              className="px-3 py-2 text-caption-14 text-text hover:text-pri-500"
             >
               {totalPages}
             </button>

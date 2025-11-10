@@ -1,40 +1,41 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { historyApi, History, HistoryQuery } from '@/lib/api/history'
+import { coursesApi, CourseMaster, CoursesQuery } from '@/lib/api/courses'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import ConfirmModal from '@/components/common/ConfirmModal'
 import { useAlert } from '@/hooks/useAlert'
 
-export default function AdminHistoryPage() {
-  const [histories, setHistories] = useState<History[]>([])
+export default function AdminCoursesMasterPage() {
+  const [courses, setCourses] = useState<CourseMaster[]>([])
   const [loading, setLoading] = useState(true)
   const [totalPages, setTotalPages] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [totalElements, setTotalElements] = useState(0)
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; history: History | null }>({
+  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; course: CourseMaster | null }>({
     isOpen: false,
-    history: null,
+    course: null,
   })
   const [deleteLoading, setDeleteLoading] = useState(false)
-  const [query, setQuery] = useState<HistoryQuery>({
+  const [query, setQuery] = useState<CoursesQuery>({
     page: 1,
     size: 20,
-    sort: 'desc',
+    sortBy: 'createdAt',
+    sortOrder: 'DESC',
   })
 
   const alert = useAlert()
 
   useEffect(() => {
-    fetchHistories()
+    fetchCourses()
   }, [query])
 
-  const fetchHistories = async () => {
+  const fetchCourses = async () => {
     try {
       setLoading(true)
-      const response = await historyApi.getHistory(query)
-      setHistories(response.items)
+      const response = await coursesApi.getMasters(query)
+      setCourses(response.items)
       setTotalPages(response.meta.totalPages)
       setCurrentPage(response.meta.page)
       setTotalElements(response.meta.totalElements)
@@ -46,14 +47,14 @@ export default function AdminHistoryPage() {
   }
 
   const handleDelete = async () => {
-    if (!deleteModal.history) return
+    if (!deleteModal.course) return
 
     try {
       setDeleteLoading(true)
-      await historyApi.deleteHistory(deleteModal.history.id)
-      alert.success('연혁이 삭제되었습니다.')
-      setDeleteModal({ isOpen: false, history: null })
-      fetchHistories()
+      await coursesApi.deleteMaster(deleteModal.course.id)
+      alert.success('마스터과목이 삭제되었습니다.')
+      setDeleteModal({ isOpen: false, course: null })
+      fetchCourses()
     } catch (error) {
       alert.error((error as Error).message)
     } finally {
@@ -61,24 +62,27 @@ export default function AdminHistoryPage() {
     }
   }
 
-  const formatDate = (year: number, month: number) => {
-    return `${year}년 ${month}월`
-  }
-
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <Title>연혁 관리</Title>
+          <Title>마스터과목 관리</Title>
           <p className="text-body-14 text-gray-600 mt-2">
-            총 {totalElements}개의 연혁이 있습니다.
+            총 {totalElements}개의 마스터과목이 있습니다.
           </p>
         </div>
-        <Link to="/admin/history/create">
-          <Button variant="info" radius="md" size="md">
-            연혁 등록
-          </Button>
-        </Link>
+        <div className="flex gap-2">
+          <Link to="/admin/courses/master/bulk-upload">
+            <Button variant="info" radius="md" size="md">
+              일괄 업로드
+            </Button>
+          </Link>
+          <Link to="/admin/courses/master/create">
+            <Button variant="info" radius="md" size="md">
+              개별 등록
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {loading ? (
@@ -92,13 +96,19 @@ export default function AdminHistoryPage() {
               <thead className="bg-info-50 border-b border-info-100">
                 <tr>
                   <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
-                    날짜
+                    교과목코드
                   </th>
                   <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
-                    제목
+                    교과목명
                   </th>
                   <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
-                    내용
+                    학과
+                  </th>
+                  <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    학점
+                  </th>
+                  <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    학기
                   </th>
                   <th className="px-4 py-3 text-center font-body-18-medium text-gray-900">
                     관리
@@ -106,33 +116,42 @@ export default function AdminHistoryPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {histories.length === 0 ? (
+                {courses.length === 0 ? (
                   <tr>
                     <td
                       colSpan={8}
                       className="px-4 py-8 text-center text-caption-14 text-gray-600"
                     >
-                      등록된 연혁이 없습니다.
+                      등록된 마스터과목이 없습니다.
                     </td>
                   </tr>
                 ) : (
-                  histories.map(history => (
-                    <tr key={history.id} className="hover:bg-gray-50">
+                  courses.map(course => (
+                    <tr key={course.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                        {formatDate(history.year, history.month)}
+                        {course.courseCode}
                       </td>
                       <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                        <div className="font-medium">{history.title}</div>
+                        <div className="font-medium">{course.subjectName}</div>
+                        {course.englishName && (
+                          <div className="text-xs text-gray-500">
+                            {course.englishName}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3 font-body-14-medium text-gray-600">
-                        <div className="max-w-xs truncate">
-                          {history.description}
-                        </div>
+                        {course.department}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex gap-2 justify-center">
+                      <td className="px-4 py-3 font-body-14-medium text-gray-600">
+                        {course.credit}학점
+                      </td>
+                      <td className="px-4 py-3 font-body-14-medium text-gray-600">
+                        {course.semester}
+                      </td>
+                      <td className="px-4 py-3 font-body-14-medium text-gray-600">
+                        <div className="flex items-center justify-end gap-2">
                           <Link
-                            to={`/admin/history/edit/${history.id}`}
+                            to={`/admin/courses/master/edit/${course.id}`}
                             className="text-indigo-600 hover:text-indigo-900 p-1"
                           >
                             <Button variant="unstyled" size="sm" radius="md">
@@ -144,7 +163,7 @@ export default function AdminHistoryPage() {
                             size="sm"
                             radius="md"
                             onClick={() =>
-                              setDeleteModal({ isOpen: true, history })
+                              setDeleteModal({ isOpen: true, course })
                             }
                           >
                             삭제
@@ -223,10 +242,10 @@ export default function AdminHistoryPage() {
 
       <ConfirmModal
         isOpen={deleteModal.isOpen}
-        onClose={() => setDeleteModal({ isOpen: false, history: null })}
+        onClose={() => setDeleteModal({ isOpen: false, course: null })}
         onConfirm={handleDelete}
-        title="연혁 삭제"
-        message={`"${deleteModal.history?.title}" 연혁을 삭제하시겠습니까?`}
+        title="마스터과목 삭제"
+        message={`"${deleteModal.course?.subjectName}" 마스터과목을 삭제하시겠습니까?`}
         warningMessage="삭제된 데이터는 복구할 수 없습니다."
         confirmText="삭제"
         loading={deleteLoading}

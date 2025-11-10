@@ -131,7 +131,7 @@ export default function HeaderAssetsPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                  className="px-4 py-8 text-center text-caption-14 text-gray-600"
                 >
                   등록된 헤더 배너가 없습니다.
                 </td>
@@ -154,7 +154,7 @@ export default function HeaderAssetsPage() {
                     </div>
                   </td>
                   <td className="px-4 py-3">
-                    <div className="font-caption-14 text-gray-600 max-w-xs truncate">
+                    <div className="text-caption-14 text-gray-600 max-w-xs truncate">
                       {asset.linkUrl || '-'}
                     </div>
                   </td>
@@ -169,7 +169,7 @@ export default function HeaderAssetsPage() {
                       {asset.isActive ? '활성' : '비활성'}
                     </span>
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600 whitespace-nowrap">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600 whitespace-nowrap">
                     {new Date(asset.createdAt).toLocaleDateString('ko-KR')}
                   </td>
                   <td className="px-4 py-3">
@@ -229,7 +229,7 @@ export default function HeaderAssetsPage() {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-2 font-caption-14 rounded ${
+                  className={`px-3 py-2 text-caption-14 rounded ${
                     currentPage === pageNum
                       ? 'text-pri-500 font-semibold'
                       : 'text-gray-900 hover:text-pri-500'
@@ -246,7 +246,7 @@ export default function HeaderAssetsPage() {
               <span className="px-2 text-gray-900">...</span>
               <button
                 onClick={() => setCurrentPage(totalPages)}
-                className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+                className="px-3 py-2 text-caption-14 text-text hover:text-pri-500"
               >
                 {totalPages}
               </button>

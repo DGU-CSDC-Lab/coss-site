@@ -240,7 +240,7 @@ export default function AdminPostsPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                  className="px-4 py-8 text-center text-caption-14 text-gray-600"
                 >
                   게시글이 없습니다.
                 </td>
@@ -338,7 +338,7 @@ export default function AdminPostsPage() {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-2 font-caption-14 rounded ${
+                  className={`px-3 py-2 text-caption-14 rounded ${
                     currentPage === pageNum
                       ? 'text-pri-500 font-semibold'
                       : 'text-gray-900 hover:text-pri-500'
@@ -356,7 +356,7 @@ export default function AdminPostsPage() {
             <span className="px-2 text-gray-900">...</span>
             <button
               onClick={() => setCurrentPage(posts.meta?.totalPages || 1)}
-              className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+              className="px-3 py-2 text-caption-14 text-text hover:text-pri-500"
             >
               {posts.meta?.totalPages}
             </button>

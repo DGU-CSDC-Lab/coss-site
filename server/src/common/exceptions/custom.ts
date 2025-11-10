@@ -275,6 +275,12 @@ export class CourseException extends BaseDomainException {
     return new CourseException(COURSE_ERRORS.COURSE_NOT_FOUND, { courseId });
   }
 
+  static courseMasterNotFound(masterId: string) {
+    return new CourseException(COURSE_ERRORS.COURSE_MASTER_NOT_FOUND, {
+      masterId,
+    });
+  }
+
   static availableOnlyCsvFormat() {
     return new CourseException(COURSE_ERRORS.AVAILABLE_ONLY_CSV_FORMAT);
   }

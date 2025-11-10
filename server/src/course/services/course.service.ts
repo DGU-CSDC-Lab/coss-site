@@ -59,7 +59,7 @@ export class CourseService {
     const {
       semester,
       department,
-      name,
+      subjectName,
       code,
       grade,
       sortBy = 'createdAt',
@@ -88,12 +88,16 @@ export class CourseService {
         });
         this.logger.debug(`Added department filter: ${department}`);
       }
-      if (name) {
-        queryBuilder.andWhere('course.name LIKE :name', { name: `%${name}%` });
-        this.logger.debug(`Added name filter: ${name}`);
+      if (subjectName) {
+        queryBuilder.andWhere('course.subjectName LIKE :subjectName', {
+          subjectName: `%${subjectName}%`,
+        });
+        this.logger.debug(`Added subjectName filter: ${subjectName}`);
       }
       if (code) {
-        queryBuilder.andWhere('course.code LIKE :code', { code: `%${code}%` });
+        queryBuilder.andWhere('course.courseCode LIKE :code', {
+          code: `%${code}%`,
+        });
         this.logger.debug(`Added code filter: ${code}`);
       }
       if (grade) {
@@ -150,7 +154,7 @@ export class CourseService {
       year,
       semester,
       department,
-      name,
+      subjectName,
       code,
       grade,
       sortBy = 'createdAt',
@@ -167,7 +171,7 @@ export class CourseService {
       // QueryBuilder를 사용하여 동적 검색 조건 구성
       const queryBuilder = this.courseOfferingRepository
         .createQueryBuilder('offering')
-        .leftJoinAndSelect('offering.master', 'master'); // CourseMaster JOIN
+        .innerJoinAndSelect('offering.master', 'master'); // CourseMaster INNER JOIN (master가 없는 레코드 제외)
 
       // 다양한 필터링 조건 적용
       if (year) {
@@ -179,21 +183,31 @@ export class CourseService {
         this.logger.debug(`Added semester filter: ${semester}`);
       }
       if (department) {
-        queryBuilder.andWhere('offering.department LIKE :department', {
+        queryBuilder.andWhere('offering.master.department LIKE :department', {
           department: `%${department}%`,
         });
         this.logger.debug(`Added department filter: ${department}`);
       }
-      if (name) {
-        queryBuilder.andWhere('course.name LIKE :name', { name: `%${name}%` });
-        this.logger.debug(`Added name filter: ${name}`);
+      if (subjectName) {
+        queryBuilder.andWhere('offering.master.subjectName LIKE :subjectName', {
+          subjectName: `%${subjectName}%`,
+        });
+        this.logger.debug(`Added subjectName filter: ${subjectName}`);
+      }
+      if (subjectName) {
+        queryBuilder.andWhere('offering.master.subjectName LIKE :subjectName', {
+          subjectName: `%${subjectName}%`,
+        });
+        this.logger.debug(`Added subjectName filter: ${subjectName}`);
       }
       if (code) {
-        queryBuilder.andWhere('course.code LIKE :code', { code: `%${code}%` });
+        queryBuilder.andWhere('offering.master.courseCode LIKE :code', {
+          code: `%${code}%`,
+        });
         this.logger.debug(`Added code filter: ${code}`);
       }
       if (grade) {
-        queryBuilder.andWhere('course.grade LIKE :grade', {
+        queryBuilder.andWhere('offering.master.grade LIKE :grade', {
           grade: `%${grade}%`,
         });
         this.logger.debug(`Added grade filter: ${grade}`);
@@ -210,12 +224,17 @@ export class CourseService {
         .take(size) // 페이지네이션: 가져올 항목 수
         .getManyAndCount(); // 데이터와 총 개수를 함께 조회
 
-      this.logger.debug(
-        `Found ${courses.length} courses out of ${totalElements} total`,
-      );
+      // master가 null인 경우 로깅
+      const nullMaster = courses.filter(c => !c.master);
+      if (nullMaster.length > 0) {
+        this.logger.warn(
+          `Found ${nullMaster.length} offerings with null master`,
+        );
+      }
 
-      // 엔티티를 응답 DTO로 변환하고 페이지네이션 정보와 함께 반환
-      const items = courses.map(this.toResponseOffering);
+      // null-safe 변환
+      const items = courses.map(offering => this.toResponseOffering(offering));
+
       return new PagedResponse(items, page, size, totalElements);
     } catch (error) {
       this.logger.error('Error finding courses', error.stack);
@@ -230,7 +249,7 @@ export class CourseService {
     const fieldMap: { [key: string]: string } = {
       name: 'course.name',
       code: 'course.code',
-      department: 'course.department', 
+      department: 'course.department',
       grade: 'course.grade',
       credit: 'course.credit',
       createdAt: 'course.createdAt',
@@ -246,7 +265,7 @@ export class CourseService {
       name: 'master.name',
       code: 'master.code',
       department: 'master.department',
-      grade: 'master.grade', 
+      grade: 'master.grade',
       credit: 'master.credit',
       createdAt: 'offering.createdAt',
     };
@@ -267,6 +286,7 @@ export class CourseService {
       // ID로 교과목 조회
       const course = await this.courseOfferingRepository.findOne({
         where: { id },
+        relations: ['master'], // master 관계 포함
       });
       if (!course) {
         this.logger.warn(`Course not found: ${id}`);
@@ -274,7 +294,7 @@ export class CourseService {
       }
 
       this.logger.debug(
-        `Found course: ${course.master.subjectName} (${course.master.courseCode})`,
+        `Found course: ${course.master?.subjectName || 'N/A'} (${course.master?.courseCode || 'N/A'})`,
       );
       return this.toResponseOffering(course);
     } catch (error) {
@@ -334,9 +354,19 @@ export class CourseService {
     this.logger.debug(
       `Creating course: ${createDto.masterId} (${createDto.year} ${createDto.semester})`,
     );
+
+    const master = await this.courseMasterRepository.findOne({
+      where: { id: createDto.masterId },
+    });
+    if (!master) {
+      this.logger.warn(`Master course not found: ${createDto.masterId}`);
+      throw CourseException.courseMasterNotFound(createDto.masterId);
+    }
+
     try {
       // DTO 필드명을 엔티티 필드명으로 매핑하여 교과목 엔티티 생성
       const course = this.courseOfferingRepository.create({
+        master: master,
         year: createDto.year,
         semester: createDto.semester,
         classTime: createDto.classTime, // DTO의 classTime -> 엔티티의 classTime
@@ -388,7 +418,10 @@ export class CourseService {
 
       // 변경사항 로깅
       const changes: string[] = [];
-      if (updateDto.subjectName && updateDto.subjectName !== course.subjectName) {
+      if (
+        updateDto.subjectName &&
+        updateDto.subjectName !== course.subjectName
+      ) {
         changes.push(`name: ${course.subjectName} → ${updateDto.subjectName}`);
       }
       if (updateDto.courseCode && updateDto.courseCode !== course.courseCode) {
@@ -675,7 +708,7 @@ export class CourseService {
     }
   }
 
-    /**
+  /**
    * 교과목 정보 삭제
    *
    * @param id 삭제할 교과목 ID
@@ -688,6 +721,7 @@ export class CourseService {
       // 삭제할 교과목 존재 여부 확인
       const course = await this.courseOfferingRepository.findOne({
         where: { id },
+        relations: ['master'],
       });
       if (!course) {
         this.logger.warn(`Course not found for deletion: ${id}`);
@@ -709,7 +743,6 @@ export class CourseService {
       throw CommonException.internalServerError(error.message);
     }
   }
-
 
   /**
    * CSV 파일을 통한 교과목 일괄 업로드
@@ -923,6 +956,30 @@ export class CourseService {
    * @private 내부에서만 사용하는 유틸리티 메서드
    */
   private toResponseOffering(course: CourseOffering): CourseOfferingResponse {
+    // master가 null인 경우 처리
+    if (!course.master) {
+      this.logger.warn(`Course offering ${course.id} has no associated master course`);
+      return {
+        id: course.id,
+        year: course.year,
+        semester: course.semester,
+        department: 'N/A',
+        courseCode: 'N/A',
+        subjectName: 'N/A',
+        englishName: null,
+        description: 'Master course not found',
+        grade: null,
+        credit: null,
+        classTime: course.classTime,
+        instructor: course.instructor,
+        classroom: course.classroom,
+        syllabusUrl: course.syllabusUrl,
+        courseType: null,
+        createdAt: course.createdAt,
+        updatedAt: course.updatedAt,
+      };
+    }
+
     return {
       id: course.id,
       year: course.year, // 연도
@@ -937,7 +994,7 @@ export class CourseService {
       classTime: course.classTime, // 엔티티의 time -> DTO의 classTime
       instructor: course.instructor, // 담당교수
       classroom: course.classroom, // 강의실
-      courseType: course.master.courseType, // 교과목 유형
+      courseType: course.master.courseType ?? null, // 교과목 유형
       syllabusUrl: course.syllabusUrl, // 강의계획서 URL
       createdAt: course.createdAt, // 생성일시
       updatedAt: course.updatedAt, // 수정일시

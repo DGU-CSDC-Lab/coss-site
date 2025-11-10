@@ -38,7 +38,7 @@ export interface CourseOffering {
 }
 
 export interface CoursesQuery {
-  name?: string // 교과목명 검색
+  subjectName?: string // 교과목명 검색 (서버 컬럼명)
   department?: string // 학과명 검색
   code?: string // 교과목 코드 검색
   grade?: string // 학년 검색

@@ -175,7 +175,7 @@ export default function AdminSchedulesPage() {
             placeholder="일정명 검색"
             value={search}
             onChange={setSearch}
-            className="px-3 py-2 border border-gray-300 rounded-md font-caption-14 w-40"
+            className="px-3 py-2 border border-gray-300 rounded-md text-caption-14 w-40"
           />
           <Button
             variant="point_2"
@@ -220,7 +220,7 @@ export default function AdminSchedulesPage() {
               <tr>
                 <td
                   colSpan={6}
-                  className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                  className="px-4 py-8 text-center text-caption-14 text-gray-600"
                 >
                   등록된 일정이 없습니다.
                 </td>
@@ -234,24 +234,24 @@ export default function AdminSchedulesPage() {
                         {schedule.title}
                       </span>
                       {schedule.description && (
-                        <span className="font-caption-14 text-gray-600">
+                        <span className="text-caption-14 text-gray-600">
                           {schedule.description}
                         </span>
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {schedule.category || '-'}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {new Date(schedule.startDate).toLocaleDateString('ko-KR')}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {schedule.endDate
                       ? new Date(schedule.endDate).toLocaleDateString('ko-KR')
                       : '-'}
                   </td>
-                  <td className="px-4 py-3 font-caption-14 text-gray-600">
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {schedule.location || '-'}
                   </td>
                   <td className="px-4 py-3">
@@ -305,7 +305,7 @@ export default function AdminSchedulesPage() {
                 <button
                   key={pageNum}
                   onClick={() => setCurrentPage(pageNum)}
-                  className={`px-3 py-2 font-caption-14 rounded ${
+                  className={`px-3 py-2 text-caption-14 rounded ${
                     currentPage === pageNum
                       ? 'text-pri-500 font-semibold'
                       : 'text-gray-900 hover:text-pri-500'
@@ -323,7 +323,7 @@ export default function AdminSchedulesPage() {
             <span className="px-2 text-gray-900">...</span>
             <button
               onClick={() => setCurrentPage(schedules.meta.totalPages)}
-              className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+              className="px-3 py-2 text-caption-14 text-text hover:text-pri-500"
             >
               {schedules.meta.totalPages}
             </button>

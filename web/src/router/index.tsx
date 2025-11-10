@@ -43,15 +43,20 @@ import AdminPostsPage from '@/pages/admin/PostsPage'
 import AdminPostsCreatePage from '@/pages/admin/posts/CreatePage'
 import AdminSchedulesPage from '@/pages/admin/SchedulesPage'
 import AdminSchedulesCreatePage from '@/pages/admin/schedules/CreatePage'
-import AdminCoursesPage from '@/pages/admin/CoursesPage'
-import AdminCoursesCreatePage from '@/pages/admin/courses/master/CreatePage'
-import AdminCoursesBulkUploadPage from '@/pages/admin/courses/master/BulkUploadPage'
+import AdminCoursesOfferingPage from '@/pages/admin/CoursesOfferingPage'
+import AdminCoursesMasterCreatePage from '@/pages/admin/courses/master/CreatePage'
+import AdminCoursesOfferingCreatePage from '@/pages/admin/courses/offering/CreatePage'
+import AdminCoursesMasterBulkUploadPage from '@/pages/admin/courses/master/BulkUploadPage'
+import AdminCoursesOfferingBulkUploadPage from '@/pages/admin/courses/offering/BulkUploadPage'
 import AdminPopupsPage from '@/pages/admin/PopupsPage'
 import AdminPopupsCreatePage from '@/pages/admin/popups/CreatePage'
 import AdminHeaderAssetsPage from '@/pages/admin/HeaderAssetsPage'
 import AdminHeaderAssetsCreatePage from '@/pages/admin/header-assets/CreatePage'
 import AdminHistoryPage from '@/pages/admin/HistoryPage'
 import AdminHistoryCreatePage from '@/pages/admin/history/CreatePage'
+import AdminCoursesMasterPage from '@/pages/admin/CoursesMasterPage'
+import AdminUsersPage from '@/pages/admin/UsersPage'
+import AdminUsersCreatePage from '@/pages/admin/users/CreatePage'
 
 export const router = createBrowserRouter([
   {
@@ -197,20 +202,44 @@ export const router = createBrowserRouter([
         element: <AdminSchedulesCreatePage />,
       },
       {
-        path: 'admin/courses',
-        element: <AdminCoursesPage />,
+        path: 'admin/courses/offering',
+        element: <AdminCoursesOfferingPage />,
       },
       {
-        path: 'admin/courses/create',
-        element: <AdminCoursesCreatePage />,
+        path: 'admin/courses/offering/create',
+        element: <AdminCoursesOfferingCreatePage />,
       },
       {
-        path: 'admin/courses/:id',
-        element: <AdminCoursesCreatePage />,
+        path: 'admin/courses/offering/edit/:id',
+        element: <AdminCoursesOfferingCreatePage />,
       },
       {
-        path: 'admin/courses/bulk-upload',
-        element: <AdminCoursesBulkUploadPage />,
+        path: 'admin/courses/offering/bulk-upload',
+        element: <AdminCoursesOfferingBulkUploadPage />,
+      },
+      {
+        path: 'admin/courses/master',
+        element: <AdminCoursesMasterPage />,
+      },
+      {
+        path: 'admin/courses/master/create',
+        element: <AdminCoursesMasterCreatePage />,
+      },
+      {
+        path: 'admin/courses/master/edit/:id',
+        element: <AdminCoursesMasterCreatePage />,
+      },
+      {
+        path: 'admin/courses/master/bulk-upload',
+        element: <AdminCoursesMasterBulkUploadPage />,
+      },
+      {
+        path: 'admin/users',
+        element: <AdminUsersPage />,
+      },
+      {
+        path: 'admin/users/create',
+        element: <AdminUsersCreatePage />,
       },
       {
         path: 'admin/popups',

@@ -344,7 +344,7 @@ export class AuthService {
   // 5.1. 모든 유저의 관리자 권한 조회
   @UseGuards(RoleGuard)
   @Roles(UserRole.ADMIN)
-  async getUserAdmin(userId: string): Promise<UserInfoResponse[]> {
+  async getUserAdmin(userId: string): Promise<(UserInfoResponse & { createdAt: Date })[]> {
     try {
       this.logger.debug(`Admin user list request by: ${userId}`);
 
@@ -361,6 +361,7 @@ export class AuthService {
         email: user.account.email,
         username: user.username,
         role: user.role,
+        createdAt: user.createdAt,
       }));
     } catch (error) {
       this.logger.error(
@@ -436,19 +437,19 @@ export class AuthService {
     try {
       this.logger.log(`Set user permission request: ${userId}`);
 
-      const user = await this.userRepository.findOne({ where: { id: userId } });
+      const user = await this.userRepository.findOne({ where: { id: request.userId } });
       if (!user) {
         this.logger.warn(
-          `Set user permission failed - user not found: ${userId}`,
+          `Set user permission failed - user not found: ${request.userId}`,
         );
-        throw AuthException.notFoundUser(userId);
+        throw AuthException.notFoundUser(request.userId);
       }
 
       user.role = request.permission as UserRole;
       await this.userRepository.save(user);
 
       this.logger.log(
-        `User permission updated: ${userId} to role ${request.permission}`,
+        `User permission updated: ${request.userId} to role ${request.permission}`,
       );
     } catch (error) {
       this.logger.error(
