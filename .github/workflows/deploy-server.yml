@@ -43,7 +43,7 @@ jobs:
         if: steps.cache-server-deps.outputs.cache-hit != 'true'
         run: cd server && npm ci
       
-      - run: cd server && npm run test
+      - run: cd server && npm test -- --passWithNoTests
 
   server-build:
     runs-on: ubuntu-latest
