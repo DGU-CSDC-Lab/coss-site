@@ -18,6 +18,7 @@ export interface Post {
   categoryName: string
   categorySlug: string
   author: string
+  authorId: string
   viewCount: number
   status: 'draft' | 'private' | 'public'
   thumbnailUrl: string

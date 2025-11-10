@@ -432,7 +432,7 @@ export class BoardService {
         where: { id: post.author.id },
       });
 
-      if (user.role !== UserRole.SUPER_ADMIN && post.author.id !== user.id) {
+      if ((user.role !== UserRole.SUPER_ADMIN && user.role !== UserRole.ADMINISTRATOR) && post.author.id !== user.id) {
         this.logger.error(
           `Cannot change SUPER_ADMIN's post to DRAFT: ${id}`,
         );
@@ -526,6 +526,7 @@ export class BoardService {
       categoryName: categoryName,
       categorySlug: categorySlug,
       author: authorName,
+      authorId: post.author.id,
       viewCount: post.viewCount,
       status: post.status,
       thumbnailUrl: post.thumbnailUrl ? this.s3Service.getFileUrl(post.thumbnailUrl) : null,
@@ -559,6 +560,7 @@ export class BoardService {
       categoryName: categoryName,
       categorySlug: categorySlug,
       author: authorName,
+      authorId: post.author.id,
       viewCount: post.viewCount,
       status: post.status,
       thumbnailUrl: post.thumbnailUrl ? this.s3Service.getFileUrl(post.thumbnailUrl) : null,

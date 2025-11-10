@@ -41,7 +41,7 @@ export class CategoryController {
 
   @Post('api/v1/admin/categories')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '카테고리 생성' })
   @ApiResponse({ status: 401, description: '인증 필요' })
@@ -52,7 +52,7 @@ export class CategoryController {
 
   @Put('api/v1/admin/categories/:id')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '카테고리 수정' })
   @ApiResponse({ status: 401, description: '인증 필요' })
@@ -67,7 +67,7 @@ export class CategoryController {
 
   @Delete('api/v1/admin/categories/:id')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '카테고리 삭제' })
   @ApiResponse({ status: 401, description: '인증 필요' })

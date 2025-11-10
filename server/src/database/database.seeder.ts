@@ -54,7 +54,7 @@ export class DatabaseSeeder implements OnModuleInit {
 
     // 이미 관리자 계정이 존재하는지 확인
     const existingAdmin = await userRepository.findOne({
-      where: { role: UserRole.SUPER_ADMIN },
+      where: { role: UserRole.ADMINISTRATOR },
     });
 
     // 존재하면 종료

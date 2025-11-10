@@ -181,6 +181,10 @@ export class AuthException extends BaseDomainException {
   static cannotUpdateSelf() {
     return new AuthException(AUTH_ERRORS.CANNOT_UPDATE_SELF);
   }
+
+  static insufficientPermissions() {
+    return new AuthException(AUTH_ERRORS.INSUFFICIENT_PERMISSIONS);
+  }
 }
 
 // ===== 게시판 도메인 Exception =====

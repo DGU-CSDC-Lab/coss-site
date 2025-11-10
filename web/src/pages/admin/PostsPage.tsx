@@ -11,8 +11,13 @@ import Dropdown from '@/components/common/Dropdown'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import ConfirmModal from '@/components/common/ConfirmModal'
 import { useAlert } from '@/hooks/useAlert'
+import { useAuthStore } from '@/store/auth.store'
+import { canManagePost } from '@/utils/roleDepth'
 
 export default function AdminPostsPage() {
+  const { user, role } = useAuthStore()
+  console.log('Current user role:', role)
+  console.log('Current user ID:', user?.id)
   const [posts, setPosts] = useState<PagedResponse<Post> | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
@@ -31,6 +36,13 @@ export default function AdminPostsPage() {
   })
   const [deleteLoading, setDeleteLoading] = useState(false)
   const alert = useAlert()
+
+  // 권한 체크 함수들
+  const canEditPost = (post: Post) =>
+    canManagePost(role ?? undefined, user?.id, post.authorId)
+
+  const canDeletePost = (post: Post) =>
+    canManagePost(role ?? undefined, user?.id, post.authorId)
 
   useEffect(() => {
     fetchCategories()
@@ -291,16 +303,75 @@ export default function AdminPostsPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex gap-2 justify-center">
-                      <Link to={`/admin/posts/${post.id}`}>
-                        <Button variant="unstyled" size="sm" radius="md">
+                      {/* 수정 버튼 */}
+                      <Link
+                        to={
+                          canManagePost(
+                            role ?? undefined,
+                            user?.id,
+                            post.authorId
+                          )
+                            ? `/admin/posts/${post.id}`
+                            : '#'
+                        }
+                      >
+                        <Button
+                          variant="unstyled"
+                          size="sm"
+                          radius="md"
+                          disabled={
+                            !canManagePost(
+                              role ?? undefined,
+                              user?.id,
+                              post.authorId
+                            )
+                          }
+                          className={
+                            !canManagePost(
+                              role ?? undefined,
+                              user?.id,
+                              post.authorId
+                            )
+                              ? 'opacity-50 cursor-not-allowed'
+                              : ''
+                          }
+                        >
                           수정
                         </Button>
                       </Link>
+
+                      {/* 삭제 버튼 */}
                       <Button
                         variant="delete"
                         size="sm"
                         radius="md"
-                        onClick={() => setDeleteModal({ isOpen: true, post })}
+                        disabled={
+                          !canManagePost(
+                            role ?? undefined,
+                            user?.id,
+                            post.authorId
+                          )
+                        }
+                        className={
+                          !canManagePost(
+                            role ?? undefined,
+                            user?.id,
+                            post.authorId
+                          )
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        }
+                        onClick={() => {
+                          if (
+                            canManagePost(
+                              role ?? undefined,
+                              user?.id,
+                              post.authorId
+                            )
+                          ) {
+                            setDeleteModal({ isOpen: true, post })
+                          }
+                        }}
                       >
                         삭제
                       </Button>

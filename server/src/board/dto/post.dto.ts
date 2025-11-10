@@ -300,6 +300,12 @@ export class PostResponse {
   author: string;
 
   @ApiProperty({
+    description: '작성자 ID',
+    example: 'user-uuid-1234-5678-9012',
+  })
+  authorId: string;
+
+  @ApiProperty({
     description: '조회수',
     example: 125,
   })

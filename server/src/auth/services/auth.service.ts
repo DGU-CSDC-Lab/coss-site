@@ -357,7 +357,7 @@ export class AuthService {
 
       const users = await this.userRepository.find({
         where: {
-          role: In([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
+          role: In([UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR]),
         },
         relations: ['account'],
       });
@@ -383,10 +383,30 @@ export class AuthService {
 
   // 5.2. 관리자 권한을 가진 유저 생성
   async createSubAdmin(
+    requesterId: string,
     request: CreateSubAdminRequest,
   ): Promise<UserInfoResponse> {
     try {
       this.logger.debug(`Create sub admin attempt for email: ${request.email}`);
+
+      // 요청자 권한 확인
+      const requester = await this.userRepository.findOne({
+        where: { id: requesterId },
+      });
+      if (!requester) throw AuthException.notFoundUser(requesterId);
+
+      // 권한 검증
+      const targetRole = request.permission as UserRole;
+      if (requester.role === UserRole.SUPER_ADMIN) {
+        // SUPER_ADMIN은 ADMIN만 생성 가능
+        if (targetRole !== UserRole.ADMIN) {
+          throw AuthException.insufficientPermissions();
+        }
+      } else if (requester.role === UserRole.ADMIN) {
+        // ADMIN은 아무것도 생성 불가
+        throw AuthException.insufficientPermissions();
+      }
+      // ADMINISTRATOR만 SUPER_ADMIN, ADMIN 둘 다 생성 가능
 
       // 이메일 중복 확인 (활성 계정만 체크)
       const existingAccount = await this.accountRepository
@@ -416,7 +436,7 @@ export class AuthService {
       // 사용자 생성 (비밀번호 없이, 최초 로그인 플래그 true)
       const newUser = this.userRepository.create({
         username: request.username,
-        role: UserRole.ADMIN,
+        role: request.permission as UserRole,
         isFirstLogin: true,
       });
       await this.userRepository.save(newUser);
@@ -479,17 +499,36 @@ export class AuthService {
 
   // 5.3. 사용자 권한 변경
   async updateUserPermission(
-    userId: string,
+    requesterId: string,
     request: UpdateUserPermissionRequest,
   ): Promise<void> {
     try {
-      this.logger.log(`Set user permission request: ${userId} -> ${request.userId}`);
+      this.logger.log(`Set user permission request: ${requesterId} -> ${request.userId}`);
 
       // 자기 자신의 권한을 변경하려는 경우 방지
-      if (userId === request.userId) {
-        this.logger.warn(`Set user permission failed - cannot change own permission: ${userId}`);
+      if (requesterId === request.userId) {
+        this.logger.warn(`Set user permission failed - cannot change own permission: ${requesterId}`);
         throw AuthException.cannotUpdateSelf();
       }
+
+      // 요청자 권한 확인
+      const requester = await this.userRepository.findOne({
+        where: { id: requesterId },
+      });
+      if (!requester) throw AuthException.notFoundUser(requesterId);
+
+      // 권한 검증
+      const targetRole = request.permission as UserRole;
+      if (requester.role === UserRole.SUPER_ADMIN) {
+        // SUPER_ADMIN은 ADMIN만 설정 가능
+        if (targetRole !== UserRole.ADMIN) {
+          throw AuthException.insufficientPermissions();
+        }
+      } else if (requester.role === UserRole.ADMIN) {
+        // ADMIN은 아무것도 설정 불가
+        throw AuthException.insufficientPermissions();
+      }
+      // ADMINISTRATOR만 SUPER_ADMIN, ADMIN 둘 다 설정 가능
 
       const user = await this.userRepository.findOne({
         where: { id: request.userId },
@@ -509,7 +548,7 @@ export class AuthService {
       );
     } catch (error) {
       this.logger.error(
-        `Set user permission error for userId: ${userId}`,
+        `Set user permission error for userId: ${requesterId}`,
         error.stack,
       );
       throw CommonException.internalServerError(error.message);
@@ -539,12 +578,8 @@ export class AuthService {
       if (!requester) throw AuthException.notFoundUser(requesterId);
       this.logger.debug(`Requester role: ${requester.role}`);
 
-      if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(requester.role)) {
-        this.logger.warn(
-          `Delete sub admin failed - requester is not admin: ${requester.role}`,
-        );
-        throw AuthException.isNotAdmin(requester.role);
-      }
+      if (!requester) throw AuthException.notFoundUser(requesterId);
+      this.logger.debug(`Requester role: ${requester.role}`);
 
       const target = await this.userRepository.findOne({
         where: { id: targetId },
@@ -554,10 +589,17 @@ export class AuthService {
       if (!target) throw AuthException.notFoundUser(targetId);
       this.logger.debug(`Target user: ${JSON.stringify(target)}`);
 
-      // SUPER_ADMIN은 다른 SUPER_ADMIN 삭제 불가 (보안)
-      if (target.role === UserRole.SUPER_ADMIN) {
-        throw AuthException.cannotDeleteSuperAdmin();
+      // 권한 검증
+      if (requester.role === UserRole.SUPER_ADMIN) {
+        // SUPER_ADMIN은 ADMIN만 삭제 가능
+        if (target.role !== UserRole.ADMIN) {
+          throw AuthException.insufficientPermissions();
+        }
+      } else if (requester.role === UserRole.ADMIN) {
+        // ADMIN은 아무것도 삭제 불가
+        throw AuthException.insufficientPermissions();
       }
+      // ADMINISTRATOR만 SUPER_ADMIN, ADMIN 둘 다 삭제 가능
 
       // 관련 데이터 삭제
       await this.passwordResetTokenRepository.delete({ userId: targetId });

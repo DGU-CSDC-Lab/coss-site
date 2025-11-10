@@ -59,7 +59,7 @@ export class BoardController {
 
   @Get('api/v1/admin/posts')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '관리자 게시글 목록 조회' })
   @ApiResponse({ status: 401, description: '인증 필요' })
@@ -78,7 +78,7 @@ export class BoardController {
 
   @Get('api/v1/admin/posts/:id')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '관리자 게시글 상세 조회' })
   @ApiResponse({ status: 401, description: '인증 필요' })
@@ -90,7 +90,7 @@ export class BoardController {
 
   @Post('api/v1/admin/posts')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '게시글 생성' })
   @ApiResponse({ status: 401, description: '인증 필요' })
@@ -104,7 +104,7 @@ export class BoardController {
 
   @Put('api/v1/admin/posts/:id')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '게시글 수정' })
   @ApiResponse({ status: 401, description: '인증 필요' })
@@ -119,7 +119,7 @@ export class BoardController {
 
   @Delete('api/v1/admin/posts/:id')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '게시글 삭제' })
   @ApiResponse({ status: 401, description: '인증 필요' })

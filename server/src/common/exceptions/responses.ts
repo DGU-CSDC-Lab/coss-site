@@ -145,7 +145,12 @@ export const AUTH_ERRORS = {
     code: 'CANNOT_UPDATE_SELF',
     message: '자기 자신의 권한은 변경할 수 없습니다.',
     httpStatus: HttpStatus.BAD_REQUEST,
-  }
+  },
+  INSUFFICIENT_PERMISSIONS: {
+    code: 'INSUFFICIENT_PERMISSIONS',
+    message: '권한이 부족합니다.',
+    httpStatus: HttpStatus.FORBIDDEN,
+  },
 } as const;
 
 // ===== 게시판 도메인 에러 =====

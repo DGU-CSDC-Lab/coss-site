@@ -4,6 +4,7 @@ import { SoftDeleteEntity } from '@/common/entities';
 
 // 사용자 역할 enum
 export enum UserRole {
+  ADMINISTRATOR = 'ADMINISTRATOR',
   ADMIN = 'ADMIN',
   SUPER_ADMIN = 'SUPER_ADMIN',
   USER = 'USER',

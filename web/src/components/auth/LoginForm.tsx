@@ -45,8 +45,9 @@ export default function LoginForm() {
         {
           id: response.userId,
           email: formData.email,
+          username: "",
         },
-        response.role as 'ADMIN' | 'USER' | null
+        response.role as 'ADMINISTRATOR' | 'SUPER_ADMIN' | 'ADMIN' | null
       )
 
       navigate('/')

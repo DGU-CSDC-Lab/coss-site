@@ -8,15 +8,22 @@ import {
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
-import Dropdown from '@/components/common/Dropdown'
 import ConfirmModal from '@/components/common/ConfirmModal'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthStore } from '@/store/auth.store'
+import {
+  canCreateUser,
+  canUpdateUser,
+  canDeleteUser,
+  ROLE_LABEL,
+  getNextRoles,
+} from '@/utils/roleDepth'
 
 const ROLE_OPTIONS = [
   { value: '', label: '권한 선택' },
   { value: 'ADMIN', label: '관리자' },
-  { value: 'SUPER_ADMIN', label: '최고 관리자' },
+  { value: 'SUPER_ADMIN', label: '중간 관리자' },
+  { value: 'ADMINISTRATOR', label: '최고 관리자' },
 ]
 
 export default function AdminUsersPage() {
@@ -33,7 +40,14 @@ export default function AdminUsersPage() {
   const [deleteLoading, setDeleteLoading] = useState(false)
 
   const alert = useAlert()
-  const { user: currentUser } = useAuthStore()
+  const { user: currentUser, role } = useAuthStore()
+
+  // 권한 체크 함수
+  const createAllowed = canCreateUser(role ?? undefined)
+  const updateAllowed = (targetRole: string) =>
+    canUpdateUser(role ?? undefined, targetRole)
+  const deleteAllowed = (targetRole: string) =>
+    canDeleteUser(role ?? undefined, targetRole)
 
   useEffect(() => {
     fetchUsers()
@@ -99,11 +113,13 @@ export default function AdminUsersPage() {
             총 {users.length}명의 관리자가 있습니다.
           </p>
         </div>
-        <Link to="/admin/users/create">
-          <Button variant="info" radius="md" size="md">
-            관리자 추가
-          </Button>
-        </Link>
+        {createAllowed && (
+          <Link to="/admin/users/create">
+            <Button variant="info" radius="md" size="md">
+              관리자 추가
+            </Button>
+          </Link>
+        )}
       </div>
 
       {loading ? (
@@ -154,56 +170,56 @@ export default function AdminUsersPage() {
                           {user.email}
                         </td>
                         <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
-                          {user.role === 'SUPER_ADMIN' ? (
-                            <Button
-                              variant={user.id === currentUser?.id ? "unstyled" : "info"}
-                              size="sm"
-                              radius="md"
-                              onClick={() => handleRoleChange(user.id, 'ADMIN')}
-                              disabled={
-                                user.role !== 'SUPER_ADMIN' ||
-                                updating === user.id ||
-                                user.id === currentUser?.id
-                              }
-                            >
-                              관리자로 변경
-                            </Button>
+                          {user.id === currentUser?.id ? (
+                            <span className="text-sm text-gray-500">
+                              {ROLE_LABEL[user.role]}
+                            </span>
+                          ) : updateAllowed(user.role) ? (
+                            <>
+                              {getNextRoles(user.role).map(nextRole => (
+                                <Button
+                                  key={nextRole}
+                                  variant={
+                                    updating === user.id ? 'unstyled' : 'info'
+                                  }
+                                  size="sm"
+                                  radius="md"
+                                  onClick={() =>
+                                    handleRoleChange(user.id, nextRole)
+                                  }
+                                  disabled={updating === user.id}
+                                  className="mr-2"
+                                >
+                                  {ROLE_LABEL[nextRole]}({nextRole})로 변경
+                                </Button>
+                              ))}
+                            </>
                           ) : (
-                            <Button
-                              variant={user.id === currentUser?.id ? "unstyled" : "info"}
-                              size="sm"
-                              radius="md"
-                              onClick={() =>
-                                handleRoleChange(user.id, 'SUPER_ADMIN')
-                              }
-                              disabled={
-                                user.role === 'SUPER_ADMIN' ||
-                                updating === user.id ||
-                                user.id === currentUser?.id
-                              }
-                            >
-                              최고 관리자로 변경
-                            </Button>
+                            <span className="text-sm text-gray-500">
+                              {ROLE_LABEL[user.role]}
+                            </span>
                           )}
                         </td>
+
                         <td className="px-4 py-3 font-body-14-medium text-gray-600 whitespace-nowrap">
                           {formatDate(user.createdAt)}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2 justify-center">
-                            {user.role !== 'SUPER_ADMIN' && user.id !== currentUser?.id && (
-                              <Button
-                                variant="delete"
-                                size="sm"
-                                radius="md"
-                                onClick={() =>
-                                  setDeleteModal({ isOpen: true, user })
-                                }
-                                disabled={updating === user.id}
-                              >
-                                삭제
-                              </Button>
-                            )}
+                            {user.id !== currentUser?.id &&
+                              deleteAllowed(user.role) && (
+                                <Button
+                                  variant="delete"
+                                  size="sm"
+                                  radius="md"
+                                  onClick={() =>
+                                    setDeleteModal({ isOpen: true, user })
+                                  }
+                                  disabled={updating === user.id}
+                                >
+                                  삭제
+                                </Button>
+                              )}
                             {updating === user.id && (
                               <LoadingSpinner size="sm" />
                             )}

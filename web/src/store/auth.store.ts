@@ -5,6 +5,7 @@ import { persist } from 'zustand/middleware'
 interface UserInfo {
   id: string
   email: string
+  username?: string
 }
 
 interface AuthState {
@@ -20,10 +21,13 @@ interface AuthState {
   login: (
     tokens: { accessToken: string; refreshToken: string },
     user: UserInfo,
-    role: 'ADMIN' | 'USER' | null
+    role: 'ADMINISTRATOR' | 'SUPER_ADMIN' | 'ADMIN' | null
   ) => void
   logout: () => void
   updateAccessToken: (newToken: string) => void
+  updateRefreshToken: (newToken: string) => void
+  updateRole: (newRole: 'ADMINISTRATOR' | 'SUPER_ADMIN' | 'ADMIN' | null) => void
+  updateUserInfo: (newUserInfo: UserInfo) => void
 }
 
 const isTokenValid = (token: string | null): boolean => {
@@ -76,6 +80,18 @@ export const useAuthStore = create<AuthState>()(
       updateAccessToken: newToken =>
         set({
           accessToken: newToken,
+        }),
+      updateRefreshToken: newToken =>
+        set({
+          refreshToken: newToken,
+        }),
+      updateUserInfo: (newUserInfo: UserInfo) =>
+        set({
+          user: newUserInfo,
+        }),
+      updateRole: newRole =>
+        set({
+          role: newRole,
         }),
     }),
     {

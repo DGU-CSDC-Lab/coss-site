@@ -73,7 +73,7 @@ class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const { accessToken, refreshToken, updateAccessToken, logout } =
+    const { accessToken, refreshToken, updateAccessToken, updateRefreshToken, logout } =
       useAuthStore.getState()
 
     // 1. Access Token이 없으면 Refresh Token으로 갱신 시도
@@ -82,6 +82,7 @@ class ApiClient {
       try {
         const newTokens = await authApi.refresh({ refreshToken })
         updateAccessToken(newTokens.accessToken)
+        updateRefreshToken(newTokens.refreshToken)
         token = newTokens.accessToken
       } catch (err: any) {
         // refresh 자체 실패 → 로그인 페이지로
@@ -113,6 +114,7 @@ class ApiClient {
           try {
             const newTokens = await authApi.refresh({ refreshToken })
             updateAccessToken(newTokens.accessToken)
+            updateRefreshToken(newTokens.refreshToken)
 
             // 새 토큰으로 재시도
             return await this.request<T>(endpoint, {

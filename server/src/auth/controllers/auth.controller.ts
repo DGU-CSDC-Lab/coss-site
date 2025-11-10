@@ -75,14 +75,19 @@ export class AuthController {
   }
 
   @Get('user/info')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '내 정보 조회' })
+  @HttpCode(HttpStatus.OK)
   async getMe(@Request() auth): Promise<UserInfoResponse> {
     return this.service.getUserInfo(auth.user.id);
   }
 
   // 내 정보 수정
   @Put('user/info')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '내 정보 수정' })
   @HttpCode(HttpStatus.OK)
@@ -96,36 +101,40 @@ export class AuthController {
   // 모든 관리자 유저 조회
   @Get('admin/permissions')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '모든 유저의 관리자 권한 조회' })
-  async getAllUserPermissions(@Request() auth): Promise<(UserInfoResponse & { createdAt: Date })[]> {
-    return this.service.getUserAdmin(auth.user.id)
+  async getAllUserPermissions(
+    @Request() auth,
+  ): Promise<(UserInfoResponse & { createdAt: Date })[]> {
+    return this.service.getUserAdmin(auth.user.id);
   }
 
   // 서브 관리자 생성
   @Post('sub-admin/create')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '서브 관리자 생성' })
   @ApiResponse({ status: 409, description: '이미 존재하는 이메일' })
   @HttpCode(HttpStatus.CREATED)
   async createSubAdmin(
+    @Request() auth,
     @Body() request: CreateSubAdminRequest,
   ): Promise<UserInfoResponse> {
-    return this.service.createSubAdmin(request);
+    return this.service.createSubAdmin(auth.user.id, request);
   }
 
   // 관리자 권한 변경
   @Put('admin/permissions')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '사용자 권한 변경' })
   @HttpCode(HttpStatus.OK)
   async updateUserPermission(
-    @Request() auth, @Body() request: UpdateUserPermissionRequest,
+    @Request() auth,
+    @Body() request: UpdateUserPermissionRequest,
   ): Promise<void> {
     return this.service.updateUserPermission(auth.user.id, request);
   }
@@ -133,13 +142,11 @@ export class AuthController {
   // 관리자 제거
   @Delete('admin/:id/permissions')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.SUPER_ADMIN)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '관리자 제거' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  async removeAdmin(
-    @Request() auth, @Param('id') id: string,
-  ): Promise<void> {
+  async removeAdmin(@Request() auth, @Param('id') id: string): Promise<void> {
     return this.service.deleteSubAdmin(auth.user.id, id);
   }
 
@@ -174,8 +181,6 @@ export class AuthController {
   }
 
   @Post('change-password')
-  @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '비밀번호 변경' })
   @ApiResponse({ status: 200, description: '비밀번호 변경 성공' })

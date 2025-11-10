@@ -21,11 +21,11 @@ import { coursesApi } from '@/lib/api/courses'
 import { headerAssetsApi } from '@/lib/api/headerAssets'
 import { popupsApi } from '@/lib/api/popups'
 import { historyApi } from '@/lib/api/history'
-import { useAuthStore } from '@/store/auth.store'
 import Information from '@/components/common/Information'
 import Title from '@/components/common/title/Title'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
+import { useAuthStore } from '@/store'
 
 interface DashboardStats {
   posts: number
@@ -39,8 +39,6 @@ interface DashboardStats {
 }
 
 export default function AdminPage() {
-  const { user, role } = useAuthStore()
-  const isSuperAdmin = role === 'SUPER_ADMIN'
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
@@ -54,6 +52,7 @@ export default function AdminPage() {
     masterCourses: 0,
   })
   const [loading, setLoading] = useState(true)
+  const { user, updateUserInfo, updateRole } = useAuthStore()
 
   const alert = useAlert()
 
@@ -65,17 +64,25 @@ export default function AdminPage() {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const [postsRes, schedulesRes, facultyRes, coursesRes, bannersRes, popupsRes, historyRes, masterCoursesRes] =
-        await Promise.all([
-          postsApi.getAdminPosts({ page: 1, size: 1 }),
-          schedulesApi.getSchedules({ page: 1, size: 1 }),
-          facultyApi.getFaculty({ page: 1, size: 1 }),
-          coursesApi.getOfferings({ page: 1, size: 1 }),
-          headerAssetsApi.getHeaderAssets({ page: 1, size: 1 }),
-          popupsApi.getPopups({ page: 1, size: 1 }),
-          historyApi.getHistory({ page: 1, size: 1 }),
-          coursesApi.getMasters({ page: 1, size: 1 }),
-        ])
+      const [
+        postsRes,
+        schedulesRes,
+        facultyRes,
+        coursesRes,
+        bannersRes,
+        popupsRes,
+        historyRes,
+        masterCoursesRes,
+      ] = await Promise.all([
+        postsApi.getAdminPosts({ page: 1, size: 1 }),
+        schedulesApi.getSchedules({ page: 1, size: 1 }),
+        facultyApi.getFaculty({ page: 1, size: 1 }),
+        coursesApi.getOfferings({ page: 1, size: 1 }),
+        headerAssetsApi.getHeaderAssets({ page: 1, size: 1 }),
+        popupsApi.getPopups({ page: 1, size: 1 }),
+        historyApi.getHistory({ page: 1, size: 1 }),
+        coursesApi.getMasters({ page: 1, size: 1 }),
+      ])
 
       setStats({
         posts: postsRes.meta.totalElements,
@@ -98,6 +105,14 @@ export default function AdminPage() {
     try {
       const userInfoRes = await authApi.getUserInfo()
       setUserInfo(userInfoRes)
+      updateUserInfo({
+        id: userInfoRes.id,
+        email: userInfoRes.email,
+        username: userInfoRes.username,
+      })
+      updateRole(
+        userInfoRes.role as 'ADMIN' | 'SUPER_ADMIN' | 'ADMINISTRATOR' | null
+      )
     } catch (error) {
       alert.error('사용자 정보를 불러오는데 실패했습니다.')
     }
@@ -321,16 +336,28 @@ export default function AdminPage() {
             <div className="space-y-3">
               <div className="p-3 bg-gray-50 rounded-md">
                 <div className="text-caption-12 text-gray-500 mb-1">이메일</div>
-                <div className="text-body-14-medium text-gray-900">{userInfo?.email}</div>
+                <div className="text-body-14-medium text-gray-900">
+                  {userInfo?.email}
+                </div>
               </div>
               <div className="p-3 bg-gray-50 rounded-md">
-                <div className="text-caption-12 text-gray-500 mb-1">사용자명</div>
-                <div className="text-body-14-medium text-gray-900">{userInfo?.username || '사용자'}</div>
+                <div className="text-caption-12 text-gray-500 mb-1">
+                  사용자명
+                </div>
+                <div className="text-body-14-medium text-gray-900">
+                  {userInfo?.username || '사용자'}
+                </div>
               </div>
               <div className="p-3 bg-gray-50 rounded-md">
                 <div className="text-caption-12 text-gray-500 mb-1">권한</div>
                 <div className="text-body-14-medium text-gray-900">
-                  {userInfo?.role === 'SUPER_ADMIN' ? '최고 관리자' : '관리자'}
+                  {userInfo?.role === 'ADMINISTRATOR'
+                    ? '최고 관리자'
+                    : userInfo?.role === 'SUPER_ADMIN'
+                      ? '중간 관리자'
+                      : userInfo?.role === 'ADMIN'
+                        ? '일반 관리자'
+                        : '권한 없음'}
                 </div>
               </div>
               <button
@@ -341,11 +368,14 @@ export default function AdminPage() {
               </button>
             </div>
           </div>
-          
+
           {/* SUPER_ADMIN 전용 섹션 */}
-          {isSuperAdmin && (
+          {(userInfo?.role === 'SUPER_ADMIN' ||
+            userInfo?.role === 'ADMINISTRATOR') && (
             <div className="bg-white border border-gray-100 rounded-md p-4">
-              <div className="text-body-18-medium">{superAdminSection.title}</div>
+              <div className="text-body-18-medium">
+                {superAdminSection.title}
+              </div>
               <div className="h-4"></div>
               <hr className="border-t border-gray-200 mb-4" />
               <ul className="space-y-3">

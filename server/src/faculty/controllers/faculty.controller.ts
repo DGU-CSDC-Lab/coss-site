@@ -49,7 +49,7 @@ export class FacultyController {
 
   @Post('api/v1/admin/faculty')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교수진 생성' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -61,7 +61,7 @@ export class FacultyController {
 
   @Put('api/v1/admin/faculty/:id')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교수진 수정' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -76,7 +76,7 @@ export class FacultyController {
 
   @Delete('api/v1/admin/faculty/:id')
   @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '교수진 삭제' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
