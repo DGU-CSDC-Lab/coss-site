@@ -9,6 +9,7 @@ import {
   UseGuards,
   Put,
   Delete,
+  Param,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -33,6 +34,7 @@ import {
   ChangePasswordRequest,
   CreateSubAdminRequest,
   UpdateUserPermissionRequest,
+  SetPasswordRequest,
 } from '@/auth/dto/auth.dto';
 
 @ApiTags('Authentication')
@@ -136,7 +138,7 @@ export class AuthController {
   @ApiOperation({ summary: '관리자 제거' })
   @HttpCode(HttpStatus.NO_CONTENT)
   async removeAdmin(
-    @Request() auth, @Body('id') id: string,
+    @Request() auth, @Param('id') id: string,
   ): Promise<void> {
     return this.service.deleteSubAdmin(auth.user.id, id);
   }
@@ -172,6 +174,8 @@ export class AuthController {
   }
 
   @Post('change-password')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '비밀번호 변경' })
   @ApiResponse({ status: 200, description: '비밀번호 변경 성공' })
@@ -186,6 +190,18 @@ export class AuthController {
     @Request() auth,
     @Body() request: ChangePasswordRequest,
   ): Promise<void> {
+    console.log('Auth object:', auth); // 디버깅용
+    console.log('Auth user:', auth.user); // 디버깅용
     return this.service.changePassword(auth.user.id, request);
+  }
+
+  // 비밀번호 설정 (최초 로그인)
+  @Post('set-password')
+  @ApiOperation({ summary: '비밀번호 설정 (최초 로그인)' })
+  @ApiResponse({ status: 200, description: '비밀번호 설정 성공' })
+  @ApiResponse({ status: 400, description: '잘못된 토큰' })
+  @HttpCode(HttpStatus.OK)
+  async setPassword(@Body() request: SetPasswordRequest): Promise<void> {
+    return this.service.setPassword(request);
   }
 }

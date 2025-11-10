@@ -4,7 +4,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
-import { Account, User, PendingUser } from '@/auth/entities';
+import { Account, User, PendingUser, PasswordResetToken } from '@/auth/entities';
 import { AuthController } from '@/auth/controllers/auth.controller';
 import { AuthService } from '@/auth/services/auth.service';
 import { VerificationCodeService } from '@/auth/services/verification-code.service';
@@ -16,7 +16,7 @@ import { RoleGuard } from '@/auth/guards/role.guard';
     ConfigModule,
 
     // DB 엔티티 등록
-    TypeOrmModule.forFeature([Account, User, PendingUser]),
+    TypeOrmModule.forFeature([Account, User, PendingUser, PasswordResetToken]),
 
     // Passport 인증 전략 모듈
     PassportModule,

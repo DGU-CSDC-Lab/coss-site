@@ -1,4 +1,4 @@
-import { Injectable, Logger, UseGuards } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
@@ -14,18 +14,20 @@ import {
   RegisterRequest,
   VerifyEmailRequest,
   CreateSubAdminRequest,
+  SetPasswordRequest,
 } from '@/auth/dto/auth.dto';
-import { Account, User, UserRole, PendingUser } from '@/auth/entities';
+import {
+  Account,
+  User,
+  UserRole,
+  PendingUser,
+  PasswordResetToken,
+} from '@/auth/entities';
 import { LoginRequest, LoginResponse } from '@/auth/dto/login.dto';
 import { RefreshTokenRequest } from '@/auth/dto/token.dto';
-import {
-  UserInfoResponse,
-  UpdateUserInfoRequest,
-} from '@/auth/dto/info.dto';
+import { UserInfoResponse, UpdateUserInfoRequest } from '@/auth/dto/info.dto';
 import { UpdateUserPermissionRequest } from '@/auth/dto/auth.dto';
 import { VerificationCodeService } from '@/auth/services/verification-code.service';
-import { RoleGuard } from '../guards/role.guard';
-import { Roles } from '../decorators/roles.decorator';
 
 @Injectable()
 export class AuthService {
@@ -56,6 +58,8 @@ export class AuthService {
     private userRepository: Repository<User>,
     @InjectRepository(PendingUser)
     private pendingUserRepository: Repository<PendingUser>,
+    @InjectRepository(PasswordResetToken)
+    private passwordResetTokenRepository: Repository<PasswordResetToken>,
     private jwtService: JwtService,
     private verificationCodeService: VerificationCodeService,
   ) {
@@ -175,7 +179,9 @@ export class AuthService {
   }
 
   // 1.1. 일반(이메일) 로그인
-  async login(request: LoginRequest): Promise<LoginResponse & { isFirstLogin: boolean }> {
+  async login(
+    request: LoginRequest,
+  ): Promise<LoginResponse & { isFirstLogin: boolean }> {
     try {
       this.logger.debug(`Login attempt for email: ${request.email}`);
 
@@ -307,7 +313,10 @@ export class AuthService {
   }
 
   // 2.3. 사용자 정보 수정
-  async updateUserInfo(userId: string, request: UpdateUserInfoRequest): Promise<UserInfoResponse> {
+  async updateUserInfo(
+    userId: string,
+    request: UpdateUserInfoRequest,
+  ): Promise<UserInfoResponse> {
     try {
       this.logger.debug(`Update user info request: ${userId}`);
 
@@ -316,9 +325,7 @@ export class AuthService {
         relations: ['account'],
       });
       if (!user) {
-        this.logger.warn(
-          `Update user info failed - user not found: ${userId}`,
-        );
+        this.logger.warn(`Update user info failed - user not found: ${userId}`);
         throw AuthException.notFoundUser(userId);
       }
 
@@ -342,9 +349,9 @@ export class AuthService {
   }
 
   // 5.1. 모든 유저의 관리자 권한 조회
-  @UseGuards(RoleGuard)
-  @Roles(UserRole.ADMIN)
-  async getUserAdmin(userId: string): Promise<(UserInfoResponse & { createdAt: Date })[]> {
+  async getUserAdmin(
+    userId: string,
+  ): Promise<(UserInfoResponse & { createdAt: Date })[]> {
     try {
       this.logger.debug(`Admin user list request by: ${userId}`);
 
@@ -356,13 +363,15 @@ export class AuthService {
       });
 
       this.logger.log(`Admin user list retrieved by: ${userId}`);
-      return users.map(user => ({
-        id: user.id,
-        email: user.account.email,
-        username: user.username,
-        role: user.role,
-        createdAt: user.createdAt,
-      }));
+      return users
+        .filter(user => user.account) // account가 null인 사용자 제외
+        .map(user => ({
+          id: user.id,
+          email: user.account.email,
+          username: user.username,
+          role: user.role,
+          createdAt: user.createdAt,
+        }));
     } catch (error) {
       this.logger.error(
         `Admin user list error for userId: ${userId}`,
@@ -373,18 +382,21 @@ export class AuthService {
   }
 
   // 5.2. 관리자 권한을 가진 유저 생성
-  @UseGuards(RoleGuard)
-  @Roles(UserRole.SUPER_ADMIN)
   async createSubAdmin(
     request: CreateSubAdminRequest,
   ): Promise<UserInfoResponse> {
     try {
       this.logger.debug(`Create sub admin attempt for email: ${request.email}`);
 
-      // 이메일 중복 확인
-      const existingAccount = await this.accountRepository.findOne({
-        where: { email: request.email },
-      });
+      // 이메일 중복 확인 (활성 계정만 체크)
+      const existingAccount = await this.accountRepository
+        .createQueryBuilder('account')
+        .leftJoin('account.user', 'user')
+        .where('account.email = :email', { email: request.email })
+        .andWhere('account.deleted_at IS NULL')
+        .andWhere('user.deleted_at IS NULL')
+        .getOne();
+
       if (existingAccount) {
         this.logger.warn(
           `Create sub admin failed - email already exists: ${request.email}`,
@@ -392,52 +404,96 @@ export class AuthService {
         throw AuthException.emailAlreadyExists(request.email);
       }
 
-      // 임시 비밀번호 생성 (8자리 랜덤)
-      const tempPassword = Math.random().toString(36).slice(-8);
-      const passwordHash = await bcrypt.hash(tempPassword, 10);
+      this.logger.debug('Creating token payload...');
+      // 임시 비밀번호 생성 대신 토큰 생성
+      const tokenPayload = {
+        userId: '',
+        email: request.email,
+        type: 'FIRST_LOGIN',
+      };
 
-      // 사용자 생성 (최초 로그인 플래그 true)
+      this.logger.debug('Creating new user...');
+      // 사용자 생성 (비밀번호 없이, 최초 로그인 플래그 true)
       const newUser = this.userRepository.create({
         username: request.username,
         role: UserRole.ADMIN,
         isFirstLogin: true,
       });
       await this.userRepository.save(newUser);
+      this.logger.debug(`User created with ID: ${newUser.id}`);
 
-      // 계정 생성
+      // 토큰에 실제 userId 추가
+      tokenPayload.userId = newUser.id;
+      const token = this.jwtService.sign(tokenPayload, { expiresIn: '24h' });
+      this.logger.debug('JWT token generated');
+
+      this.logger.debug('Creating new account...');
+      // 계정 생성 (비밀번호 해시 없이)
       const newAccount = this.accountRepository.create({
         email: request.email,
-        passwordHash,
-        user: newUser,
+        passwordHash: null, // 비밀번호 설정 전까지 null
       });
       await this.accountRepository.save(newAccount);
+      this.logger.debug(`Account created with ID: ${newAccount.id}`);
+
+      // User에 account 연결
+      newUser.account = newAccount;
+      await this.userRepository.save(newUser);
+      this.logger.debug('User-Account relationship established');
+
+      this.logger.debug('Creating password reset token...');
+      // 토큰 저장
+      const resetToken = this.passwordResetTokenRepository.create({
+        token,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24시간
+        type: 'FIRST_LOGIN',
+        user: newUser,
+        userId: newUser.id,
+      });
+      await this.passwordResetTokenRepository.save(resetToken);
+      this.logger.debug('Password reset token saved');
+
+      // 이메일 발송 (비밀번호 설정 링크)
+      const setPasswordUrl = `${process.env.FRONTEND_URL}/auth/set-password?token=${token}`;
+      await this.sendAdminPasswordSetupEmail(
+        request.email,
+        request.username,
+        setPasswordUrl,
+      );
 
       this.logger.log(`Sub admin created successfully: ${request.email}`);
       return {
         id: newUser.id,
-        email: newAccount.email,
+        email: request.email,
         username: newUser.username,
-        role: newUser.role
+        role: newUser.role,
       };
     } catch (error) {
       this.logger.error(
-        `Create sub admin failed for ${request.email}: ${error.message}`,
+        `Create sub admin failed for ${request?.email || 'unknown'}: ${error.message}`,
+        error.stack,
       );
       throw CommonException.internalServerError(error.message);
     }
   }
 
   // 5.3. 사용자 권한 변경
-  @UseGuards(RoleGuard)
-  @Roles(UserRole.SUPER_ADMIN)
   async updateUserPermission(
     userId: string,
     request: UpdateUserPermissionRequest,
   ): Promise<void> {
     try {
-      this.logger.log(`Set user permission request: ${userId}`);
+      this.logger.log(`Set user permission request: ${userId} -> ${request.userId}`);
 
-      const user = await this.userRepository.findOne({ where: { id: request.userId } });
+      // 자기 자신의 권한을 변경하려는 경우 방지
+      if (userId === request.userId) {
+        this.logger.warn(`Set user permission failed - cannot change own permission: ${userId}`);
+        throw AuthException.cannotUpdateSelf();
+      }
+
+      const user = await this.userRepository.findOne({
+        where: { id: request.userId },
+      });
       if (!user) {
         this.logger.warn(
           `Set user permission failed - user not found: ${request.userId}`,
@@ -461,26 +517,59 @@ export class AuthService {
   }
 
   // 5.4. 하위 관리자 삭제
-  @UseGuards(RoleGuard)
-  @Roles(UserRole.SUPER_ADMIN)
-  async deleteSubAdmin(userId: string, targetId: string): Promise<void> {
+  async deleteSubAdmin(requesterId: string, targetId: string): Promise<void> {
     try {
-      this.logger.log(`Delete sub admin request: ${userId}`);
+      this.logger.log(
+        `Delete sub admin request: ${requesterId} -> ${targetId}`,
+      );
 
-      const user = await this.userRepository.findOne({ where: { id: targetId } });
-      if (!user) {
-        this.logger.warn(`Delete sub admin failed - user not found: ${targetId}`);
-        throw AuthException.notFoundUser(targetId);
-      }
-
-      if (user.role !== UserRole.ADMIN) {
+      // 자기 자신을 삭제하려는 경우 방지
+      if (requesterId === targetId) {
         this.logger.warn(
-          `Delete sub admin failed - user is not an admin: ${targetId}`,
+          `Delete sub admin failed - cannot delete self: ${targetId}`,
         );
-        throw AuthException.isNotAdmin(user.role);
+        throw AuthException.cannotDeleteSelf();
       }
 
-      await this.userRepository.remove(user);
+      const requester = await this.userRepository.findOne({
+        where: { id: requesterId },
+        relations: ['account'],
+      });
+
+      if (!requester) throw AuthException.notFoundUser(requesterId);
+      this.logger.debug(`Requester role: ${requester.role}`);
+
+      if (![UserRole.ADMIN, UserRole.SUPER_ADMIN].includes(requester.role)) {
+        this.logger.warn(
+          `Delete sub admin failed - requester is not admin: ${requester.role}`,
+        );
+        throw AuthException.isNotAdmin(requester.role);
+      }
+
+      const target = await this.userRepository.findOne({
+        where: { id: targetId },
+        relations: ['account'],
+      });
+
+      if (!target) throw AuthException.notFoundUser(targetId);
+      this.logger.debug(`Target user: ${JSON.stringify(target)}`);
+
+      // SUPER_ADMIN은 다른 SUPER_ADMIN 삭제 불가 (보안)
+      if (target.role === UserRole.SUPER_ADMIN) {
+        throw AuthException.cannotDeleteSuperAdmin();
+      }
+
+      // 관련 데이터 삭제
+      await this.passwordResetTokenRepository.delete({ userId: targetId });
+
+      const accountToDelete = target.account;
+      target.account = null;
+      await this.userRepository.save(target);
+      await this.userRepository.remove(target);
+
+      if (accountToDelete) {
+        await this.accountRepository.remove(accountToDelete);
+      }
 
       this.logger.log(`Sub admin deleted successfully: ${targetId}`);
     } catch (error) {
@@ -675,6 +764,120 @@ export class AuthService {
         `Failed to send verification email: ${email} - ${error.message}`,
       );
       throw AuthException.failedCodeSend(email, error.message);
+    }
+  }
+
+  // 관리자 비밀번호 설정 이메일 발송
+  private async sendAdminPasswordSetupEmail(
+    email: string,
+    username: string,
+    setupUrl: string,
+  ): Promise<void> {
+    try {
+      this.logger.debug(`Attempting to send admin setup email to: ${email}`);
+
+      const mailOptions = {
+        from: process.env.FROM_EMAIL,
+        to: email,
+        subject: '[IoT학과] 관리자 계정 비밀번호 설정',
+        html: `
+          <h2>관리자 계정이 생성되었습니다</h2>
+          <p>안녕하세요, <strong>${username}</strong>님</p>
+          <p>IoT학과 관리자 계정이 생성되었습니다.</p>
+          <p>아래 링크를 클릭하여 비밀번호를 설정해주세요:</p>
+          <p><a href="${setupUrl}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">비밀번호 설정하기</a></p>
+          <p>또는 다음 링크를 복사하여 브라우저에 붙여넣으세요:</p>
+          <p>${setupUrl}</p>
+          <p>이 링크는 24시간 후 만료됩니다.</p>
+          <br>
+          <p>감사합니다.</p>
+          <p>IoT학과 관리팀</p>
+        `,
+      };
+
+      this.logger.debug(`Mail options: ${JSON.stringify(mailOptions)}`);
+
+      const result = await this.transporter.sendMail(mailOptions);
+      this.logger.debug(`Email send result: ${JSON.stringify(result)}`);
+      this.logger.log(`Admin password setup email sent successfully: ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send admin setup email: ${email} - ${error.message}`,
+        error.stack,
+      );
+      throw AuthException.failedCodeSend(email, error.message);
+    }
+  }
+
+  // 비밀번호 설정 (최초 로그인)
+  async setPassword(request: SetPasswordRequest): Promise<void> {
+    try {
+      this.logger.debug('Password set attempt');
+
+      // 토큰 검증
+      let payload: any;
+      try {
+        payload = this.jwtService.verify(request.token);
+      } catch (error) {
+        this.logger.error('Invalid Token in Password Set: ', error.stack);
+        throw AuthException.invalidToken();
+      }
+
+      // 토큰 DB에서 확인
+      const resetToken = await this.passwordResetTokenRepository.findOne({
+        where: {
+          token: request.token,
+          isUsed: false,
+          type: 'FIRST_LOGIN',
+        },
+        relations: ['user'],
+      });
+
+      if (!resetToken) {
+        this.logger.warn('Token not found or already used');
+        throw AuthException.invalidToken();
+      }
+
+      // 토큰 만료 확인
+      if (new Date() > resetToken.expiresAt) {
+        this.logger.warn('Token expired for password set');
+        throw AuthException.invalidToken();
+      }
+
+      // 사용자 확인
+      const user = resetToken.user;
+      if (!user || user.id !== payload.userId) {
+        this.logger.warn('User mismatch for password set');
+        throw AuthException.invalidToken();
+      }
+
+      // 비밀번호 해시 생성
+      const passwordHash = await bcrypt.hash(request.password, 10);
+
+      // 계정 업데이트 (비밀번호 설정)
+      await this.accountRepository.update(
+        { user: { id: user.id } },
+        { passwordHash },
+      );
+
+      // 사용자 업데이트 (최초 로그인 플래그 해제)
+      await this.userRepository.update(
+        { id: user.id },
+        { isFirstLogin: false },
+      );
+
+      // 토큰 사용 처리
+      await this.passwordResetTokenRepository.update(
+        { id: resetToken.id },
+        { isUsed: true },
+      );
+
+      this.logger.log(`Password set successfully for user: ${user.id}`);
+    } catch (error) {
+      this.logger.error('Password set error', error.stack);
+      throw error instanceof AuthException
+        ? error
+        : CommonException.internalServerError(error.message);
     }
   }
 }

@@ -69,4 +69,7 @@ export const authApi = {
 
   changePassword: (data: ChangePasswordRequest): Promise<void> =>
     api.auth.post('/auth/change-password', data),
+
+  setPassword: (data: { token: string; password: string }): Promise<void> =>
+    api.post('/auth/set-password', data),
 }

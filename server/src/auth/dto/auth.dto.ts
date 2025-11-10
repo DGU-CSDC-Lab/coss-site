@@ -5,6 +5,8 @@ import {
   MinLength,
   IsNumberString,
   Length,
+  IsNotEmpty,
+  MaxLength,
 } from 'class-validator';
 
 // 이메일 회원가입 DTO
@@ -82,14 +84,23 @@ export class ResetPasswordRequest {
   newPassword: string;
 }
 
-/** 비밀번호 재설정 */
-// 비밀번호 변경 (로그인 필요)
+// 비밀번호 변경 DTO
 export class ChangePasswordRequest {
+  @ApiProperty({
+    description: '현재 비밀번호',
+    example: 'currentPassword123!',
+  })
   @IsString()
+  @IsNotEmpty()
   currentPassword: string;
 
+  @ApiProperty({
+    description: '새 비밀번호',
+    example: 'newPassword123!',
+  })
   @IsString()
-  @MinLength(6)
+  @MinLength(8)
+  @MaxLength(50)
   newPassword: string;
 }
 
@@ -133,3 +144,22 @@ export class UpdateUserPermissionRequest {
   @IsString()
   permission: string;
 } 
+
+export class SetPasswordRequest {
+  @ApiProperty({
+    description: '비밀번호 설정 토큰',
+    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+  })
+  @IsString()
+  @IsNotEmpty()
+  token: string;
+
+  @ApiProperty({
+    description: '새 비밀번호',
+    example: 'newPassword123!',
+  })
+  @IsString()
+  @MinLength(8)
+  @MaxLength(50)
+  password: string;
+}

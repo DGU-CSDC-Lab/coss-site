@@ -131,6 +131,21 @@ export const AUTH_ERRORS = {
     message: '인증번호 검증에 실패했습니다.',
     httpStatus: HttpStatus.BAD_REQUEST,
   },
+  CANNOT_DELETE_SELF: {
+    code: 'CANNOT_DELETE_SELF',
+    message: '자기 자신을 삭제할 수 없습니다.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+  },
+  CANNOT_DELETE_SUPER_ADMIN: {
+    code: 'CANNOT_DELETE_SUPER_ADMIN',
+    message: '슈퍼 관리자는 삭제할 수 없습니다.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+  },
+  CANNOT_UPDATE_SELF: {
+    code: 'CANNOT_UPDATE_SELF',
+    message: '자기 자신의 권한은 변경할 수 없습니다.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+  }
 } as const;
 
 // ===== 게시판 도메인 에러 =====

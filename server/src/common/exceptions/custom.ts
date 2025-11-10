@@ -169,6 +169,18 @@ export class AuthException extends BaseDomainException {
   static verificationCodeExpired() {
     return new AuthException(AUTH_ERRORS.EXPIRED_CODE);
   }
+
+  static cannotDeleteSelf() {
+    return new AuthException(AUTH_ERRORS.CANNOT_DELETE_SELF);
+  }
+
+  static cannotDeleteSuperAdmin() {
+    return new AuthException(AUTH_ERRORS.CANNOT_DELETE_SUPER_ADMIN);
+  }
+
+  static cannotUpdateSelf() {
+    return new AuthException(AUTH_ERRORS.CANNOT_UPDATE_SELF);
+  }
 }
 
 // ===== 게시판 도메인 Exception =====

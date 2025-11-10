@@ -13,6 +13,7 @@ import {
   ShieldCheckIcon,
 } from '@heroicons/react/24/outline'
 import { postsApi } from '@/lib/api/posts'
+import PasswordChangeModal from '@/components/admin/PasswordChangeModal'
 import { schedulesApi } from '@/lib/api/schedules'
 import { facultyApi } from '@/lib/api/faculty'
 import { coursesApi } from '@/lib/api/courses'
@@ -39,6 +40,7 @@ interface DashboardStats {
 export default function AdminPage() {
   const { user, role } = useAuthStore()
   const isSuperAdmin = role === 'SUPER_ADMIN'
+  const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [stats, setStats] = useState<DashboardStats>({
     posts: 0,
     schedules: 0,
@@ -298,6 +300,35 @@ export default function AdminPage() {
               </ul>
             </div>
           ))}
+
+          {/* 계정 관리 섹션 */}
+          <div className="bg-white border border-gray-100 rounded-md p-4">
+            <div className="text-body-18-medium">계정 관리</div>
+            <div className="h-4"></div>
+            <hr className="border-t border-gray-200 mb-4" />
+            <div className="space-y-3">
+              <div className="p-3 bg-gray-50 rounded-md">
+                <div className="text-caption-12 text-gray-500 mb-1">이메일</div>
+                <div className="text-body-14-medium text-gray-900">{user?.email}</div>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-md">
+                <div className="text-caption-12 text-gray-500 mb-1">사용자명</div>
+                <div className="text-body-14-medium text-gray-900">{user?.username || '사용자'}</div>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-md">
+                <div className="text-caption-12 text-gray-500 mb-1">권한</div>
+                <div className="text-body-14-medium text-gray-900">
+                  {role === 'SUPER_ADMIN' ? '최고 관리자' : '관리자'}
+                </div>
+              </div>
+              <button
+                onClick={() => setShowPasswordModal(true)}
+                className="w-full p-2 text-body-14-medium text-pri-600 hover:text-pri-700 hover:bg-pri-50 rounded-md transition-colors"
+              >
+                비밀번호 변경
+              </button>
+            </div>
+          </div>
           
           {/* SUPER_ADMIN 전용 섹션 */}
           {isSuperAdmin && (
@@ -332,6 +363,11 @@ export default function AdminPage() {
           )}
         </div>
       </section>
+
+      <PasswordChangeModal
+        isOpen={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </div>
   )
 }

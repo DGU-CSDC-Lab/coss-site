@@ -10,7 +10,7 @@ export class Account extends SoftDeleteEntity {
   email: string;
 
   // 비밀번호 (해시값으로 저장)
-  @Column({ name: 'password_hash', type: 'varchar', length: 100 })
+  @Column({ name: 'password_hash', type: 'varchar', length: 100, nullable: true })
   passwordHash: string;
 
   // 사용자와의 일대일 관계 설정 (역방향)

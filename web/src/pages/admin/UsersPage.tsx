@@ -11,6 +11,7 @@ import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import Dropdown from '@/components/common/Dropdown'
 import ConfirmModal from '@/components/common/ConfirmModal'
 import { useAlert } from '@/hooks/useAlert'
+import { useAuthStore } from '@/store/auth.store'
 
 const ROLE_OPTIONS = [
   { value: '', label: '권한 선택' },
@@ -22,13 +23,17 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
-  const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; user: AdminUser | null }>({
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean
+    user: AdminUser | null
+  }>({
     isOpen: false,
     user: null,
   })
   const [deleteLoading, setDeleteLoading] = useState(false)
 
   const alert = useAlert()
+  const { user: currentUser } = useAuthStore()
 
   useEffect(() => {
     fetchUsers()
@@ -151,23 +156,31 @@ export default function AdminUsersPage() {
                         <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
                           {user.role === 'SUPER_ADMIN' ? (
                             <Button
-                              variant="info"
+                              variant={user.id === currentUser?.id ? "unstyled" : "info"}
                               size="sm"
                               radius="md"
                               onClick={() => handleRoleChange(user.id, 'ADMIN')}
-                              disabled={user.role !== 'SUPER_ADMIN' || updating === user.id}
+                              disabled={
+                                user.role !== 'SUPER_ADMIN' ||
+                                updating === user.id ||
+                                user.id === currentUser?.id
+                              }
                             >
                               관리자로 변경
                             </Button>
                           ) : (
                             <Button
-                              variant="info"
+                              variant={user.id === currentUser?.id ? "unstyled" : "info"}
                               size="sm"
                               radius="md"
                               onClick={() =>
                                 handleRoleChange(user.id, 'SUPER_ADMIN')
                               }
-                              disabled={user.role === 'SUPER_ADMIN' || updating === user.id}
+                              disabled={
+                                user.role === 'SUPER_ADMIN' ||
+                                updating === user.id ||
+                                user.id === currentUser?.id
+                              }
                             >
                               최고 관리자로 변경
                             </Button>
@@ -178,7 +191,7 @@ export default function AdminUsersPage() {
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2 justify-center">
-                            {user.role !== 'SUPER_ADMIN' && (
+                            {user.role !== 'SUPER_ADMIN' && user.id !== currentUser?.id && (
                               <Button
                                 variant="delete"
                                 size="sm"

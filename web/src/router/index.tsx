@@ -4,6 +4,7 @@ import ConditionalLayout from '@/components/layout/ConditionalLayout'
 // Pages
 import HomePage from '@/pages/HomePage'
 import LoginPage from '@/pages/LoginPage'
+import SetPasswordPage from '@/pages/auth/SetPasswordPage'
 import NotFoundPage from '@/pages/NotFoundPage'
 
 // About pages
@@ -71,6 +72,10 @@ export const router = createBrowserRouter([
       {
         path: 'login',
         element: <LoginPage />,
+      },
+      {
+        path: 'auth/set-password',
+        element: <SetPasswordPage />,
       },
       // About routes
       {

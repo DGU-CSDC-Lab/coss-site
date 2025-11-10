@@ -4,7 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseSeeder } from '@/database/database.seeder';
 
 // Import entities directly from domains
-import { Account, User, PendingUser } from '@/auth/entities';
+import { Account, User, PendingUser, PasswordResetToken } from '@/auth/entities';
 import { BoardPost } from '@/board/entities';
 import { AcademicSchedule } from '@/schedule/entities';
 import { File } from '@/file/entities';
@@ -33,6 +33,7 @@ import { HeaderAsset } from '@/header-asset/entities';
           Account,
           User,
           PendingUser,
+          PasswordResetToken,
           BoardPost,
           AcademicSchedule,
           File,
