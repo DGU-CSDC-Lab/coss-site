@@ -7,7 +7,7 @@ import { Account, User, PendingUser } from '@/auth/entities';
 import { AuthController } from '@/auth/controllers/auth.controller';
 import { AuthService } from '@/auth/services/auth.service';
 import { VerificationCodeService } from '@/auth/services/verification-code.service';
-import { AdminGuard } from '@/auth/guards/admin.guard';
+import { RoleGuard } from '@/auth/guards/role.guard';
 
 const logger = new Logger('AuthModule');
 const jwtSecret = process.env.JWT_SECRET;
@@ -31,7 +31,7 @@ if (!jwtSecret) {
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, VerificationCodeService, AdminGuard],
-  exports: [AdminGuard, JwtModule, TypeOrmModule],
+  providers: [AuthService, VerificationCodeService, RoleGuard],
+  exports: [RoleGuard, JwtModule, TypeOrmModule],
 })
 export class AuthModule {}

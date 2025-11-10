@@ -1,8 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UseGuards } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BoardPost, PostStatus } from '@/board/entities';
-import { User } from '@/auth/entities';
+import { User, UserRole } from '@/auth/entities';
 import { Category } from '@/category/entities';
 import { S3Service } from '@/file/services/s3.service';
 import { FileService } from '@/file/services/file.service';
@@ -18,12 +18,16 @@ import {
 import { PagedResponse } from '@/common/dto/response.dto';
 import { File, OwnerType } from '@/file/entities';
 import { CommonException, PostException } from '@/common/exceptions';
+import { RoleGuard } from '@/auth/guards/role.guard';
+import { Roles } from '@/auth/decorators/roles.decorator';
 
 @Injectable()
 export class BoardService {
   private readonly logger = new Logger(BoardService.name);
 
   constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     @InjectRepository(BoardPost)
     private postRepository: Repository<BoardPost>,
     @InjectRepository(File)
@@ -130,6 +134,8 @@ export class BoardService {
    * @param query 검색 조건 및 페이지 정보 (상태 필터 포함)
    * @returns 페이지네이션된 게시글 목록
    */
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async findAllForAdmin(
     query: AdminPostListQuery,
   ): Promise<PagedResponse<PostResponse>> {
@@ -332,6 +338,8 @@ export class BoardService {
    * @param authorId 작성자 ID
    * @returns 작성된 게시글 상세 정보
    */
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async create(
     createDto: PostCreateRequest,
     authorId: string,
@@ -410,6 +418,8 @@ export class BoardService {
    * @param updateDto 수정할 데이터
    * @returns 수정된 게시글 상세 정보
    */
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   async update(
     id: string,
     updateDto: PostUpdateRequest,
@@ -427,6 +437,19 @@ export class BoardService {
       }
 
       this.logger.debug(`Found post to update: ${post.title}`);
+
+      const user = await this.userRepository.findOne({
+        where: { id: post.author.id },
+      });
+
+      if (user.role !== UserRole.SUPER_ADMIN && post.author.id !== user.id) {
+        this.logger.error(
+          `Cannot change SUPER_ADMIN's post to DRAFT: ${id}`,
+        );
+        throw CommonException.forbidden(
+          `슈퍼 관리자나 글의 작성자만 내용을 수정할 수 있습니다.`,
+        );
+      }
 
       let category = post.category;
 
@@ -472,6 +495,8 @@ export class BoardService {
    * - 게시글 존재 여부 확인 후 삭제 처리
    * @param id 삭제할 게시글 ID
    */
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.SUPER_ADMIN)
   async delete(id: string): Promise<void> {
     try {
       this.logger.log(`Deleting post: ${id}`);

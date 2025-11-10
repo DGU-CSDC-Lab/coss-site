@@ -92,3 +92,44 @@ export class ChangePasswordRequest {
   @MinLength(6)
   newPassword: string;
 }
+
+// 관리자 생성 DTO
+export class CreateSubAdminRequest {
+  @ApiProperty({
+    description: '관리자 이메일',
+    example: 'admin@iot.ac.kr',
+  })
+  @IsEmail()
+  email: string;
+  
+  @ApiProperty({
+    description: '관리자명',
+    example: 'sub_admin',
+  })
+  @IsString()
+  username: string;
+
+  @ApiProperty({
+    description: '권한',
+    example: 'ADMIN',
+  })
+  @IsString()
+  permission: string; 
+}
+
+// 사용자 권한 수정 DTO
+export class UpdateUserPermissionRequest {
+  @ApiProperty({
+    description: '사용자 ID',
+    example: 'uuid-1234-5678-9012',
+  })
+  @IsString()
+  userId: string;
+
+  @ApiProperty({
+    description: '새로운 사용자 역할',
+    example: 'ADMIN',
+  })
+  @IsString()
+  permission: string;
+} 

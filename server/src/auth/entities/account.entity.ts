@@ -16,4 +16,8 @@ export class Account extends SoftDeleteEntity {
   // 사용자와의 일대일 관계 설정 (역방향)
   @OneToOne(() => User, user => user.account)
   user: User;
+
+  // 첫 로그인 여부
+  @Column({ name: 'is_first_login', type: 'boolean', default: true })
+  isFirstLogin: boolean;
 }

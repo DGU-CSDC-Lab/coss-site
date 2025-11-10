@@ -5,6 +5,7 @@ import { SoftDeleteEntity } from '@/common/entities';
 // 사용자 역할 enum
 export enum UserRole {
   ADMIN = 'ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
   USER = 'USER',
 }
 
@@ -15,6 +16,9 @@ export class User extends SoftDeleteEntity {
 
   @Column({ name: 'role', type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
+
+  @Column({ name: 'is_first_login', type: 'boolean', default: true })
+  isFirstLogin: boolean;
 
   @OneToOne(() => Account)
   @JoinColumn({ name: 'account_id' }) // Account entity에 account id를 자동 생성함.

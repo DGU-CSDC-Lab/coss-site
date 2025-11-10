@@ -44,8 +44,19 @@ stop: ## Clean containers and volumes
 
 # Clean up
 clean: ## Clean containers and volumes
-	docker-compose -f docker-compose.local.yml down -v --remove-orphans
-	docker system prune -f
+	@bash cd server && rm -rf dist node_modules/.cache
+	@bash cd web && rm -rf dist node_modules/.cache
+	docker stop coss-mariadb || echo "No database container to stop"
+	docker rm coss-mariadb || echo "No database container to remove"
+	docker volume rm coss-mariadb-data || echo "No database volume to remove"
+	docker stop coss-minio || echo "No MinIO container to stop"
+	docker rm coss-minio || echo "No MinIO container to remove"
+	docker volume rm coss-minio || echo "No MinIO volume to remove"
+	docker stop coss-mailhog || echo "No MailHog container to stop"
+	docker rm coss-mailhog || echo "No MailHog container to remove"
+	docker ps
+	docker volume prune -f || echo "No dangling images to remove"
+	@echo "✅ Cleaned up containers, volumes, and build artifacts"
 
 # Logs
 logs-web: ## Show web logs

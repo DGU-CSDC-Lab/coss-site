@@ -15,6 +15,7 @@ import {
   HISTORY_ERRORS,
   HEADER_ASSET_ERRORS,
 } from '@/common/exceptions/responses';
+import { UserRole } from '@/auth/entities';
 
 class BaseDomainException extends HttpException {
   constructor(errorResponse: ApiErrorResponse, details?: Record<string, any>) {
@@ -122,7 +123,14 @@ export class AuthException extends BaseDomainException {
   static isNotAdmin(userRole?: string) {
     return new AuthException(
       AUTH_ERRORS.IS_NOT_ADMIN,
-      userRole ? { userRole } : undefined,
+      userRole == UserRole.ADMIN ? { userRole } : undefined,
+    );
+  }
+
+  static isNotSuperAdmin(userRole?: string) {
+    return new AuthException(
+      AUTH_ERRORS.IS_NOT_ADMIN,
+      userRole == UserRole.SUPER_ADMIN ? { userRole } : undefined,
     );
   }
 

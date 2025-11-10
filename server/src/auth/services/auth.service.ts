@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as nodemailer from 'nodemailer';
 
@@ -13,12 +13,19 @@ import {
   ChangePasswordRequest,
   RegisterRequest,
   VerifyEmailRequest,
+  CreateSubAdminRequest,
 } from '@/auth/dto/auth.dto';
 import { Account, User, UserRole, PendingUser } from '@/auth/entities';
 import { LoginRequest, LoginResponse } from '@/auth/dto/login.dto';
 import { RefreshTokenRequest } from '@/auth/dto/token.dto';
-import { UserInfoResponse } from '@/auth/dto/info.dto';
+import {
+  UserInfoResponse,
+  UpdateUserInfoRequest,
+} from '@/auth/dto/info.dto';
+import { UpdateUserPermissionRequest } from '@/auth/dto/auth.dto';
 import { VerificationCodeService } from '@/auth/services/verification-code.service';
+import { RoleGuard } from '../guards/role.guard';
+import { Roles } from '../decorators/roles.decorator';
 
 @Injectable()
 export class AuthService {
@@ -102,8 +109,8 @@ export class AuthService {
         {
           error: error.message,
           stack: error.stack,
-          originalError: error
-        }
+          originalError: error,
+        },
       );
       throw CommonException.internalServerError(error.message);
     }
@@ -168,7 +175,7 @@ export class AuthService {
   }
 
   // 1.1. 일반(이메일) 로그인
-  async login(request: LoginRequest): Promise<LoginResponse> {
+  async login(request: LoginRequest): Promise<LoginResponse & { isFirstLogin: boolean }> {
     try {
       this.logger.debug(`Login attempt for email: ${request.email}`);
 
@@ -211,6 +218,7 @@ export class AuthService {
         refreshToken,
         userId: user.id,
         role: user.role,
+        isFirstLogin: account.isFirstLogin,
       };
     } catch (error) {
       this.logger.error(`Login error for email: ${request.email}`, error.stack);
@@ -287,6 +295,191 @@ export class AuthService {
       };
     } catch (error) {
       this.logger.error(`User info error for userId: ${userId}`, error.stack);
+      throw CommonException.internalServerError(error.message);
+    }
+  }
+
+  // 2.3. 사용자 정보 수정
+  async updateUserInfo(userId: string, request: UpdateUserInfoRequest): Promise<UserInfoResponse> {
+    try {
+      this.logger.debug(`Update user info request: ${userId}`);
+
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['account'],
+      });
+      if (!user) {
+        this.logger.warn(
+          `Update user info failed - user not found: ${userId}`,
+        );
+        throw AuthException.notFoundUser(userId);
+      }
+
+      user.username = request.username;
+      await this.userRepository.save(user);
+
+      this.logger.log(`User info updated: ${user.account.email}`);
+      return {
+        id: user.id,
+        email: user.account.email,
+        username: user.username,
+        role: user.role,
+      };
+    } catch (error) {
+      this.logger.error(
+        `Update user info error for userId: ${userId}`,
+        error.stack,
+      );
+      throw CommonException.internalServerError(error.message);
+    }
+  }
+
+  // 5.1. 모든 유저의 관리자 권한 조회
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN)
+  async getUserAdmin(userId: string): Promise<UserInfoResponse[]> {
+    try {
+      this.logger.debug(`Admin user list request by: ${userId}`);
+
+      const users = await this.userRepository.find({
+        where: {
+          role: In([UserRole.ADMIN, UserRole.SUPER_ADMIN]),
+        },
+        relations: ['account'],
+      });
+
+      this.logger.log(`Admin user list retrieved by: ${userId}`);
+      return users.map(user => ({
+        id: user.id,
+        email: user.account.email,
+        username: user.username,
+        role: user.role,
+      }));
+    } catch (error) {
+      this.logger.error(
+        `Admin user list error for userId: ${userId}`,
+        error.stack,
+      );
+      throw CommonException.internalServerError(error.message);
+    }
+  }
+
+  // 5.2. 관리자 권한을 가진 유저 생성
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  async createSubAdmin(
+    request: CreateSubAdminRequest,
+  ): Promise<UserInfoResponse> {
+    try {
+      this.logger.debug(`Create sub admin attempt for email: ${request.email}`);
+
+      // 이메일 중복 확인
+      const existingAccount = await this.accountRepository.findOne({
+        where: { email: request.email },
+      });
+      if (existingAccount) {
+        this.logger.warn(
+          `Create sub admin failed - email already exists: ${request.email}`,
+        );
+        throw AuthException.emailAlreadyExists(request.email);
+      }
+
+      // 임시 비밀번호 생성 (8자리 랜덤)
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+      // 사용자 생성 (최초 로그인 플래그 true)
+      const newUser = this.userRepository.create({
+        username: request.username,
+        role: UserRole.ADMIN,
+        isFirstLogin: true,
+      });
+      await this.userRepository.save(newUser);
+
+      // 계정 생성
+      const newAccount = this.accountRepository.create({
+        email: request.email,
+        passwordHash,
+        user: newUser,
+      });
+      await this.accountRepository.save(newAccount);
+
+      this.logger.log(`Sub admin created successfully: ${request.email}`);
+      return {
+        id: newUser.id,
+        email: newAccount.email,
+        username: newUser.username,
+        role: newUser.role
+      };
+    } catch (error) {
+      this.logger.error(
+        `Create sub admin failed for ${request.email}: ${error.message}`,
+      );
+      throw CommonException.internalServerError(error.message);
+    }
+  }
+
+  // 5.3. 사용자 권한 변경
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  async updateUserPermission(
+    userId: string,
+    request: UpdateUserPermissionRequest,
+  ): Promise<void> {
+    try {
+      this.logger.log(`Set user permission request: ${userId}`);
+
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        this.logger.warn(
+          `Set user permission failed - user not found: ${userId}`,
+        );
+        throw AuthException.notFoundUser(userId);
+      }
+
+      user.role = request.permission as UserRole;
+      await this.userRepository.save(user);
+
+      this.logger.log(
+        `User permission updated: ${userId} to role ${request.permission}`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Set user permission error for userId: ${userId}`,
+        error.stack,
+      );
+      throw CommonException.internalServerError(error.message);
+    }
+  }
+
+  // 5.4. 하위 관리자 삭제
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.SUPER_ADMIN)
+  async deleteSubAdmin(userId: string, targetId: string): Promise<void> {
+    try {
+      this.logger.log(`Delete sub admin request: ${userId}`);
+
+      const user = await this.userRepository.findOne({ where: { id: targetId } });
+      if (!user) {
+        this.logger.warn(`Delete sub admin failed - user not found: ${targetId}`);
+        throw AuthException.notFoundUser(targetId);
+      }
+
+      if (user.role !== UserRole.ADMIN) {
+        this.logger.warn(
+          `Delete sub admin failed - user is not an admin: ${targetId}`,
+        );
+        throw AuthException.isNotAdmin(user.role);
+      }
+
+      await this.userRepository.remove(user);
+
+      this.logger.log(`Sub admin deleted successfully: ${targetId}`);
+    } catch (error) {
+      this.logger.error(
+        `Delete sub admin error for userId: ${targetId}`,
+        error.stack,
+      );
       throw CommonException.internalServerError(error.message);
     }
   }
@@ -470,7 +663,9 @@ export class AuthService {
       await this.transporter.sendMail(mailOptions);
       this.logger.log(`Verification email sent successfully: ${email}`);
     } catch (error) {
-      this.logger.error(`Failed to send verification email: ${email} - ${error.message}`);
+      this.logger.error(
+        `Failed to send verification email: ${email} - ${error.message}`,
+      );
       throw AuthException.failedCodeSend(email, error.message);
     }
   }

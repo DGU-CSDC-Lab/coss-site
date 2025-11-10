@@ -26,3 +26,11 @@ export class UserInfoResponse {
   })
   email: string;
 }
+
+export class UpdateUserInfoRequest {
+  @ApiProperty({
+    description: '사용자명',
+    example: 'new_admin',
+  })
+  username: string;
+}

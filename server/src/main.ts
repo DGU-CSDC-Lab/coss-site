@@ -88,8 +88,10 @@ async function bootstrap() {
     )
     .build();
 
-  // Swagger 모듈 설정
-  const document = SwaggerModule.createDocument(app, config);
+  // Swagger 모듈 설정 (자동 스키마 생성 활성화)
+  const document = SwaggerModule.createDocument(app, config, {
+    operationIdFactory: (controllerKey: string, methodKey: string) => methodKey,
+  });
   SwaggerModule.setup('api-docs', app, document, {
     // api-docs 경로로 설정
     swaggerOptions: {
