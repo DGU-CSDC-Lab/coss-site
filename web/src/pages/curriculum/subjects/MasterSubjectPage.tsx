@@ -11,9 +11,13 @@ import EmptyState from '@/components/common/EmptyState'
 import { useAlert } from '@/hooks/useAlert'
 
 export default function MasterSubjectPage() {
-  const [courses, setCourses] = useState<PagedResponse<CourseMaster> | null>(null)
+  const [courses, setCourses] = useState<PagedResponse<CourseMaster> | null>(
+    null
+  )
   const [loading, setLoading] = useState(false)
-  const [selectedCourse, setSelectedCourse] = useState<CourseMaster | null>(null)
+  const [selectedCourse, setSelectedCourse] = useState<CourseMaster | null>(
+    null
+  )
   const [showModal, setShowModal] = useState(false)
 
   const alert = useAlert()
@@ -165,7 +169,7 @@ export default function MasterSubjectPage() {
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
                         {course.courseCode}
                       </td>
-                      <td 
+                      <td
                         className="px-3 py-1 text-caption-14 text-blue-600 text-center truncate cursor-pointer hover:underline"
                         onClick={() => handleCourseClick(course)}
                       >
@@ -190,7 +194,10 @@ export default function MasterSubjectPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={7} className="p-0">
+                    <td
+                      colSpan={8}
+                      className="px-4 py-8 text-center text-caption-14 text-gray-600"
+                    >
                       <EmptyState />
                     </td>
                   </tr>
@@ -215,40 +222,52 @@ export default function MasterSubjectPage() {
                 </p>
               </div>
             </div>
-            
+
             <div className="space-y-3">
               <div>
                 <p className="text-body-18-medium text-gray-900 leading-relaxed">
                   {selectedCourse.description || '설명이 없습니다.'}
                 </p>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                 <div>
                   <span className="text-caption-14 text-gray-500">학점:</span>
-                  <span className="ml-2 text-caption-14 text-gray-900">{selectedCourse.credit || '-'}</span>
+                  <span className="ml-2 text-caption-14 text-gray-900">
+                    {selectedCourse.credit || '-'}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-caption-14 text-gray-500">수강학년:</span>
-                  <span className="ml-2 text-caption-14 text-gray-900">{selectedCourse.grade || '-'}</span>
+                  <span className="text-caption-14 text-gray-500">
+                    수강학년:
+                  </span>
+                  <span className="ml-2 text-caption-14 text-gray-900">
+                    {selectedCourse.grade || '-'}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-caption-14 text-gray-500">강의유형:</span>
-                  <span className="ml-2 text-caption-14 text-gray-900">{selectedCourse.courseType || '-'}</span>
+                  <span className="text-caption-14 text-gray-500">
+                    강의유형:
+                  </span>
+                  <span className="ml-2 text-caption-14 text-gray-900">
+                    {selectedCourse.courseType || '-'}
+                  </span>
                 </div>
                 <div>
                   <span className="text-caption-14 text-gray-500">학기:</span>
-                  <span className="ml-2 text-caption-14 text-gray-900">{selectedCourse.semester}</span>
+                  <span className="ml-2 text-caption-14 text-gray-900">
+                    {selectedCourse.semester}
+                  </span>
                 </div>
               </div>
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <Button
                 onClick={() => setShowModal(false)}
                 variant="cancel"
-                size='md'
-                radius='md'
+                size="md"
+                radius="md"
               >
                 닫기
               </Button>

@@ -11,7 +11,9 @@ import EmptyState from '@/components/common/EmptyState'
 import { useAlert } from '@/hooks/useAlert'
 
 export default function OfferingSubjectsPage() {
-  const [courses, setCourses] = useState<PagedResponse<CourseOffering> | null>(null)
+  const [courses, setCourses] = useState<PagedResponse<CourseOffering> | null>(
+    null
+  )
   const [loading, setLoading] = useState(false)
 
   const alert = useAlert()
@@ -218,7 +220,10 @@ export default function OfferingSubjectsPage() {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={10} className="p-0">
+                    <td
+                      colSpan={8}
+                      className="px-4 py-8 text-center text-caption-14 text-gray-600"
+                    >
                       <EmptyState />
                     </td>
                   </tr>
