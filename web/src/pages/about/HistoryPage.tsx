@@ -23,11 +23,11 @@ export default function HistoryPage() {
         <div className="space-y-8">
           {histories?.items && histories.items.length > 0 ? (
             histories.items.map((history: any) => (
-              <div key={history.id} className="border-l-4 border-orange-500 pl-6">
+              <div key={history.id} className="border-l-4 border-gray-400 pl-6">
                 <h3 className="text-xl text-semibold text-gray-900 mb-2">
                   {history.year}년 {history.month}월
                 </h3>
-                <p className="text-gray-700">{history.content}</p>
+                <p className="text-gray-700">{history.title}</p>
               </div>
             ))
           ) : (

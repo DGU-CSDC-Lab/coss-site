@@ -66,6 +66,16 @@ export const AUTH_ERRORS = {
     message: '존재하지 않는 사용자입니다.',
     httpStatus: HttpStatus.NOT_FOUND,
   },
+  REFRESH_TOKEN_EXPIRED: {
+    code: 'REFRESH_TOKEN_EXPIRED',
+    message: '리프레시 토큰이 만료되었습니다.',
+    httpStatus: HttpStatus.UNAUTHORIZED,
+  },
+  INVALID_TOKEN: {
+    code: 'INVALID_TOKEN',
+    message: '유효하지 않은 인증 토큰입니다.',
+    httpStatus: HttpStatus.UNAUTHORIZED,
+  },
   INVALID_EMAIL_FORMAT: {
     code: 'INVALID_EMAIL_FORMAT',
     message: '이메일 형식이 일치하지 않습니다.',

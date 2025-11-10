@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ErrorResponse } from '@/common/dto/response.dto';
+import { JsonWebTokenError } from '@nestjs/jwt';
 
 /**
  * 전역 HTTP 예외 필터
@@ -66,7 +67,14 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = exception.message;
         errorCode = this.getErrorCode(status);
       }
-    } else {
+    } 
+    else if (exception instanceof JsonWebTokenError) {
+      status = HttpStatus.UNAUTHORIZED;
+      errorCode = 'INVALID_TOKEN';
+      message = '유효하지 않은 인증 토큰입니다.';
+      this.logger.warn('JWT Error: Invalid token', { error: exception.message });
+    }
+    else {
       // HttpException이 아닌 예상치 못한 에러 처리
       status = HttpStatus.INTERNAL_SERVER_ERROR;
       errorCode = 'INTERNAL_SERVER_ERROR';

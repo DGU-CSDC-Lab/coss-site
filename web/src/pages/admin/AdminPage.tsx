@@ -8,6 +8,7 @@ import {
   AcademicCapIcon,
   ChevronRightIcon,
   SpeakerWaveIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline'
 import { postsApi } from '@/lib/api/posts'
 import { schedulesApi } from '@/lib/api/schedules'
@@ -15,6 +16,7 @@ import { facultyApi } from '@/lib/api/faculty'
 import { coursesApi } from '@/lib/api/courses'
 import { headerAssetsApi } from '@/lib/api/headerAssets'
 import { popupsApi } from '@/lib/api/popups'
+import { historyApi } from '@/lib/api/history'
 import Information from '@/components/common/Information'
 import Title from '@/components/common/title/Title'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
@@ -27,6 +29,7 @@ interface DashboardStats {
   courses: number
   banners: number
   popups: number
+  history: number
 }
 
 export default function AdminPage() {
@@ -37,6 +40,7 @@ export default function AdminPage() {
     courses: 0,
     banners: 0,
     popups: 0,
+    history: 0,
   })
   const [loading, setLoading] = useState(true)
 
@@ -49,7 +53,7 @@ export default function AdminPage() {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const [postsRes, schedulesRes, facultyRes, coursesRes, bannersRes, popupsRes] =
+      const [postsRes, schedulesRes, facultyRes, coursesRes, bannersRes, popupsRes, historyRes] =
         await Promise.all([
           postsApi.getAdminPosts({ page: 1, size: 1 }),
           schedulesApi.getSchedules({ page: 1, size: 1 }),
@@ -57,6 +61,7 @@ export default function AdminPage() {
           coursesApi.getOfferings({ page: 1, size: 1 }),
           headerAssetsApi.getHeaderAssets({ page: 1, size: 1 }),
           popupsApi.getPopups({ page: 1, size: 1 }),
+          historyApi.getHistory({ page: 1, size: 1 }),
         ])
 
       setStats({
@@ -66,6 +71,7 @@ export default function AdminPage() {
         courses: coursesRes.meta.totalElements,
         banners: bannersRes.meta.totalElements,
         popups: (popupsRes as any).meta.totalElements,
+        history: historyRes.meta.totalElements,
       })
     } catch (error) {
       alert.error((error as Error).message)
@@ -106,6 +112,12 @@ export default function AdminPage() {
       href: '/admin/courses/bulk-upload',
     },
     {
+      title: '연혁 등록',
+      description: '학과 연혁을 등록합니다.',
+      icon: ClockIcon,
+      href: '/admin/history/create',
+    },
+    {
       title: '배너 생성',
       description: '메인 배너 이미지를 생성합니다.',
       icon: PhotoIcon,
@@ -134,6 +146,12 @@ export default function AdminPage() {
           href: '/admin/faculty',
           icon: UserGroupIcon,
           count: stats.faculty,
+        },
+        {
+          name: '연혁 관리',
+          href: '/admin/history',
+          icon: ClockIcon,
+          count: stats.history,
         },
         {
           name: '팝업 관리',

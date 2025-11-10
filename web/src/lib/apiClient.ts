@@ -62,7 +62,7 @@ class ApiClient {
     }
 
     const result = await response.json()
-    
+
     // Extract data from SuccessResponse wrapper for single objects
     // PagedResponse remains unchanged
     return result.data !== undefined ? result.data : result
@@ -76,8 +76,26 @@ class ApiClient {
     const { accessToken, refreshToken, updateAccessToken, logout } =
       useAuthStore.getState()
 
-    if (!accessToken) {
-      throw new Error('No access token available')
+    // 1. Access Token이 없으면 Refresh Token으로 갱신 시도
+    let token = accessToken
+    if (!token && refreshToken) {
+      try {
+        const newTokens = await authApi.refresh({ refreshToken })
+        updateAccessToken(newTokens.accessToken)
+        token = newTokens.accessToken
+      } catch (err: any) {
+        // refresh 자체 실패 → 로그인 페이지로
+        logout()
+        globalThis.location.href = '/login'
+        throw new Error('세션이 만료 되었습니다. 다시 로그인 해주세요.')
+      }
+    }
+
+    // 2. 그래도 accessToken이 없으면 로그아웃 처리
+    if (!token) {
+      logout()
+      globalThis.location.href = '/login'
+      throw new Error('세션이 만료 되었습니다. 다시 로그인 해주세요.')
     }
 
     try {
@@ -108,7 +126,7 @@ class ApiClient {
             // refresh API에서도 401, 403 발생 시
             if (refreshError.status === 401 || refreshError.status === 403) {
               alert('재로그인이 필요합니다.')
-              window.location.href = '/login'
+              globalThis.location.href = '/login'
             }
             logout()
             throw new Error('Authentication failed')

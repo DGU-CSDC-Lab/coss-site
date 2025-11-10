@@ -16,24 +16,31 @@ export class RoleGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredRoles = this.reflector.get<UserRole[]>('roles', context.getHandler());
+    const requiredRoles = this.reflector.getAllAndOverride<UserRole[]>(
+      'roles',
+      [context.getHandler(), context.getClass()],
+    );
     if (!requiredRoles) return true;
 
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
-    
+
     if (!token) {
       throw CommonException.unauthorized('No token provided');
     }
 
+    console.log("Started:::");
     const payload = this.jwtService.verify(token);
-    const user = await this.userRepository.findOne({ where: { id: payload.sub } });
-    
+    const user = await this.userRepository.findOne({
+      where: { id: payload.sub },
+    });
+
     if (!user || !requiredRoles.includes(user.role)) {
       throw CommonException.forbidden('Insufficient permissions');
     }
-
+    console.log('RoleGuard: User role validated', user.role);
     request.user = user;
+    console.log('RoleGuard: User attached to request', request.user);
     return true;
   }
 

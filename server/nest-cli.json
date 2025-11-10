@@ -13,5 +13,7 @@
         }
       }
     ]
-  }
+  },
+  "watch": ["src"],
+  "ignore": ["**/*.log", "dist", "node_modules", "server.log"]
 }

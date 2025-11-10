@@ -100,6 +100,14 @@ export class AuthException extends BaseDomainException {
     );
   }
 
+  static refreshTokenExpired() { 
+    return new AuthException(AUTH_ERRORS.REFRESH_TOKEN_EXPIRED);
+  }
+
+  static invalidToken() {
+    return new AuthException(AUTH_ERRORS.INVALID_TOKEN);
+  }
+
   static invalidEmailFormat(email: string) {
     return new AuthException(AUTH_ERRORS.INVALID_EMAIL_FORMAT, { email });
   }

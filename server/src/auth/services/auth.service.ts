@@ -1,5 +1,5 @@
 import { Injectable, Logger, UseGuards } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { JsonWebTokenError, JwtService, TokenExpiredError } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -265,6 +265,13 @@ export class AuthService {
         role: user.role,
       };
     } catch (error) {
+      if (error instanceof TokenExpiredError) {
+        this.logger.warn('Token refresh failed - token expired');
+        throw AuthException.refreshTokenExpired();
+      }
+      if (error instanceof JsonWebTokenError) {
+        throw AuthException.invalidToken();
+      }
       this.logger.error('Token refresh error', error.stack);
       throw CommonException.internalServerError(error.message);
     }

@@ -46,7 +46,6 @@ export default function AdminFacultyPage() {
 
   const totalElements = faculty?.meta?.totalElements || 0
   const totalPages = faculty?.meta?.totalPages || 1
-  const currentPage = page
 
   if (loading) {
     return (
@@ -63,7 +62,9 @@ export default function AdminFacultyPage() {
       <div className="flex justify-between items-center mb-6">
         <Title>교원 관리</Title>
         <Link to="/admin/faculty/create">
-          <Button variant="info" radius="md" size="md">새 교원 추가</Button>
+          <Button variant="info" radius="md" size="md">
+            새 교원 추가
+          </Button>
         </Link>
       </div>
 
@@ -184,25 +185,22 @@ export default function AdminFacultyPage() {
         </button>
 
         {/* 페이지 번호 */}
-        {Array.from(
-          { length: Math.min(5, totalPages || 1) },
-          (_, i) => {
-            const pageNum = i + 1
-            return (
-              <button
-                key={pageNum}
-                onClick={() => setPage(pageNum)}
-                className={`px-3 py-2 font-caption-14 rounded ${
-                  page === pageNum
-                    ? 'text-pri-500 font-semibold'
-                    : 'text-gray-900 hover:text-pri-500'
-                }`}
-              >
-                {pageNum}
-              </button>
-            )
-          }
-        )}
+        {Array.from({ length: Math.min(5, totalPages || 1) }, (_, i) => {
+          const pageNum = i + 1
+          return (
+            <button
+              key={pageNum}
+              onClick={() => setPage(pageNum)}
+              className={`px-3 py-2 font-caption-14 rounded ${
+                page === pageNum
+                  ? 'text-pri-500 font-semibold'
+                  : 'text-gray-900 hover:text-pri-500'
+              }`}
+            >
+              {pageNum}
+            </button>
+          )
+        })}
 
         {/* 마지막 페이지 생략 처리 */}
         {totalPages > 5 && (

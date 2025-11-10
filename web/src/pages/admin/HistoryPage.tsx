@@ -1,0 +1,215 @@
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { historyApi, History, HistoryQuery } from '@/lib/api/history'
+import Title from '@/components/common/title/Title'
+import Button from '@/components/common/Button'
+import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import { useAlert } from '@/hooks/useAlert'
+
+export default function AdminHistoryPage() {
+  const [histories, setHistories] = useState<History[]>([])
+  const [loading, setLoading] = useState(true)
+  const [totalPages, setTotalPages] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalElements, setTotalElements] = useState(0)
+  const [query, setQuery] = useState<HistoryQuery>({
+    page: 1,
+    size: 20,
+    sort: 'desc',
+  })
+
+  const alert = useAlert()
+
+  useEffect(() => {
+    fetchHistories()
+  }, [query])
+
+  const fetchHistories = async () => {
+    try {
+      setLoading(true)
+      const response = await historyApi.getHistory(query)
+      setHistories(response.items)
+      setTotalPages(response.meta.totalPages)
+      setCurrentPage(response.meta.page)
+      setTotalElements(response.meta.totalElements)
+    } catch (error) {
+      alert.error((error as Error).message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`"${title}" 연혁을 삭제하시겠습니까?`)) return
+
+    try {
+      await historyApi.deleteHistory(id)
+      alert.success('연혁이 삭제되었습니다.')
+      fetchHistories()
+    } catch (error) {
+      alert.error((error as Error).message)
+    }
+  }
+
+  const formatDate = (year: number, month: number) => {
+    return `${year}년 ${month}월`
+  }
+
+  return (
+    <div className="w-full">
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <Title>연혁 관리</Title>
+          <p className="text-body-14 text-gray-600 mt-2">
+            총 {totalElements}개의 연혁이 있습니다.
+          </p>
+        </div>
+        <Link to="/admin/history/create">
+          <Button variant="info" radius="md" size="md">
+            연혁 등록
+          </Button>
+        </Link>
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <LoadingSpinner size="lg" />
+        </div>
+      ) : (
+        <>
+          <div className="overflow-x-auto rounded-lg border border-info-100">
+            <table className="w-full min-w-[800px]">
+              <thead className="bg-info-50 border-b border-info-100">
+                <tr>
+                  <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    날짜
+                  </th>
+                  <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    제목
+                  </th>
+                  <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    내용
+                  </th>
+                  <th className="px-4 py-3 text-center font-body-18-medium text-gray-900">
+                    관리
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {histories.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={8}
+                      className="px-4 py-8 text-center font-caption-14 text-gray-600"
+                    >
+                      등록된 연혁이 없습니다.
+                    </td>
+                  </tr>
+                ) : (
+                  histories.map(history => (
+                    <tr key={history.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 font-body-14-medium text-gray-600">
+                        {formatDate(history.year, history.month)}
+                      </td>
+                      <td className="px-4 py-3 font-body-14-medium text-gray-600">
+                        <div className="font-medium">{history.title}</div>
+                      </td>
+                      <td className="px-4 py-3 font-body-14-medium text-gray-600">
+                        <div className="max-w-xs truncate">
+                          {history.description}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex gap-2 justify-center">
+                          <Link
+                            to={`/admin/history/edit/${history.id}`}
+                            className="text-indigo-600 hover:text-indigo-900 p-1"
+                          >
+                            <Button variant="unstyled" size="sm" radius="md">
+                              수정
+                            </Button>
+                          </Link>
+                          <Button
+                            variant="delete"
+                            size="sm"
+                            radius="md"
+                            onClick={() =>
+                              handleDelete(history.id, history.title)
+                            }
+                          >
+                            삭제
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1}
+                className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
+              >
+                <img
+                  src="/assets/icon/chevron_left.svg"
+                  alt="이전"
+                  width={16}
+                  height={16}
+                />
+              </button>
+
+              {Array.from({ length: Math.min(5, totalPages || 1) }, (_, i) => {
+                const pageNum = i + 1
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3 py-2 font-caption-14 rounded ${
+                      currentPage === pageNum
+                        ? 'text-pri-500 font-semibold'
+                        : 'text-gray-900 hover:text-pri-500'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                )
+              })}
+
+              {totalPages > 5 && (
+                <>
+                  <span className="px-2 text-gray-900">...</span>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    className="px-3 py-2 font-caption-14 text-text hover:text-pri-500"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={() =>
+                  setCurrentPage(Math.min(totalPages || 1, currentPage + 1))
+                }
+                disabled={currentPage === (totalPages || 1)}
+                className="flex items-center justify-center w-8 h-8 disabled:opacity-50"
+              >
+                <img
+                  src="/assets/icon/chevron_right.svg"
+                  alt="다음"
+                  width={16}
+                  height={16}
+                />
+              </button>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}

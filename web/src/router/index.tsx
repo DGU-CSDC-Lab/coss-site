@@ -50,6 +50,8 @@ import AdminPopupsPage from '@/pages/admin/PopupsPage'
 import AdminPopupsCreatePage from '@/pages/admin/popups/CreatePage'
 import AdminHeaderAssetsPage from '@/pages/admin/HeaderAssetsPage'
 import AdminHeaderAssetsCreatePage from '@/pages/admin/header-assets/CreatePage'
+import AdminHistoryPage from '@/pages/admin/HistoryPage'
+import AdminHistoryCreatePage from '@/pages/admin/history/CreatePage'
 
 export const router = createBrowserRouter([
   {
@@ -233,6 +235,18 @@ export const router = createBrowserRouter([
       {
         path: 'admin/header-assets/:id',
         element: <AdminHeaderAssetsCreatePage />,
+      },
+      {
+        path: 'admin/history',
+        element: <AdminHistoryPage />,
+      },
+      {
+        path: 'admin/history/create',
+        element: <AdminHistoryCreatePage />,
+      },
+      {
+        path: 'admin/history/edit/:id',
+        element: <AdminHistoryCreatePage />,
       },
     ],
   },

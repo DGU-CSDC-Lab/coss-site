@@ -49,7 +49,7 @@ export default function Button({
   }
 
   const baseClasses =
-    'flex items-center justify-center text-medium transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed'
+    'text-medium transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed'
 
   if (iconOnly) {
     return (
@@ -57,17 +57,18 @@ export default function Button({
         type={type}
         onClick={onClick}
         disabled={disabled}
-        className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${radiusClasses[radius]} ${className} flex items-center justify-center select-none`}
+        className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${radiusClasses[radius]} ${className} flex flex-row items-center justify-center select-none`}
       >
-        {icon || (iconUrl && (
-          <img
-            src={iconUrl}
-            alt=""
-            width={16}
-            height={16}
-            className="flex-shrink-0"
-          />
-        ))}
+        {icon ||
+          (iconUrl && (
+            <img
+              src={iconUrl}
+              alt=""
+              width={16}
+              height={16}
+              className="flex-shrink-0"
+            />
+          ))}
       </button>
     )
   }
