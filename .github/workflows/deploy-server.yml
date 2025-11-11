@@ -165,6 +165,10 @@ jobs:
             aws ecr get-login-password --region ap-northeast-2 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
 
             cd deploy
+
+            cat > .env << 'EOF'
+            NODE_ENV=production
+            EOF
             
             cat > .env.prod << 'EOF'
             DOMAIN_URL=${{ secrets.DOMAIN_URL }}
