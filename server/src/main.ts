@@ -1,9 +1,9 @@
 import { NestFactory } from '@nestjs/core';
-import { LogLevel, ValidationPipe } from '@nestjs/common';
+import { LogLevel, ValidationPipe, Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from '@/app.module';
-import { Logger } from 'nestjs-pino';
-import otelSDK from '../metrics/telemetry/tracing';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import otelSDK from '@/logger/tracing';
 
 // 로그 레벨 설정 함수
 const getLogLevels = (): LogLevel[] => {
@@ -29,10 +29,12 @@ async function bootstrap() {
 
   // Nest App 인스턴스 생성
   const app = await NestFactory.create(AppModule, {
+    bufferLogs: true, // 초기 로그도 버퍼링해서 Winston이 처리하게
     logger: getLogLevels(),
   });
 
-  app.useLogger(app.get(Logger));
+  const nestLogger = app.get(WINSTON_MODULE_NEST_PROVIDER);
+  app.useLogger(nestLogger);
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -44,9 +46,10 @@ async function bootstrap() {
   );
 
   app.use((req, res, next) => {
-    app.get(Logger).log(`${req.method} ${req.url}`);
+    const start = Date.now();
     res.on('finish', () => {
-      app.get(Logger).log(`${req.method} ${req.url} - ${res.statusCode}`);
+      const duration = Date.now() - start;
+      nestLogger.log(`[HTTP] ${req.method} ${req.url} ${res.statusCode} +${duration}ms`);
     });
 
     next();
@@ -102,6 +105,7 @@ async function bootstrap() {
 
   // 서버 시작
   await app.listen(process.env.PORT || 3000, '0.0.0.0');
+  nestLogger.log(`Server running on port ${process.env.PORT || 3000}`);
   // console.log(`Application is running on: ${await app.getUrl()}`);
   // console.log(`Swagger docs available at: ${await app.getUrl()}/api-docs`);
   // console.log(`CORS origins: ${JSON.stringify([...allowedOrigins])}`);

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseModule } from '@/database/database.module';
-import { LoggerModule } from 'nestjs-pino';
 import { CommonModule } from '@/common/common.module';
 import { AuthModule } from '@/auth/auth.module';
 import { CategoryModule } from '@/category/category.module';
@@ -15,6 +14,10 @@ import { FileModule } from '@/file/file.module';
 import { HeaderAssetModule } from '@/header-asset/header-asset.module';
 import { HealthModule } from '@/health/health.module';
 import { OpenTelemetryModule } from 'nestjs-otel';
+import { WinstonModule } from 'nest-winston';
+import LokiTransport from 'winston-loki';
+import { format, transports } from 'winston';
+import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 
 // Root application module
 @Module({
@@ -29,12 +32,49 @@ import { OpenTelemetryModule } from 'nestjs-otel';
     }),
     CommonModule,
     DatabaseModule,
-    LoggerModule.forRoot({
-      pinoHttp: {
-        transport:
-          process.env.NODE_ENV !== 'production'
-            ? { target: 'pino-pretty' } // 개발 시 컬러 + 가독성 로그
-            : undefined,
+    WinstonModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const ENV = configService.get<string>('NODE_ENV', 'local');
+        const NAME = configService.get<string>('APP_NAME', 'iot-site');
+        const LOKI_HOST = configService.get<string>(
+          'LOKI_HOST',
+          'http://localhost:3100',
+        );
+
+        const baseFormat = format.combine(
+          format.timestamp(),
+          format.printf(({ timestamp, level, message }) => {
+            return `[${timestamp}] [${level.toUpperCase()}] ${message}`;
+          }),
+        );
+
+        // production/staging
+        if (ENV !== 'local' && ENV !== 'test') {
+          return {
+            transports: [
+              new transports.Console({
+                level: 'info',
+                format: baseFormat,
+              }),
+              new LokiTransport({
+                host: LOKI_HOST,
+                labels: { app: `${ENV}-${NAME}` },
+                format: baseFormat,
+              }),
+            ],
+          };
+        }
+
+        // local/test 환경
+        return {
+          transports: [
+            new transports.Console({
+              level: 'debug',
+              format: baseFormat,
+            }),
+          ],
+        };
       },
     }),
     OpenTelemetryModule.forRoot({
@@ -53,6 +93,25 @@ import { OpenTelemetryModule } from 'nestjs-otel';
     HeaderAssetModule,
     HealthModule,
     AuthModule,
+  ],
+  providers: [
+    {
+      provide: PrometheusExporter,
+      useFactory: () => {
+        const exporter = new PrometheusExporter(
+          {
+            port: 9464,
+            endpoint: '/metrics',
+          },
+          () => {
+            console.log(
+              'Prometheus scrape endpoint available at http://localhost:9464/metrics',
+            );
+          },
+        );
+        return exporter;
+      },
+    },
   ],
 })
 export class AppModule {}
