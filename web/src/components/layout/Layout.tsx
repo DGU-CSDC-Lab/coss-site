@@ -20,11 +20,11 @@ const Layout = ({ children }: LayoutProps) => {
   const pathname = location.pathname
 
   // 배너를 표시하지 않을 페이지들
-  const excludedRoutes = ['/', '/login']
+  const excludedRoutes = ['/', '/login', '/auth/set-password']
   const shouldShowHeader = !excludedRoutes.includes(pathname)
 
   // 로그인 페이지 여부 체크
-  const isLoginPage = pathname === '/login'
+  const isLoginPage = pathname === '/login' || pathname === '/auth/set-password'
   // admin 페이지 여부 체크
   const isAdminPage = pathname.startsWith('/admin')
 

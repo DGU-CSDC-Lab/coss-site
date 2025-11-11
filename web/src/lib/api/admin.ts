@@ -5,6 +5,8 @@ export interface AdminUser {
   email: string
   username: string
   role: string
+  isFirstLogin: boolean 
+  passwordTokenExpiry?: string // 비밀번호 설정 토큰 만료 시간
   createdAt: string
   updatedAt: string
 }
@@ -37,4 +39,8 @@ export const adminApi = {
   // 관리자 제거 (SUPER_ADMIN만)
   removeAdmin: (id: string): Promise<void> =>
     api.auth.delete(`/auth/admin/${id}/permissions`),
+
+  // 비밀번호 설정 링크 재발급
+  resendPasswordLink: (userId: string): Promise<void> =>
+    api.auth.post('/auth/resend-password-link', { userId }),
 }

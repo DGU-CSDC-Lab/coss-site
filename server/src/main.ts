@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { LogLevel, ValidationPipe, Logger } from '@nestjs/common';
+import { LogLevel, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from '@/app.module';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
@@ -49,7 +49,9 @@ async function bootstrap() {
     const start = Date.now();
     res.on('finish', () => {
       const duration = Date.now() - start;
-      nestLogger.log(`[HTTP] ${req.method} ${req.url} ${res.statusCode} +${duration}ms`);
+      nestLogger.log(
+        `[HTTP] ${req.method} ${req.url} ${res.statusCode} +${duration}ms`,
+      );
     });
 
     next();

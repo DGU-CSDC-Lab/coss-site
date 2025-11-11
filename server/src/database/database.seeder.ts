@@ -72,6 +72,7 @@ export class DatabaseSeeder implements OnModuleInit {
       const account = new Account();
       account.email = 'admin@iot.ac.kr';
       account.passwordHash = hashedPassword;
+      account.isFirstLogin = false;
 
       // 트랜잭션으로 묶어서 처리
       const savedAccount = await manager.save(Account, account);

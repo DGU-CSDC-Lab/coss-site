@@ -195,8 +195,6 @@ export class AuthController {
     @Request() auth,
     @Body() request: ChangePasswordRequest,
   ): Promise<void> {
-    console.log('Auth object:', auth); // 디버깅용
-    console.log('Auth user:', auth.user); // 디버깅용
     return this.service.changePassword(auth.user.id, request);
   }
 
@@ -208,5 +206,21 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async setPassword(@Body() request: SetPasswordRequest): Promise<void> {
     return this.service.setPassword(request);
+  }
+
+  // 비밀번호 설정 링크 재발급
+  @Post('resend-password-link')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
+  @ApiBearerAuth('bearerAuth')
+  @ApiOperation({ summary: '비밀번호 설정 링크 재발급' })
+  @ApiResponse({ status: 200, description: '링크 재발급 성공' })
+  @ApiResponse({ status: 404, description: '존재하지 않는 사용자' })
+  @HttpCode(HttpStatus.OK)
+  async resendPasswordLink(
+    @Request() auth,
+    @Body() request: { userId: string },
+  ): Promise<void> {
+    return this.service.resendPasswordLink(auth.user.id, request.userId);
   }
 }

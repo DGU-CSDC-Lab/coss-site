@@ -351,7 +351,7 @@ export class AuthService {
   // 5.1. 모든 유저의 관리자 권한 조회
   async getUserAdmin(
     userId: string,
-  ): Promise<(UserInfoResponse & { createdAt: Date })[]> {
+  ): Promise<(UserInfoResponse & { createdAt: Date, isFirstLogin: boolean })[]> {
     try {
       this.logger.debug(`Admin user list request by: ${userId}`);
 
@@ -374,6 +374,7 @@ export class AuthService {
           email: user.account.email,
           username: user.username,
           role: user.role,
+          isFirstLogin: user.isFirstLogin,
           createdAt: user.createdAt,
         }));
     } catch (error) {

@@ -139,34 +139,34 @@ export default function OfferingSubjectsPage() {
             <table className="w-full border-collapse min-w-[1000px]">
               <thead className="bg-info-50 border-b border-info-100 sticky top-0 z-10">
                 <tr>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[80px]">
                     개설년도
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[60px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[60px]">
                     개설학기
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[100px]">
                     개설학과
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[100px]">
                     교과목 코드
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[160px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[160px]">
                     과목명
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[80px]">
                     수강학년
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[60px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[60px]">
                     학점
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[140px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[140px]">
                     강의시간
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[80px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[80px]">
                     담당교수
                   </th>
-                  <th className="px-4 py-3 text-body-14-medium text-info-700 w-[100px]">
+                  <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[100px]">
                     강의계획서
                   </th>
                 </tr>

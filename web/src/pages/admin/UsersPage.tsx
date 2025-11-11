@@ -30,6 +30,7 @@ export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState<string | null>(null)
+  const [resending, setResending] = useState<string | null>(null)
   const [deleteModal, setDeleteModal] = useState<{
     isOpen: boolean
     user: AdminUser | null
@@ -100,6 +101,26 @@ export default function AdminUsersPage() {
     }
   }
 
+  const handleResendPasswordLink = async (userId: string) => {
+    if (resending) return
+
+    try {
+      setResending(userId)
+      await adminApi.resendPasswordLink(userId)
+      alert.success('비밀번호 설정 링크가 재발급되었습니다.')
+      fetchUsers() // 새로운 만료 시간으로 업데이트
+    } catch (error) {
+      alert.error((error as Error).message)
+    } finally {
+      setResending(null)
+    }
+  }
+
+  const isTokenExpired = (user: AdminUser): boolean => {
+    if (!user.isFirstLogin || !user.passwordTokenExpiry) return false
+    return new Date(user.passwordTokenExpiry) < new Date()
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR')
   }
@@ -133,19 +154,22 @@ export default function AdminUsersPage() {
               <table className="w-full min-w-[800px]">
                 <thead className="bg-info-50 border-b border-info-100">
                   <tr>
-                    <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    <th className="px-4 py-3 text-left font-body-18-medium whitespace-nowrap text-gray-900">
                       사용자명
                     </th>
-                    <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    <th className="px-4 py-3 text-left font-body-18-medium whitespace-nowrap text-gray-900">
                       이메일
                     </th>
-                    <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    <th className="px-4 py-3 text-left font-body-18-medium whitespace-nowrap text-gray-900">
                       권한
                     </th>
-                    <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    <th className="px-4 py-3 text-left font-body-18-medium whitespace-nowrap text-gray-900">
+                      가입 완료
+                    </th>
+                    <th className="px-4 py-3 text-left font-body-18-medium whitespace-nowrap text-gray-900">
                       생성일
                     </th>
-                    <th className="px-4 py-3 text-center font-body-18-medium text-gray-900">
+                    <th className="px-4 py-3 text-center font-body-18-medium whitespace-nowrap text-gray-900">
                       관리
                     </th>
                   </tr>
@@ -175,52 +199,77 @@ export default function AdminUsersPage() {
                               {ROLE_LABEL[user.role]}
                             </span>
                           ) : updateAllowed(user.role) ? (
-                            <>
+                            <select
+                              value={user.role}
+                              onChange={(e) => {
+                                if (e.target.value !== user.role) {
+                                  handleRoleChange(user.id, e.target.value)
+                                }
+                              }}
+                              disabled={updating === user.id}
+                              className="px-3 py-2 text-caption-14 rounded-md bg-white ring-1 ring-gray-100 focus:outline-none focus:ring-1 focus:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors cursor-pointer min-w-[120px]"
+                            >
+                              <option value={user.role}>{ROLE_LABEL[user.role]}</option>
                               {getNextRoles(user.role).map(nextRole => (
-                                <Button
-                                  key={nextRole}
-                                  variant={
-                                    updating === user.id ? 'unstyled' : 'info'
-                                  }
-                                  size="sm"
-                                  radius="md"
-                                  onClick={() =>
-                                    handleRoleChange(user.id, nextRole)
-                                  }
-                                  disabled={updating === user.id}
-                                  className="mr-2"
-                                >
-                                  {ROLE_LABEL[nextRole]}({nextRole})로 변경
-                                </Button>
+                                <option key={nextRole} value={nextRole}>
+                                  {ROLE_LABEL[nextRole]}
+                                </option>
                               ))}
-                            </>
+                            </select>
                           ) : (
                             <span className="text-sm text-gray-500">
                               {ROLE_LABEL[user.role]}
                             </span>
                           )}
                         </td>
-
+                        <td
+                          className={`px-4 py-3 font-body-14-medium ${
+                            user.isFirstLogin
+                              ? 'text-red-600'
+                              : 'text-green-600'
+                          }`}
+                        >
+                          {user.isFirstLogin ? '미완료' : '완료'}
+                        </td>
                         <td className="px-4 py-3 font-body-14-medium text-gray-600 whitespace-nowrap">
                           {formatDate(user.createdAt)}
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex gap-2 justify-center">
-                            {user.id !== currentUser?.id &&
-                              deleteAllowed(user.role) && (
-                                <Button
-                                  variant="delete"
-                                  size="sm"
-                                  radius="md"
-                                  onClick={() =>
-                                    setDeleteModal({ isOpen: true, user })
-                                  }
-                                  disabled={updating === user.id}
-                                >
-                                  삭제
-                                </Button>
-                              )}
-                            {updating === user.id && (
+                            {user.id !== currentUser?.id && (
+                              <>
+                                {user.isFirstLogin && isTokenExpired(user) && (
+                                  <Button
+                                    variant="info"
+                                    size="sm"
+                                    radius="md"
+                                    onClick={() => handleResendPasswordLink(user.id)}
+                                    disabled={resending === user.id || updating === user.id}
+                                  >
+                                    링크 재발급
+                                  </Button>
+                                )}
+                                {user.isFirstLogin && !isTokenExpired(user) && (
+                                  <span className="text-sm text-gray-500 px-2 py-1">
+                                    링크 유효
+                                  </span>
+                                )}
+                                {deleteAllowed(user.role) && (
+                                  <Button
+                                    variant="delete"
+                                    size="sm"
+                                    radius="md"
+                                    onClick={() =>
+                                      setDeleteModal({ isOpen: true, user })
+                                    }
+                                    disabled={updating === user.id || resending === user.id}
+                                  >
+                                    삭제
+                                  </Button>
+                                )}
+                              </>
+                            )}
+                            {(updating === user.id || resending === user.id) && (
                               <LoadingSpinner size="sm" />
                             )}
                           </div>

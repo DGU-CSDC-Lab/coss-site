@@ -59,7 +59,8 @@ export const canCreateUser = (currentRole?: string): boolean => {
 export const getNextRoles = (currentRole: string): string[] => {
   if (currentRole === 'ADMINISTRATOR') return ['SUPER_ADMIN', 'ADMIN']
   if (currentRole === 'SUPER_ADMIN') return ['ADMIN']
-  return [] // ADMIN은 불가
+  if (currentRole === 'ADMIN') return ['SUPER_ADMIN'] // 일반 관리자를 중간 관리자로 승격 가능
+  return []
 }
 
 // 게시물 수정 / 삭제 권한 체크 공통 함수
