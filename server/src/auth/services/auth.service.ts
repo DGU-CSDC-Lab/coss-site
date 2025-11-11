@@ -906,7 +906,7 @@ export class AuthService {
 
       // 계정 업데이트 (비밀번호 설정)
       await this.accountRepository.update(
-        { userId: user.id },
+        { id: user.account.id },
         { passwordHash },
       );
 

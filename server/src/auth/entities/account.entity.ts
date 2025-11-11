@@ -13,12 +13,8 @@ export class Account extends SoftDeleteEntity {
   @Column({ name: 'password_hash', type: 'varchar', length: 100, nullable: true })
   passwordHash: string;
 
-  @Column({ name: 'user_id', type: 'char', length: 50 })
-  userId: string;
-
   // 사용자와의 일대일 관계 설정 (역방향)
   @OneToOne(() => User, user => user.account)
-  @JoinColumn({ name: 'user_id' })
   user: User;
 
   // 첫 로그인 여부
