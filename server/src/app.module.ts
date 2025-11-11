@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '@/database/database.module';
+import { LoggerModule } from 'nestjs-pino';
 import { CommonModule } from '@/common/common.module';
 import { AuthModule } from '@/auth/auth.module';
 import { CategoryModule } from '@/category/category.module';
@@ -13,6 +14,7 @@ import { HistoryModule } from '@/history/history.module';
 import { FileModule } from '@/file/file.module';
 import { HeaderAssetModule } from '@/header-asset/header-asset.module';
 import { HealthModule } from '@/health/health.module';
+import { OpenTelemetryModule } from 'nestjs-otel';
 
 // Root application module
 @Module({
@@ -27,6 +29,19 @@ import { HealthModule } from '@/health/health.module';
     }),
     CommonModule,
     DatabaseModule,
+    LoggerModule.forRoot({
+      pinoHttp: {
+        transport:
+          process.env.NODE_ENV !== 'production'
+            ? { target: 'pino-pretty' } // 개발 시 컬러 + 가독성 로그
+            : undefined,
+      },
+    }),
+    OpenTelemetryModule.forRoot({
+      metrics: {
+        hostMetrics: true,
+      },
+    }),
     CategoryModule,
     BoardModule,
     ScheduleModule,

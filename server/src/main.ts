@@ -1,8 +1,9 @@
 import { NestFactory } from '@nestjs/core';
-import { LogLevel, Logger } from '@nestjs/common';
-import { ValidationPipe } from '@nestjs/common';
+import { LogLevel, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from '@/app.module';
+import { Logger } from 'nestjs-pino';
+import otelSDK from '../metrics/telemetry/tracing';
 
 // 로그 레벨 설정 함수
 const getLogLevels = (): LogLevel[] => {
@@ -24,13 +25,14 @@ const getLogLevels = (): LogLevel[] => {
 
 // 환경변수 로드
 async function bootstrap() {
-  // HTTP 요청 로깅 미들웨어
-  const logger = new Logger('HTTP');
+  await otelSDK.start();
 
   // Nest App 인스턴스 생성
   const app = await NestFactory.create(AppModule, {
     logger: getLogLevels(),
   });
+
+  app.useLogger(app.get(Logger));
 
   // Global validation pipe
   app.useGlobalPipes(
@@ -42,10 +44,9 @@ async function bootstrap() {
   );
 
   app.use((req, res, next) => {
-    logger.log(`${req.method} ${req.url}`);
-
+    app.get(Logger).log(`${req.method} ${req.url}`);
     res.on('finish', () => {
-      logger.log(`${req.method} ${req.url} - ${res.statusCode}`);
+      app.get(Logger).log(`${req.method} ${req.url} - ${res.statusCode}`);
     });
 
     next();
