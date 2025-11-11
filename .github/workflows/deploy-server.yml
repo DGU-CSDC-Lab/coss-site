@@ -181,6 +181,7 @@ jobs:
             REPOSITORY_NAME=${{ secrets.ECR_REPOSITORY }}
             SWAGGER_SERVER_URL=${{ secrets.SWAGGER_PRODUCTION_SERVER_URL }}
             ALLOWED_ORIGINS=${{ secrets.SWAGGER_ALLOWED_ORIGINS }}
+            FRONTEND_URL=${{ secrets.FRONTEND_URL }}
             SMTP_HOST=${{ secrets.SMTP_HOST }}
             SMTP_PORT=${{ secrets.SMTP_PORT }}
             SMTP_USER=${{ secrets.SMTP_USER }}
