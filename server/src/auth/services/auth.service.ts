@@ -357,7 +357,11 @@ export class AuthService {
 
       const users = await this.userRepository.find({
         where: {
-          role: In([UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR]),
+          role: In([
+            UserRole.ADMIN,
+            UserRole.SUPER_ADMIN,
+            UserRole.ADMINISTRATOR,
+          ]),
         },
         relations: ['account'],
       });
@@ -503,11 +507,15 @@ export class AuthService {
     request: UpdateUserPermissionRequest,
   ): Promise<void> {
     try {
-      this.logger.log(`Set user permission request: ${requesterId} -> ${request.userId}`);
+      this.logger.log(
+        `Set user permission request: ${requesterId} -> ${request.userId}`,
+      );
 
       // 자기 자신의 권한을 변경하려는 경우 방지
       if (requesterId === request.userId) {
-        this.logger.warn(`Set user permission failed - cannot change own permission: ${requesterId}`);
+        this.logger.warn(
+          `Set user permission failed - cannot change own permission: ${requesterId}`,
+        );
         throw AuthException.cannotUpdateSelf();
       }
 
