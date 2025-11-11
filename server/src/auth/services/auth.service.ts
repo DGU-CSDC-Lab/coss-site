@@ -502,6 +502,81 @@ export class AuthService {
     }
   }
 
+  // 5.2.1. 비밀번호 설정 링크 재발급
+  async resendPasswordLink(
+    requesterId: string,
+    targetUserId: string,
+  ): Promise<void> {
+    try {
+      this.logger.debug(`Resend password link attempt for user: ${targetUserId}`);
+
+      // 요청자 권한 확인
+      const requester = await this.userRepository.findOne({
+        where: { id: requesterId },
+      });
+      if (!requester) throw AuthException.notFoundUser(requesterId);
+
+      // 대상 사용자 확인
+      const targetUser = await this.userRepository.findOne({
+        where: { id: targetUserId },
+        relations: ['account'],
+      });
+      if (!targetUser) throw AuthException.notFoundUser(targetUserId);
+
+      // 권한 검증 (자신보다 낮은 권한만 가능)
+      if (requester.role === UserRole.SUPER_ADMIN && targetUser.role !== UserRole.ADMIN) {
+        throw AuthException.insufficientPermissions();
+      } else if (requester.role === UserRole.ADMIN) {
+        throw AuthException.insufficientPermissions();
+      }
+
+      // 최초 로그인 사용자인지 확인
+      if (!targetUser.isFirstLogin) {
+        throw new Error('이미 비밀번호가 설정된 사용자입니다.');
+      }
+
+      // 기존 토큰 무효화
+      await this.passwordResetTokenRepository.update(
+        { userId: targetUserId, type: 'FIRST_LOGIN' },
+        { isUsed: true }
+      );
+
+      // 새 토큰 생성
+      const tokenPayload = {
+        userId: targetUserId,
+        email: targetUser.account.email,
+        type: 'FIRST_LOGIN',
+      };
+      const token = this.jwtService.sign(tokenPayload, { expiresIn: '24h' });
+
+      // 새 토큰 저장
+      const resetToken = this.passwordResetTokenRepository.create({
+        token,
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        type: 'FIRST_LOGIN',
+        user: targetUser,
+        userId: targetUserId,
+      });
+      await this.passwordResetTokenRepository.save(resetToken);
+
+      // 이메일 재발송
+      const setPasswordUrl = `${process.env.FRONTEND_URL}/auth/set-password?token=${token}`;
+      await this.sendAdminPasswordSetupEmail(
+        targetUser.account.email,
+        targetUser.username,
+        setPasswordUrl,
+      );
+
+      this.logger.log(`Password link resent successfully for user: ${targetUserId}`);
+    } catch (error) {
+      this.logger.error(
+        `Resend password link failed for user ${targetUserId}: ${error.message}`,
+        error.stack,
+      );
+      throw CommonException.internalServerError(error.message);
+    }
+  }
+
   // 5.3. 사용자 권한 변경
   async updateUserPermission(
     requesterId: string,
