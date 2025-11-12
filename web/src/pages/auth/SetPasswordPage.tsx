@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { authApi } from '@/lib/api/auth'
 import Button from '@/components/common/Button'
 import Input from '@/components/common/Input'
@@ -12,6 +13,8 @@ export default function SetPasswordPage() {
   const navigate = useNavigate()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [tokenValid, setTokenValid] = useState(false)
   const [checking, setChecking] = useState(true)
@@ -93,27 +96,53 @@ export default function SetPasswordPage() {
         <div className="h-6" />
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
+          <div className="relative">
             <Input
-              type="password"
+              type={showPassword ? 'text' : 'password'}
               value={password}
               onChange={setPassword}
               placeholder="새 비밀번호 (8자 이상)"
               size="lg"
-              className="w-full"
+              className="w-full pr-12"
               required
+            />
+            <Button
+              onClick={() => setShowPassword(!showPassword)}
+              variant="custom"
+              iconOnly
+              icon={
+                showPassword ? (
+                  <EyeIcon className="h-5 w-5" />
+                ) : (
+                  <EyeSlashIcon className="h-5 w-5" />
+                )
+              }
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
             />
           </div>
 
-          <div>
+          <div className="relative">
             <Input
-              type="password"
+              type={showConfirmPassword ? 'text' : 'password'}
               value={confirmPassword}
               onChange={setConfirmPassword}
               placeholder="비밀번호 확인"
               size="lg"
-              className="w-full"
+              className="w-full pr-12"
               required
+            />
+            <Button
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              variant="custom"
+              iconOnly
+              icon={
+                showConfirmPassword ? (
+                  <EyeIcon className="h-5 w-5" />
+                ) : (
+                  <EyeSlashIcon className="h-5 w-5" />
+                )
+              }
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
             />
           </div>
 

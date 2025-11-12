@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline'
 import { authApi } from '@/lib/api/auth'
@@ -11,7 +11,7 @@ import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 
 export default function LoginForm() {
   const navigate = useNavigate()
-  const { login } = useAuthStore()
+  const { login, logout } = useAuthStore()
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
@@ -19,6 +19,10 @@ export default function LoginForm() {
     password: '',
   })
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    logout()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

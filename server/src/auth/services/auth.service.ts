@@ -355,13 +355,32 @@ export class AuthService {
     try {
       this.logger.debug(`Admin user list request by: ${userId}`);
 
+      // 요청자 권한 확인
+      const requester = await this.userRepository.findOne({
+        where: { id: userId },
+      });
+      if (!requester) throw AuthException.notFoundUser(userId);
+
+      // 권한에 따라 조회할 역할 결정
+      let allowedRoles: UserRole[] = [];
+      if (requester.role === UserRole.ADMINISTRATOR) {
+        // ADMINISTRATOR는 모든 관리자 조회 가능
+        allowedRoles = [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR];
+      } else if (requester.role === UserRole.SUPER_ADMIN) {
+        // SUPER_ADMIN은 ADMIN만 조회 가능
+        allowedRoles = [UserRole.ADMIN];
+      } else if (requester.role === UserRole.ADMIN) {
+        // ADMIN은 아무도 조회 불가
+        allowedRoles = [];
+      }
+
+      if (allowedRoles.length === 0) {
+        return [];
+      }
+
       const users = await this.userRepository.find({
         where: {
-          role: In([
-            UserRole.ADMIN,
-            UserRole.SUPER_ADMIN,
-            UserRole.ADMINISTRATOR,
-          ]),
+          role: In(allowedRoles),
         },
         relations: ['account'],
       });
@@ -431,7 +450,7 @@ export class AuthService {
       // 권한 검증
       const targetRole = request.permission as UserRole;
       if (requester.role === UserRole.SUPER_ADMIN) {
-        // SUPER_ADMIN은 ADMIN만 생성 가능
+        // SUPER_ADMIN은 ADMIN만 생성 가능 (자신과 같은 레벨 불가)
         if (targetRole !== UserRole.ADMIN) {
           throw AuthException.insufficientPermissions();
         }
@@ -632,7 +651,7 @@ export class AuthService {
       // 권한 검증
       const targetRole = request.permission as UserRole;
       if (requester.role === UserRole.SUPER_ADMIN) {
-        // SUPER_ADMIN은 ADMIN만 설정 가능
+        // SUPER_ADMIN은 ADMIN만 설정 가능 (자신과 같은 레벨 불가)
         if (targetRole !== UserRole.ADMIN) {
           throw AuthException.insufficientPermissions();
         }
