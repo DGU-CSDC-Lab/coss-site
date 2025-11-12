@@ -363,6 +363,9 @@ export class AuthService {
 
       // 권한에 따라 조회할 역할 결정
       let allowedRoles: UserRole[] = [];
+      allowedRoles = [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR];
+      
+      /*
       if (requester.role === UserRole.ADMINISTRATOR) {
         // ADMINISTRATOR는 모든 관리자 조회 가능
         allowedRoles = [UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR];
@@ -372,7 +375,7 @@ export class AuthService {
       } else if (requester.role === UserRole.ADMIN) {
         // ADMIN은 아무도 조회 불가
         allowedRoles = [];
-      }
+      }*/
 
       if (allowedRoles.length === 0) {
         return [];
