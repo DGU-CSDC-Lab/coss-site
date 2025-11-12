@@ -982,7 +982,7 @@ export class AuthService {
           isUsed: false,
           type: 'FIRST_LOGIN',
         },
-        relations: ['user'],
+        relations: ['user', 'user.account'],
       });
 
       if (!resetToken) {
