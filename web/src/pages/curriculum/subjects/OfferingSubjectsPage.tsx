@@ -35,7 +35,7 @@ export default function OfferingSubjectsPage() {
         semester: selectedSemester,
         [searchType]: keyword || undefined,
         page: 1,
-        size: 1000, // 충분히 큰 값으로 설정하여 모든 데이터 가져오기
+        size: 499, // 충분히 큰 값으로 설정하여 모든 데이터 가져오기
       })
       setCourses(response)
     } catch (error) {

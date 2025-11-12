@@ -21,7 +21,7 @@ export class PaginationQuery {
     description: '페이지당 항목 수',
     example: 20,
     minimum: 1,
-    maximum: 100,
+    maximum: 500,
     default: 20,
     required: false,
   })
@@ -29,7 +29,7 @@ export class PaginationQuery {
   @Transform(({ value }) => parseInt(value))
   @IsInt()
   @Min(1)
-  @Max(100)
+  @Max(500)
   size?: number = 20;
 }
 
