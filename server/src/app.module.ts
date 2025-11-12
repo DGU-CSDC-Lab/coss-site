@@ -15,7 +15,7 @@ import { HeaderAssetModule } from '@/header-asset/header-asset.module';
 import { HealthModule } from '@/health/health.module';
 import { OpenTelemetryModule } from 'nestjs-otel';
 import { WinstonModule } from 'nest-winston';
-import * as LokiTransport from 'winston-loki';
+const LokiTransport = require('winston-loki');
 import { format, transports } from 'winston';
 import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
 
