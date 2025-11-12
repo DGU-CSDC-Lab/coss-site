@@ -16,8 +16,6 @@ import { canManagePost } from '@/utils/roleDepth'
 
 export default function AdminPostsPage() {
   const { user, role } = useAuthStore()
-  console.log('Current user role:', role)
-  console.log('Current user ID:', user?.id)
   const [posts, setPosts] = useState<PagedResponse<Post> | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
