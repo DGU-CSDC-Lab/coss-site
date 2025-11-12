@@ -19,12 +19,12 @@ export const getRoleOptions = (role: string) => {
   if (role === 'ADMINISTRATOR') {
     return [
       ...baseOptions,
-      { value: 'ADMIN', label: '관리자' },
-      { value: 'SUPER_ADMIN', label: '최고 관리자' },
+      { value: 'ADMIN', label: '일반 관리자' },
+      { value: 'SUPER_ADMIN', label: '중간 관리자' },
     ]
   }
   if (role === 'SUPER_ADMIN') {
-    return [...baseOptions, { value: 'ADMIN', label: '관리자' }]
+    return [...baseOptions, { value: 'ADMIN', label: '일반 관리자' }]
   }
   return baseOptions
 }
