@@ -90,6 +90,19 @@ export default function AdminPopupsCreatePage() {
     },
   })
 
+  // 수정 모드에서 기존 이미지 URL을 관리
+  const [displayImageUrl, setDisplayImageUrl] = useState('')
+  const [fileName, setFileName] = useState('')
+
+  useEffect(() => {
+    if (popup?.imageUrl && !imageUrl) {
+      setDisplayImageUrl(popup.imageUrl)
+      setFileName(popup.title || '기존 이미지')
+    } else if (imageUrl) {
+      setDisplayImageUrl(imageUrl)
+    }
+  }, [popup?.imageUrl, imageUrl])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -265,24 +278,28 @@ export default function AdminPopupsCreatePage() {
                 <Label className="mb-2" optional={true}>
                   이미지
                 </Label>
-                <input
+                <Input
                   type="file"
                   accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md text-body-18-medium text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:text-medium file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
+                  value={fileName}
+                  fileUrl={displayImageUrl}
+                  onFileChange={handleImageChange}
+                  onChange={setFileName}
+                  size="lg"
+                  className="w-full"
                 />
                 {imageUploading && (
                   <p className="mt-2 text-caption-14 text-gray-600">
                     업로드 중...
                   </p>
                 )}
-                {imageUrl && (
+                {displayImageUrl && (
                   <div className="mt-3">
                     <p className="text-caption-14 text-gray-600 mb-2">
-                      미리보기:
+                      {imageUrl ? '새 이미지 미리보기:' : '현재 이미지:'}
                     </p>
                     <img
-                      src={imageUrl}
+                      src={displayImageUrl}
                       alt="미리보기"
                       className="w-full max-w-xs h-auto rounded-md border"
                     />
