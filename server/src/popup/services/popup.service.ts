@@ -94,9 +94,14 @@ export class PopupService {
    */
   async findActive(): Promise<PopupResponse[]> {
     try {
+      // Asia/Seoul 시간대로 현재 시간 생성
       const now = new Date();
+      const kstOffset = 9 * 60; // KST는 UTC+9
+      const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+      const kstTime = new Date(utc + (kstOffset * 60000));
+      
       this.logger.log(
-        `Finding active popups for current time: ${now.toISOString()}`,
+        `Finding active popups for KST time: ${kstTime.toISOString()} (Local: ${now.toISOString()})`,
       );
 
       // 현재 시점에서 활성화된 팝업 조회
@@ -104,18 +109,17 @@ export class PopupService {
         .createQueryBuilder('popup')
         .where('popup.deletedAt IS NULL') // 소프트 삭제되지 않은 항목
         .andWhere('popup.isActive = :isActive', { isActive: true }) // 활성화된 항목
-        .andWhere('popup.startDate <= :now', { now }) // 시작일이 현재 시점 이전
-        .andWhere('popup.endDate >= :now', { now }) // 종료일이 현재 시점 이후
+        .andWhere('popup.startDate <= :now', { now: kstTime }) // 시작일이 현재 시점 이전
+        .andWhere('popup.endDate >= :now', { now: kstTime }) // 종료일이 현재 시점 이후
         .orderBy('popup.priority', 'DESC') // 높은 우선순위가 먼저 표시
         .getMany();
 
       this.logger.debug(`Found ${popups.length} active popups`);
 
-      // 활성화된 팝업들의 제목 로깅 (디버깅용)
-      if (popups.length > 0) {
-        const titles = popups.map(p => p.title).join(', ');
-        this.logger.debug(`Active popup titles: ${titles}`);
-      }
+      // 디버깅을 위한 상세 로깅
+      popups.forEach(popup => {
+        this.logger.debug(`Popup: ${popup.title}, Start: ${popup.startDate.toISOString()}, End: ${popup.endDate.toISOString()}, Active: ${popup.isActive}`);
+      });
 
       return popups.map(popup => this.toResponse(popup));
     } catch (error) {
