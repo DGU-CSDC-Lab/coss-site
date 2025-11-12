@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { coursesApi } from '@/lib/api/courses'
 import Title from '@/components/common/title/Title'
 import Button from '@/components/common/Button'
+import Input from '@/components/common/Input'
 import Label from '@/components/common/Label'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import Information from '@/components/common/Information'
@@ -17,6 +18,7 @@ export default function AdminCourseMasterBulkUploadPage() {
   const alert = useAlert()
   const [loading, setLoading] = useState(false)
   const [file, setFile] = useState<File | null>(null)
+  const [fileName, setFileName] = useState('')
 
   const hasChanges = !!file
   const exitWarning = useUnsavedChanges({ hasChanges })
@@ -25,6 +27,7 @@ export default function AdminCourseMasterBulkUploadPage() {
     const selectedFile = e.target.files?.[0]
     if (selectedFile) {
       setFile(selectedFile)
+      setFileName(selectedFile.name)
     }
   }
 
@@ -130,17 +133,15 @@ export default function AdminCourseMasterBulkUploadPage() {
                 <Label required={true} className="mb-2">
                   Excel 파일 선택
                 </Label>
-                <input
+                <Input
                   type="file"
                   accept=".xlsx,.xls"
-                  onChange={handleFileChange}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md text-body-14-regular text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
+                  value={fileName}
+                  onFileChange={handleFileChange}
+                  onChange={setFileName}
+                  size="lg"
+                  className="w-full"
                 />
-                {file && (
-                  <p className="mt-2 text-caption-14 text-green-600">
-                    선택된 파일: {file.name}
-                  </p>
-                )}
               </div>
             </div>
           </div>

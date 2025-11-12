@@ -19,8 +19,7 @@ import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import ExitWarningModal from '@/components/common/ExitWarningModal'
-import FileUpload from '@/components/admin/FileUpload'
-import { UploadResult } from '@/utils/fileUpload'
+import { useFileUpload } from '@/hooks/useFileUpload'
 
 export default function AdminCourseOfferingCreatePage() {
   const navigate = useNavigate()
@@ -31,8 +30,21 @@ export default function AdminCourseOfferingCreatePage() {
   const [course, setCourse] = useState<CourseOffering | null>(null)
   const [masters, setMasters] = useState<CourseMaster[]>([])
   const [masterLoading, setMasterLoading] = useState(false)
-  const [files, setFiles] = useState<UploadResult[]>([])
+  const [fileName, setFileName] = useState('')
+  const [fileUrl, setFileUrl] = useState('')
   const isEdit = !!params.id
+
+  const fileUpload = useFileUpload({
+    ownerType: 'course',
+    ownerId: params.id || 'course-temp',
+    onSuccess: (result) => {
+      setFileUrl(result.publicUrl || '')
+      setFormData({ ...formData, syllabusUrl: result.publicUrl || '' })
+    },
+    onError: (error) => {
+      alert.error('파일 업로드 중 오류가 발생했습니다.')
+    }
+  })
 
   const [formData, setFormData] = useState({
     masterId: '',
@@ -88,6 +100,12 @@ export default function AdminCourseOfferingCreatePage() {
 
       setFormData(data)
       setOriginalData(data)
+      
+      // 기존 파일 정보 설정
+      if (courseData.syllabusUrl) {
+        setFileUrl(courseData.syllabusUrl)
+        setFileName('기존 강의계획서')
+      }
     } catch (error) {
       alert.error('개설 교과목 정보를 불러올 수 없습니다.')
       navigate('/admin/courses/offering')
@@ -96,8 +114,19 @@ export default function AdminCourseOfferingCreatePage() {
     }
   }
 
-  const semesterOptions = SEMESTER_OPTIONS
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
 
+    setFileName(file.name)
+    try {
+      await fileUpload.upload(file, false)
+    } catch (error) {
+      setFileName('')
+    }
+  }
+
+  const semesterOptions = SEMESTER_OPTIONS
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -116,8 +145,7 @@ export default function AdminCourseOfferingCreatePage() {
           classTime: formData.classTime || undefined,
           instructor: formData.instructor || undefined,
           classroom: formData.classroom || undefined,
-          syllabusUrl:
-            files.length > 0 ? files[0].publicUrl || formData.syllabusUrl || undefined : formData.syllabusUrl || undefined,
+          syllabusUrl: fileUrl || formData.syllabusUrl || undefined,
         }
 
         await coursesApi.updateOffering(params.id, courseData)
@@ -130,8 +158,7 @@ export default function AdminCourseOfferingCreatePage() {
           classTime: formData.classTime || undefined,
           instructor: formData.instructor || undefined,
           classroom: formData.classroom || undefined,
-          syllabusUrl:
-            files.length > 0 ? files[0].publicUrl || formData.syllabusUrl || undefined : formData.syllabusUrl || undefined,
+          syllabusUrl: fileUrl || formData.syllabusUrl || undefined,
         }
 
         await coursesApi.createOffering(courseData)
@@ -285,14 +312,21 @@ export default function AdminCourseOfferingCreatePage() {
                   <Label className="mb-2" optional={true}>
                     강의계획서 파일
                   </Label>
-                  <FileUpload
-                    initialFiles={files}
-                    onFilesChange={setFiles}
-                    maxFiles={1}
-                    maxSize={10 * 1024 * 1024}
-                    ownerType="course"
-                    ownerId={'course-temp'}
+                  <Input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    value={fileName}
+                    fileUrl={fileUrl}
+                    onFileChange={handleFileChange}
+                    onChange={setFileName}
+                    size="lg"
+                    className="w-full"
                   />
+                  {fileUpload.uploading && (
+                    <p className="mt-2 text-caption-14 text-gray-600">
+                      업로드 중...
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
