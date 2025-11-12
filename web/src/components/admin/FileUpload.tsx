@@ -14,7 +14,7 @@ interface FileUploadProps {
   maxFiles?: number
   accept?: string
   maxSize?: number
-  ownerType: 'post' | 'popup' | 'faculty' | 'header'
+  ownerType: 'post' | 'popup' | 'faculty' | 'header' | 'feedback' | 'course'
   ownerId: string
 }
 
@@ -34,8 +34,6 @@ export default function FileUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const alert = useAlert()
 
-  console.log('Initial files:', initialFiles)
-  
   useEffect(() => {
     if (initialFiles.length > 0) {
       setFiles(initialFiles)
@@ -96,6 +94,10 @@ export default function FileUpload({
     const updatedFiles = files.filter((_, i) => i !== index)
     setFiles(updatedFiles)
     onFilesChange(updatedFiles)
+  }
+
+  const handleFileClick = (file: UploadResult) => {
+    window.open(file.publicUrl, '_blank')
   }
 
   /**
@@ -198,8 +200,12 @@ export default function FileUpload({
                 key={index}
                 className="flex items-center justify-between p-3 bg-surface rounded"
               >
-                <div className="flex-1">
-                  <div className="text-caption-14 text-text">
+                <div
+                  className="flex-1 cursor-pointer"
+                  onClick={() => handleFileClick(file)}
+                  title="클릭하여 파일 보기"
+                >
+                  <div className="text-caption-14 text-info-600 hover:underline">
                     {file.fileName}
                   </div>
                   <div className="text-caption-12 text-text-light">

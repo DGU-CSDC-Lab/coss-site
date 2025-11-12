@@ -29,6 +29,8 @@ import {
 } from '@/file/dto/file.dto';
 import { PagedResponse } from '@/common';
 import { File } from '@/file/entities/file.entity';
+import { UserRole } from '@/auth/entities';
+import { Roles } from '@/auth/decorators/roles.decorator';
 
 @ApiTags('Files')
 @Controller('api/v1/files')
@@ -37,6 +39,7 @@ export class FileController {
 
   @Post('presigned-url')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: 'Presigned URL 발급' })
   @ApiResponse({ status: 400, description: '업로드 할 수 없는 파일 타입이거나 파일 크기가 너무 큼' })
@@ -52,6 +55,7 @@ export class FileController {
 
   @Post('register')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '파일 등록' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -86,6 +90,7 @@ export class FileController {
 
   @Delete(':fileId')
   @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '파일 삭제' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })

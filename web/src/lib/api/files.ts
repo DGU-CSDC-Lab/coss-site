@@ -2,7 +2,7 @@ import { api } from '@/lib/apiClient'
 import { PagedResponse } from '@/lib/apiClient'
 
 export interface OwnerData {
-  ownerType: 'post' | 'popup' | 'faculty' | 'header'
+  ownerType: 'post' | 'popup' | 'faculty' | 'header' | 'feedback' | 'course'
   ownerId: string
 }
 
@@ -10,7 +10,7 @@ export interface PresignedUrlRequest {
   fileName: string
   fileSize: number
   mimeType: string
-  ownerType: 'post' | 'popup' | 'faculty' | 'header'
+  ownerType: 'post' | 'popup' | 'faculty' | 'header' | 'feedback' | 'course'
   ownerId: string
 }
 
@@ -25,7 +25,7 @@ export interface RegisterFileRequest {
   mimeType: string
   fileSize: number
   fileName: string
-  ownerType: 'post' | 'popup' | 'faculty' | 'header'
+  ownerType: 'post' | 'popup' | 'faculty' | 'header' | 'feedback' | 'course'
   ownerId: string
 }
 

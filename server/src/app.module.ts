@@ -12,6 +12,7 @@ import { FacultyModule } from '@/faculty/faculty.module';
 import { HistoryModule } from '@/history/history.module';
 import { FileModule } from '@/file/file.module';
 import { HeaderAssetModule } from '@/header-asset/header-asset.module';
+import { FeedbackModule } from '@/feedback/feedback.module';
 import { HealthModule } from '@/health/health.module';
 import { OpenTelemetryModule } from 'nestjs-otel';
 import { WinstonModule } from 'nest-winston';
@@ -91,6 +92,7 @@ import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
     HistoryModule,
     FileModule,
     HeaderAssetModule,
+    FeedbackModule,
     HealthModule,
     AuthModule,
   ],

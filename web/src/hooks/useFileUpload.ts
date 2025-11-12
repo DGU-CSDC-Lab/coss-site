@@ -1,15 +1,14 @@
 import { useState } from 'react'
 import { 
   uploadFile, 
-  uploadFileToS3Only, 
-  uploadImageToS3Only,
+  uploadFileToS3Only,
   UploadResult, 
   FileUploadError,
   UploadOptions 
 } from '@/utils/fileUpload'
 
 interface UseFileUploadOptions {
-  ownerType: 'post' | 'popup' | 'faculty' | 'header'
+  ownerType: 'post' | 'popup' | 'faculty' | 'header' | 'feedback' | 'course'
   ownerId: string
   onSuccess?: (result: UploadResult, file: File) => void
   onError?: (error: Error) => void
@@ -70,7 +69,7 @@ export const useFileUpload = (options: UseFileUploadOptions) => {
 
 // 이미지 전용 훅 (기존 useImageUpload 대체)
 export const useImageUpload = (options: {
-  ownerType?: 'post' | 'popup' | 'faculty' | 'header'
+  ownerType?: 'post' | 'popup' | 'faculty' | 'header' | 'feedback' | 'course'
   ownerId?: string
   onSuccess?: (result: UploadResult, file: File) => void
   onError?: (error: Error) => void
@@ -116,6 +115,9 @@ export const useImageUpload = (options: {
       setFileName('')
       URL.revokeObjectURL(previewUrl)
       throw error
+    } finally {
+      // 같은 파일 재선택을 위해 input value 초기화
+      e.target.value = ''
     }
   }
 

@@ -7,6 +7,8 @@ export enum OwnerType {
   POPUP = 'popup',
   FACULTY = 'faculty',
   HEADER = 'header',
+  COURSE = 'course',
+  FEEDBACK = 'feedback',
 }
 
 export enum FileStatus {

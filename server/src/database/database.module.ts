@@ -4,7 +4,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseSeeder } from '@/database/database.seeder';
 
 // Import entities directly from domains
-import { Account, User, PendingUser, PasswordResetToken } from '@/auth/entities';
+import {
+  Account,
+  User,
+  PendingUser,
+  PasswordResetToken,
+} from '@/auth/entities';
 import { BoardPost } from '@/board/entities';
 import { AcademicSchedule } from '@/schedule/entities';
 import { File } from '@/file/entities';
@@ -14,6 +19,7 @@ import { History } from '@/history/entities';
 import { CourseMaster, CourseOffering } from '@/course/entities';
 import { Category } from '@/category/entities';
 import { HeaderAsset } from '@/header-asset/entities';
+import { Feedback } from '@/feedback/entities';
 
 @Module({
   imports: [
@@ -39,14 +45,17 @@ import { HeaderAsset } from '@/header-asset/entities';
           File,
           Popup,
           FacultyMember,
+          Feedback,
           History,
           CourseMaster,
           CourseOffering,
           Category,
           HeaderAsset,
         ],
-        synchronize: process.env.NODE_ENV !== 'production', // 임시로 활성화
-        logging: process.env.NODE_ENV === 'production' ? ['error', 'warn'] : true, // 프로덕션에서는 에러/경고만
+        synchronize: process.env.NODE_ENV !== 'production',
+        // 임시로 활성화
+        logging:
+          process.env.NODE_ENV === 'production' ? ['error', 'warn'] : true, // 프로덕션에서는 에러/경고만
         dropSchema: false, // production에서는 false로 설정
       }),
     }),

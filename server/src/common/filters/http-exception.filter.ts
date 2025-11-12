@@ -18,7 +18,7 @@ import { JsonWebTokenError } from '@nestjs/jwt';
  * - 기타 예외: 500 Internal Server Error로 처리하고 로깅
  * - 모든 에러에 추적 ID(traceId) 자동 생성
  */
-@Catch() // 모든 예외를 캐치
+@Catch(HttpException) // 모든 예외를 캐치
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
   /**

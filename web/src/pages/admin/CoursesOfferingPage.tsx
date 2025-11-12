@@ -213,6 +213,9 @@ export default function CoursesOfferingPage() {
                   <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
                     강의실
                   </th>
+                  <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+                    강의계획서
+                  </th>
                   <th className="px-4 py-3 text-right font-body-18-medium text-gray-900">
                     관리
                   </th>
@@ -253,6 +256,20 @@ export default function CoursesOfferingPage() {
                       </td>
                       <td className="px-4 py-3 font-body-14-medium text-gray-600">
                         {course.classroom || '-'}
+                      </td>
+                      <td className="px-4 py-3 font-body-14-medium text-gray-600">
+                        {course.syllabusUrl ? (
+                          <a
+                            href={course.syllabusUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-info-600 hover:underline"
+                          >
+                            강의계획서 보기
+                          </a>
+                        ) : (
+                          '-'
+                        )}
                       </td>
                       <td className="px-4 py-3 font-body-14-medium text-gray-600">
                         <div className="flex items-center justify-end gap-2">

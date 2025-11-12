@@ -11,6 +11,7 @@ import {
   ClockIcon,
   BookOpenIcon,
   ShieldCheckIcon,
+  ChatBubbleLeftRightIcon,
 } from '@heroicons/react/24/outline'
 import { postsApi } from '@/lib/api/posts'
 import { authApi, UserInfoResponse } from '@/lib/api/auth'
@@ -367,6 +368,31 @@ export default function AdminPage() {
               </ul>
             </div>
           )}
+
+          {/* 개발자 건의 섹션 */}
+          <div className="bg-white border border-gray-100 rounded-md p-4">
+            <div className="text-body-18-medium">개발자 지원</div>
+            <div className="h-4"></div>
+            <hr className="border-t border-gray-200 mb-4" />
+            <ul className="space-y-3">
+              <li>
+                <Link
+                  to="/admin/feedback"
+                  className="flex items-center justify-between p-2 rounded hover:bg-gray-100 transition-colors w-full"
+                >
+                  <div className="flex items-center gap-3">
+                    <ChatBubbleLeftRightIcon className="w-5 h-5 text-gray-400" />
+                    <span className="text-body-14-medium text-gray-700">
+                      개발자에게 건의
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <ChevronRightIcon className="w-5 h-5 text-gray-400" />
+                  </div>
+                </Link>
+              </li>
+            </ul>
+          </div>
 
           {/* 계정 관리 섹션 */}
           <div className="bg-white border border-gray-100 rounded-md p-4">

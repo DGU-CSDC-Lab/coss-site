@@ -58,6 +58,7 @@ import AdminHistoryCreatePage from '@/pages/admin/history/CreatePage'
 import AdminCoursesMasterPage from '@/pages/admin/CoursesMasterPage'
 import AdminUsersPage from '@/pages/admin/UsersPage'
 import AdminUsersCreatePage from '@/pages/admin/users/CreatePage'
+import AdminFeedbackPage from '@/pages/admin/FeedbackPage'
 
 export const router = createBrowserRouter([
   {
@@ -245,6 +246,10 @@ export const router = createBrowserRouter([
       {
         path: 'admin/users/create',
         element: <AdminUsersCreatePage />,
+      },
+      {
+        path: 'admin/feedback',
+        element: <AdminFeedbackPage />,
       },
       {
         path: 'admin/popups',

@@ -18,8 +18,9 @@ import Label from '@/components/common/Label'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import { useAlert } from '@/hooks/useAlert'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
-import { useFileUpload } from '@/hooks/useFileUpload'
 import ExitWarningModal from '@/components/common/ExitWarningModal'
+import FileUpload from '@/components/admin/FileUpload'
+import { UploadResult } from '@/utils/fileUpload'
 
 export default function AdminCourseOfferingCreatePage() {
   const navigate = useNavigate()
@@ -30,6 +31,7 @@ export default function AdminCourseOfferingCreatePage() {
   const [course, setCourse] = useState<CourseOffering | null>(null)
   const [masters, setMasters] = useState<CourseMaster[]>([])
   const [masterLoading, setMasterLoading] = useState(false)
+  const [files, setFiles] = useState<UploadResult[]>([])
   const isEdit = !!params.id
 
   const [formData, setFormData] = useState({
@@ -46,17 +48,6 @@ export default function AdminCourseOfferingCreatePage() {
   const hasChanges = JSON.stringify(formData) !== JSON.stringify(originalData)
   const exitWarning = useUnsavedChanges({ hasChanges })
 
-  const { upload, uploading: fileUploading, result: fileResult, reset: resetFile } = useFileUpload({
-    ownerType: 'post', // 또는 새로운 타입 'course' 추가 필요
-    ownerId: params.id || 'temp',
-    uploadOptions: {
-      allowedTypes: ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
-    },
-    onError: (error) => {
-      alert.error('파일 업로드 중 오류가 발생했습니다.')
-    }
-  })
-
   useEffect(() => {
     if (isEdit && params.id) {
       fetchCourse(params.id)
@@ -66,10 +57,10 @@ export default function AdminCourseOfferingCreatePage() {
   const searchMasters = async (query: string) => {
     try {
       setMasterLoading(true)
-      const response = await coursesApi.getMasters({ 
+      const response = await coursesApi.getMasters({
         subjectName: query || undefined,
-        page: 1, 
-        size: 10 
+        page: 1,
+        size: 10,
       })
       setMasters(response.items)
     } catch (error) {
@@ -84,7 +75,7 @@ export default function AdminCourseOfferingCreatePage() {
       setInitialLoading(true)
       const courseData = await coursesApi.getOffering(id)
       setCourse(courseData)
-      
+
       const data = {
         masterId: '', // API에서 masterId를 제공하지 않는 경우 빈 값
         year: courseData.year,
@@ -94,7 +85,7 @@ export default function AdminCourseOfferingCreatePage() {
         classroom: courseData.classroom || '',
         syllabusUrl: courseData.syllabusUrl || '',
       }
-      
+
       setFormData(data)
       setOriginalData(data)
     } catch (error) {
@@ -125,7 +116,8 @@ export default function AdminCourseOfferingCreatePage() {
           classTime: formData.classTime || undefined,
           instructor: formData.instructor || undefined,
           classroom: formData.classroom || undefined,
-          syllabusUrl: fileResult?.publicUrl || formData.syllabusUrl || undefined,
+          syllabusUrl:
+            files.length > 0 ? files[0].publicUrl || formData.syllabusUrl || undefined : formData.syllabusUrl || undefined,
         }
 
         await coursesApi.updateOffering(params.id, courseData)
@@ -138,7 +130,8 @@ export default function AdminCourseOfferingCreatePage() {
           classTime: formData.classTime || undefined,
           instructor: formData.instructor || undefined,
           classroom: formData.classroom || undefined,
-          syllabusUrl: fileResult?.publicUrl || formData.syllabusUrl || undefined,
+          syllabusUrl:
+            files.length > 0 ? files[0].publicUrl || formData.syllabusUrl || undefined : formData.syllabusUrl || undefined,
         }
 
         await coursesApi.createOffering(courseData)
@@ -212,7 +205,10 @@ export default function AdminCourseOfferingCreatePage() {
                     type="number"
                     value={formData.year.toString()}
                     onChange={value =>
-                      setFormData({ ...formData, year: parseInt(value) || new Date().getFullYear() })
+                      setFormData({
+                        ...formData,
+                        year: parseInt(value) || new Date().getFullYear(),
+                      })
                     }
                     placeholder="개설년도를 입력하세요"
                     className="w-full"
@@ -260,7 +256,9 @@ export default function AdminCourseOfferingCreatePage() {
                   <Input
                     type="text"
                     value={formData.instructor}
-                    onChange={value => setFormData({ ...formData, instructor: value })}
+                    onChange={value =>
+                      setFormData({ ...formData, instructor: value })
+                    }
                     placeholder="담당교원명을 입력하세요"
                     className="w-full"
                     size="lg"
@@ -287,32 +285,14 @@ export default function AdminCourseOfferingCreatePage() {
                   <Label className="mb-2" optional={true}>
                     강의계획서 파일
                   </Label>
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        try {
-                          const result = await upload(file, false) // S3만 업로드
-                          setFormData({ ...formData, syllabusUrl: result.publicUrl || '' })
-                        } catch (error) {
-                          // 에러는 useFileUpload에서 처리
-                        }
-                      }
-                    }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-md text-body-14-regular text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100"
+                  <FileUpload
+                    initialFiles={files}
+                    onFilesChange={setFiles}
+                    maxFiles={1}
+                    maxSize={10 * 1024 * 1024}
+                    ownerType="course"
+                    ownerId={'course-temp'}
                   />
-                  {fileUploading && (
-                    <p className="mt-2 text-caption-14 text-gray-600">
-                      업로드 중...
-                    </p>
-                  )}
-                  {fileResult?.publicUrl && (
-                    <p className="mt-2 text-caption-14 text-green-600">
-                      파일이 업로드되었습니다.
-                    </p>
-                  )}
                 </div>
               </div>
             </div>
@@ -332,7 +312,13 @@ export default function AdminCourseOfferingCreatePage() {
             radius="md"
             disabled={loading}
           >
-            {loading ? <LoadingSpinner size="md" /> : isEdit ? '개설 교과목 수정' : '개설 교과목 생성'}
+            {loading ? (
+              <LoadingSpinner size="md" />
+            ) : isEdit ? (
+              '개설 교과목 수정'
+            ) : (
+              '개설 교과목 생성'
+            )}
           </Button>
         </div>
       </div>

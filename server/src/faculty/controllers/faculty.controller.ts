@@ -67,6 +67,7 @@ export class FacultyController {
   @ApiResponse({ status: 401, description: '인증되지 않음' })
   @ApiResponse({ status: 403, description: '관리자 권한 필요' })
   @ApiResponse({ status: 404, description: '교수진을 찾을 수 없음' })
+  @HttpCode(HttpStatus.OK)
   async updateFaculty(
     @Param('id') id: string,
     @Body() updateDto: FacultyUpdate,

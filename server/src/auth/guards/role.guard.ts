@@ -31,7 +31,6 @@ export class RoleGuard implements CanActivate {
       throw CommonException.unauthorized('No token provided');
     }
 
-    console.log("Started:::");
     const payload = this.jwtService.verify(token);
     const user = await this.userRepository.findOne({
       where: { id: payload.sub },
