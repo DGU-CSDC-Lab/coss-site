@@ -18,7 +18,7 @@ import { JsonWebTokenError } from '@nestjs/jwt';
  * - 기타 예외: 500 Internal Server Error로 처리하고 로깅
  * - 모든 에러에 추적 ID(traceId) 자동 생성
  */
-@Catch(HttpException) // 모든 예외를 캐치
+@Catch() // 모든 예외를 캐치
 export class HttpExceptionFilter implements ExceptionFilter {
   private readonly logger = new Logger(HttpExceptionFilter.name);
   /**
@@ -57,7 +57,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = exceptionResponse;
         errorCode = this.getErrorCode(status);
       } else if (typeof exceptionResponse === 'object') {
-        // 객체 형태의 응답인 경우 (ValidationPipe 등에서 생성)
+        // 객체 형태의 응답인 경우 (커스텀 예외 포함)
         const responseObj = exceptionResponse as any;
         message = responseObj.message || exception.message;
         errorCode = responseObj.code || responseObj.error || this.getErrorCode(status);
