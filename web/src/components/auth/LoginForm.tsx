@@ -126,6 +126,14 @@ export default function LoginForm() {
         >
           {loading ? <LoadingSpinner size="md" /> : '로그인'}
         </Button>
+        <Button
+          type="button"
+          onClick={() => navigate('/reset-password')}
+          variant="custom"
+          className="w-full text-info-600 hover:underline"
+        >
+          비밀번호를 잊으셨나요?
+        </Button>
       </form>
     </div>
   )
