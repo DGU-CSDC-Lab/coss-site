@@ -24,7 +24,7 @@ import { Roles } from '@/auth/decorators/roles.decorator';
 import { UserRole } from '@/auth/entities/user.entity';
 import { LoginRequest, LoginResponse } from '@/auth/dto/login.dto';
 import { RefreshTokenRequest } from '@/auth/dto/token.dto';
-import { UpdateUserInfoRequest, UserInfoResponse } from '@/auth/dto/info.dto';
+import { AdminInfoResponse, UpdateUserInfoRequest, UserInfoResponse } from '@/auth/dto/info.dto';
 import {
   RegisterRequest,
   VerifyEmailRequest,
@@ -106,7 +106,7 @@ export class AuthController {
   @ApiOperation({ summary: '모든 유저의 관리자 권한 조회' })
   async getAllUserPermissions(
     @Request() auth,
-  ): Promise<(UserInfoResponse & { createdAt: Date })[]> {
+  ): Promise<(AdminInfoResponse)[]> {
     return this.service.getUserAdmin(auth.user.id);
   }
 

@@ -6,7 +6,7 @@ export interface AdminUser {
   username: string
   role: string
   isFirstLogin: boolean 
-  passwordTokenExpiry?: string // 비밀번호 설정 토큰 만료 시간
+  isLinkExpired?: boolean // 비밀번호 설정 토큰 만료 여부
   createdAt: string
   updatedAt: string
 }

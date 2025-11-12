@@ -25,7 +25,7 @@ import {
 } from '@/auth/entities';
 import { LoginRequest, LoginResponse } from '@/auth/dto/login.dto';
 import { RefreshTokenRequest } from '@/auth/dto/token.dto';
-import { UserInfoResponse, UpdateUserInfoRequest } from '@/auth/dto/info.dto';
+import { UserInfoResponse, UpdateUserInfoRequest, AdminInfoResponse } from '@/auth/dto/info.dto';
 import { UpdateUserPermissionRequest } from '@/auth/dto/auth.dto';
 import { VerificationCodeService } from '@/auth/services/verification-code.service';
 
@@ -351,7 +351,7 @@ export class AuthService {
   // 5.1. 모든 유저의 관리자 권한 조회
   async getUserAdmin(
     userId: string,
-  ): Promise<(UserInfoResponse & { createdAt: Date, isFirstLogin: boolean })[]> {
+  ): Promise<(AdminInfoResponse)[]> {
     try {
       this.logger.debug(`Admin user list request by: ${userId}`);
 
@@ -366,17 +366,43 @@ export class AuthService {
         relations: ['account'],
       });
 
-      this.logger.log(`Admin user list retrieved by: ${userId}`);
-      return users
-        .filter(user => user.account) // account가 null인 사용자 제외
-        .map(user => ({
+      const results = [];
+      for (const user of users) {
+        if (!user.account) continue; // account가 null인 사용자 제외
+
+        let isLinkExpired = false;
+        
+        // 최초 로그인 사용자인 경우 토큰 만료 여부 확인
+        if (user.isFirstLogin) {
+          const resetToken = await this.passwordResetTokenRepository.findOne({
+            where: {
+              userId: user.id,
+              type: 'FIRST_LOGIN',
+              isUsed: false,
+            },
+            order: { createdAt: 'DESC' },
+          });
+          
+          if (resetToken) {
+            isLinkExpired = new Date() > resetToken.expiresAt;
+          } else {
+            isLinkExpired = true; // 토큰이 없으면 만료된 것으로 간주
+          }
+        }
+
+        results.push({
           id: user.id,
           email: user.account.email,
           username: user.username,
           role: user.role,
           isFirstLogin: user.isFirstLogin,
           createdAt: user.createdAt,
-        }));
+          isLinkExpired,
+        });
+      }
+
+      this.logger.log(`Admin user list retrieved by: ${userId}`);
+      return results;
     } catch (error) {
       this.logger.error(
         `Admin user list error for userId: ${userId}`,

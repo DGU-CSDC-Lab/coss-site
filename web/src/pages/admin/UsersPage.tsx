@@ -117,8 +117,8 @@ export default function AdminUsersPage() {
   }
 
   const isTokenExpired = (user: AdminUser): boolean => {
-    if (!user.isFirstLogin || !user.passwordTokenExpiry) return false
-    return new Date(user.passwordTokenExpiry) < new Date()
+    if (!user.isFirstLogin || !user.isLinkExpired) return false
+    return user.isLinkExpired
   }
 
   const formatDate = (dateString: string) => {
