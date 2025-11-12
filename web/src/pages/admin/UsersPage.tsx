@@ -19,13 +19,6 @@ import {
   getNextRoles,
 } from '@/utils/roleDepth'
 
-const ROLE_OPTIONS = [
-  { value: '', label: '권한 선택' },
-  { value: 'ADMIN', label: '관리자' },
-  { value: 'SUPER_ADMIN', label: '중간 관리자' },
-  { value: 'ADMINISTRATOR', label: '최고 관리자' },
-]
-
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
@@ -201,7 +194,7 @@ export default function AdminUsersPage() {
                           ) : updateAllowed(user.role) ? (
                             <select
                               value={user.role}
-                              onChange={(e) => {
+                              onChange={e => {
                                 if (e.target.value !== user.role) {
                                   handleRoleChange(user.id, e.target.value)
                                 }
@@ -209,7 +202,9 @@ export default function AdminUsersPage() {
                               disabled={updating === user.id}
                               className="px-3 py-2 text-caption-14 rounded-md bg-white ring-1 ring-gray-100 focus:outline-none focus:ring-1 focus:bg-gray-100 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors cursor-pointer min-w-[120px]"
                             >
-                              <option value={user.role}>{ROLE_LABEL[user.role]}</option>
+                              <option value={user.role}>
+                                {ROLE_LABEL[user.role]}
+                              </option>
                               {getNextRoles(user.role).map(nextRole => (
                                 <option key={nextRole} value={nextRole}>
                                   {ROLE_LABEL[nextRole]}
@@ -243,8 +238,13 @@ export default function AdminUsersPage() {
                                     variant="info"
                                     size="sm"
                                     radius="md"
-                                    onClick={() => handleResendPasswordLink(user.id)}
-                                    disabled={resending === user.id || updating === user.id}
+                                    onClick={() =>
+                                      handleResendPasswordLink(user.id)
+                                    }
+                                    disabled={
+                                      resending === user.id ||
+                                      updating === user.id
+                                    }
                                   >
                                     링크 재발급
                                   </Button>
@@ -262,14 +262,18 @@ export default function AdminUsersPage() {
                                     onClick={() =>
                                       setDeleteModal({ isOpen: true, user })
                                     }
-                                    disabled={updating === user.id || resending === user.id}
+                                    disabled={
+                                      updating === user.id ||
+                                      resending === user.id
+                                    }
                                   >
                                     삭제
                                   </Button>
                                 )}
                               </>
                             )}
-                            {(updating === user.id || resending === user.id) && (
+                            {(updating === user.id ||
+                              resending === user.id) && (
                               <LoadingSpinner size="sm" />
                             )}
                           </div>

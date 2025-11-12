@@ -164,7 +164,7 @@ class ApiClient {
     data?: any,
     authenticated = false
   ): Promise<T> {
-    const body = data ? JSON.stringify(data) : undefined
+    const body = data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined)
 
     const options: RequestInit = {
       method: 'POST',
@@ -185,7 +185,7 @@ class ApiClient {
   ): Promise<T> {
     const options: RequestInit = {
       method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
+      body: data instanceof FormData ? data : (data ? JSON.stringify(data) : undefined),
     }
 
     if (authenticated) {

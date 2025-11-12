@@ -46,8 +46,14 @@ export const getCreatableRoles = (currentRole?: string): string[] => {
   )
 }
 
-// 삭제 가능 여부
-export const canDeleteUser = canModifyRole
+// 삭제 가능 여부 (같은 레벨 또는 아래 레벨 삭제 가능)
+export const canDeleteUser = (
+  currentRole?: string,
+  targetRole?: string
+): boolean => {
+  if (!currentRole || !targetRole) return false
+  return ROLE_DEPTH[currentRole] >= ROLE_DEPTH[targetRole]
+}
 export const canUpdateUser = canModifyRole
 
 // 생성 가능 여부

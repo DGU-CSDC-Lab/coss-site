@@ -747,27 +747,48 @@ export class CourseService {
   /**
    * CSV 파일을 통한 교과목 일괄 업로드
    *
-   * @param buffer CSV 파일 버퍼
-   * @param filename 파일명 (확장자 검증용)
+   * @param file CSV 파일 버퍼
    * @returns 업로드 결과 (성공/실패 개수, 에러 목록)
    * @throws BadRequestException CSV 파일이 아니거나 형식이 잘못된 경우
    */
   async uploadFromMasterFile(
-    buffer: Buffer,
-    filename: string,
+    file: Express.Multer.File,
   ): Promise<CourseUploadResult> {
-    this.logger.debug(`Uploading courses from file: ${filename}`);
+    this.logger.debug(`Uploading courses from file: ${file.originalname}`);
 
     try {
-      // 파일 확장자 검증
-      if (!filename.endsWith('.csv')) {
-        this.logger.warn(`Invalid file type: ${filename}`);
-        throw CourseException.availableOnlyCsvFormat();
+      // 파일명 검증
+      if (!file.originalname) {
+        this.logger.warn('No filename provided');
+        throw CourseException.fileNotProvided();
       }
 
-      // CSV 데이터 파싱
-      const csvData = buffer.toString('utf-8');
-      const lines = csvData.split('\n').filter(line => line.trim());
+      // 파일 확장자 검증 (Excel 파일 지원)
+      const isExcel =
+        file.originalname.endsWith('.xlsx') ||
+        file.originalname.endsWith('.xls');
+      const isCsv = file.originalname.endsWith('.csv');
+
+      if (!isExcel && !isCsv) {
+        this.logger.warn(`Invalid file type: ${file.originalname}`);
+        throw CourseException.invalidFileType(file.mimetype);
+      }
+
+      let lines: string[];
+
+      if (isExcel) {
+        // Excel 파일 처리
+        const XLSX = require('xlsx');
+        const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const csvData = XLSX.utils.sheet_to_csv(worksheet);
+        lines = csvData.split('\n').filter(line => line.trim());
+      } else {
+        // CSV 데이터 파싱
+        const csvData = file.buffer.toString('utf-8');
+        lines = csvData.split('\n').filter(line => line.trim());
+      }
 
       if (lines.length < 2) {
         this.logger.warn(`Invalid CSV format: ${lines.length} lines`);
@@ -795,15 +816,19 @@ export class CourseService {
 
           // CSV 컬럼을 CourseMasterCreate DTO로 매핑
           const courseData: CourseMasterCreate = {
-            semester: columns[1] || '1학기',
-            department: columns[2] || '',
-            courseCode: columns[3] || '',
-            subjectName: columns[4] || '',
-            englishName: columns[5] || '',
-            description: columns[6] || '',
-            grade: columns[7] || '',
-            credit: columns[8] ? parseFloat(columns[8]) : 0,
-            courseType: columns[9] || '',
+            semester: columns[0] || '1학기',
+            department: columns[1] || '',
+            courseCode: columns[2] || '',
+            subjectName: columns[3] || '',
+            englishName: columns[4] || '',
+            description: columns[5] || '',
+            grade: columns[6] || '',
+            credit: columns[7]
+              ? isNaN(parseFloat(columns[7]))
+                ? 0
+                : parseFloat(columns[7])
+              : 0,
+            courseType: columns[8] || '',
           };
 
           // 교과목 생성
@@ -845,21 +870,43 @@ export class CourseService {
    * @throws BadRequestException CSV 파일이 아니거나 형식이 잘못된 경우
    */
   async uploadFromOfferingFile(
-    buffer: Buffer,
-    filename: string,
+    file: Express.Multer.File,
   ): Promise<CourseUploadResult> {
-    this.logger.debug(`Uploading courses from file: ${filename}`);
+    this.logger.debug(`Uploading courses from file: ${file.originalname}`);
 
     try {
-      // 파일 확장자 검증
-      if (!filename.endsWith('.csv')) {
-        this.logger.warn(`Invalid file type: ${filename}`);
-        throw CourseException.availableOnlyCsvFormat();
+      // 파일명 검증
+      if (!file.originalname) {
+        this.logger.warn('No filename provided');
+        throw CourseException.fileNotProvided();
       }
 
-      // CSV 데이터 파싱
-      const csvData = buffer.toString('utf-8');
-      const lines = csvData.split('\n').filter(line => line.trim());
+      // 파일 확장자 검증 (Excel 파일 지원)
+      const isExcel =
+        file.originalname.endsWith('.xlsx') ||
+        file.originalname.endsWith('.xls');
+      const isCsv = file.originalname.endsWith('.csv');
+
+      if (!isExcel && !isCsv) {
+        this.logger.warn(`Invalid file type: ${file.originalname}`);
+        throw CourseException.invalidFileType(file.mimetype);
+      }
+
+      let lines: string[];
+
+      if (isExcel) {
+        // Excel 파일 처리
+        const XLSX = require('xlsx');
+        const workbook = XLSX.read(file.buffer, { type: 'buffer' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const csvData = XLSX.utils.sheet_to_csv(worksheet);
+        lines = csvData.split('\n').filter(line => line.trim());
+      } else {
+        // CSV 데이터 파싱
+        const csvData = file.buffer.toString('utf-8');
+        lines = csvData.split('\n').filter(line => line.trim());
+      }
 
       if (lines.length < 2) {
         this.logger.warn(`Invalid CSV format: ${lines.length} lines`);
@@ -871,7 +918,6 @@ export class CourseService {
       const errors: string[] = [];
       let successCount = 0;
       let failureCount = 0;
-
       // 헤더 행 건너뛰고 데이터 행 처리
       for (let i = 1; i < lines.length; i++) {
         try {
@@ -886,9 +932,23 @@ export class CourseService {
           }
 
           // CSV 컬럼을 CourseCreate DTO로 매핑
+          const courseCode = columns[0] || '';
+          
+          // 교과목 코드로 마스터 교과목 찾기
+          const masterCourse = await this.courseMasterRepository.findOne({
+            where: { courseCode }
+          });
+          
+          if (!masterCourse) {
+            const errorMsg = `Row ${i + 1}: Master course not found for code: ${courseCode}`;
+            errors.push(errorMsg);
+            failureCount++;
+            continue;
+          }
+
           const courseData: CourseOfferingCreate = {
-            masterId: columns[1] || '',
-            year: parseInt(columns[0]) || new Date().getFullYear(),
+            masterId: masterCourse.id,
+            year: parseInt(columns[1]) || new Date().getFullYear(),
             semester: columns[2] || '1학기',
             classTime: columns[3] || '',
             instructor: columns[4] || '',
@@ -958,7 +1018,9 @@ export class CourseService {
   private toResponseOffering(course: CourseOffering): CourseOfferingResponse {
     // master가 null인 경우 처리
     if (!course.master) {
-      this.logger.warn(`Course offering ${course.id} has no associated master course`);
+      this.logger.warn(
+        `Course offering ${course.id} has no associated master course`,
+      );
       return {
         id: course.id,
         year: course.year,

@@ -266,6 +266,16 @@ export const COURSE_ERRORS = {
     message: '헤더 행이 하나 이상이어야 합니다.',
     httpStatus: HttpStatus.BAD_REQUEST,
   },
+  FILE_NOT_PROVIDED: {
+    code: 'FILE_NOT_PROVIDED',
+    message: '파일이 제공되지 않았습니다.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+  },
+  INVALID_FILE_TYPE: {
+    code: 'INVALID_FILE_TYPE',
+    message: '지원되지 않는 파일 형식입니다.',
+    httpStatus: HttpStatus.BAD_REQUEST,
+  },
 } as const;
 
 // ===== 교수진 도메인 에러 =====

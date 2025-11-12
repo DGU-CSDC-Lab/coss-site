@@ -45,7 +45,7 @@ export class CourseController {
   constructor(private courseService: CourseService) {}
 
   @Get('api/v1/courses/offering/search')
-  @ApiOperation({ summary: '교과목 목록 검색' })
+  @ApiOperation({ summary: '개설 과목 교과목 목록 검색' })
   async getCoursesOffering(@Query() query: CourseQuery): Promise<PagedResponse<CourseOfferingResponse>> {
     return this.courseService.findAllOfferings(query);
   }
@@ -171,7 +171,7 @@ export class CourseController {
   @UseGuards(RoleGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
-  @ApiOperation({ summary: '교과목 일괄 업로드' })
+  @ApiOperation({ summary: '마스터 교과목 일괄 업로드' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 400, description: 'CSV 형식이 아니거나 헤더 행이 부족함' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -179,14 +179,14 @@ export class CourseController {
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(HttpStatus.CREATED)
   async uploadMasterCourses(@UploadedFile() file: Express.Multer.File): Promise<CourseUploadResult> {
-    return this.courseService.uploadFromMasterFile(file.buffer, file.filename);
+    return this.courseService.uploadFromMasterFile(file);
   }
 
   @Post('api/v1/admin/courses/offering/upload')
   @UseGuards(RoleGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
-  @ApiOperation({ summary: '교과목 일괄 업로드' })
+  @ApiOperation({ summary: '개설 과목 교과목 일괄 업로드' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 400, description: 'CSV 형식이 아니거나 헤더 행이 부족함' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })
@@ -194,6 +194,6 @@ export class CourseController {
   @UseInterceptors(FileInterceptor('file'))
   @HttpCode(HttpStatus.CREATED)
   async uploadOfferingCourses(@UploadedFile() file: Express.Multer.File): Promise<CourseUploadResult> {
-    return this.courseService.uploadFromMasterFile(file.buffer, file.filename);
+    return this.courseService.uploadFromOfferingFile(file);
   }
 }

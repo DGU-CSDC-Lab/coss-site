@@ -304,6 +304,14 @@ export class CourseException extends BaseDomainException {
   static moreThanOneHeaderRow() {
     return new CourseException(COURSE_ERRORS.MORE_THAN_ONE_HEADER_ROW);
   }
+
+  static fileNotProvided() {
+    return new CourseException(COURSE_ERRORS.FILE_NOT_PROVIDED);
+  }
+
+  static invalidFileType(type: string) {
+    return new CourseException(COURSE_ERRORS.INVALID_FILE_TYPE, { type });
+  }
 }
 
 // ===== 교수진 도메인 Exception =====
