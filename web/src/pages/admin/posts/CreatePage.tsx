@@ -39,7 +39,7 @@ export default function AdminPostsCreatePage() {
   const [thumbnailFileName, setThumbnailFileName] = useState('')
   const [formData, setFormData] = useState({
     title: '',
-    categoryId: 'select',
+    categoryId: 'draft',
     contentHtml: '',
   })
   const [files, setFiles] = useState<UploadResult[]>([])
