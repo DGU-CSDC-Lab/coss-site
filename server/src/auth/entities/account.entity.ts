@@ -10,7 +10,12 @@ export class Account extends SoftDeleteEntity {
   email: string;
 
   // 비밀번호 (해시값으로 저장)
-  @Column({ name: 'password_hash', type: 'varchar', length: 100, nullable: true })
+  @Column({
+    name: 'password_hash',
+    type: 'varchar',
+    length: 100,
+    nullable: true,
+  })
   passwordHash: string;
 
   // 사용자와의 일대일 관계 설정 (역방향)
@@ -18,6 +23,15 @@ export class Account extends SoftDeleteEntity {
   user: User;
 
   // 첫 로그인 여부
-  @Column({ name: 'is_first_login', type: 'boolean', default: true })
+  @Column({
+    name: 'is_first_login',
+    type: 'tinyint',
+    width: 1,
+    default: 1,
+    transformer: {
+      to: (value: boolean) => (value ? 1 : 0),
+      from: (value: any) => !!value,
+    },
+  })
   isFirstLogin: boolean;
 }

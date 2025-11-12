@@ -390,6 +390,8 @@ export class AuthService {
           }
         }
 
+        this.logger.debug(`Admin user found: ${user.role} - ${user.account.email}`);
+
         results.push({
           id: user.id,
           email: user.account.email,
