@@ -5,7 +5,7 @@ export default function GreetingPage() {
   return (
     <div className="w-full">
       <Tabs />
-      <Title className="mb-12">단장 인사말</Title>
+      <Title className="mb-12">학과장 인사말</Title>
       <div className="flex gap-8">
         {/* 왼쪽 이미지 영역 */}
         <div className="w-64 flex-shrink-0">
