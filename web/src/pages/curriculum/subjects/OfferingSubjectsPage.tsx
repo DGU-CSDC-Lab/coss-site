@@ -136,7 +136,7 @@ export default function OfferingSubjectsPage() {
       <div className="rounded-lg border border-info-100 overflow-hidden">
         <div className="overflow-x-auto">
           <div className="max-h-[460px] overflow-y-auto">
-            <table className="w-full border-collapse min-w-[1000px]">
+            <table className="w-full border-collapse min-w-[1180px]">
               <thead className="bg-info-50 border-b border-info-100 sticky top-0 z-10">
                 <tr>
                   <th className="px-4 py-3 text-body-14-medium text-info-700 whitespace-nowrap w-[80px]">
