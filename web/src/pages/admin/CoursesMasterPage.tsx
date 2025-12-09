@@ -99,7 +99,7 @@ export default function AdminCoursesMasterPage() {
     try {
       setDeleteLoading(true)
       await coursesApi.deleteMaster(deleteModal.course.id)
-      alert.success('마스터과목이 삭제되었습니다.')
+      alert.success('운영과목이 삭제되었습니다.')
       setDeleteModal({ isOpen: false, course: null })
       fetchCourses()
     } catch (error) {
@@ -113,9 +113,9 @@ export default function AdminCoursesMasterPage() {
     <div className="w-full">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <Title>마스터과목 관리</Title>
+          <Title>운영과목 관리</Title>
           <p className="text-body-14 text-gray-600 mt-2">
-            총 {totalElements}개의 마스터과목이 있습니다.
+            총 {totalElements}개의 운영과목이 있습니다.
           </p>
         </div>
         <div className="flex gap-2">
@@ -209,7 +209,7 @@ export default function AdminCoursesMasterPage() {
                       colSpan={8}
                       className="px-4 py-8 text-center text-caption-14 text-gray-600"
                     >
-                      등록된 마스터과목이 없습니다.
+                      등록된 운영과목이 없습니다.
                     </td>
                   </tr>
                 ) : (
@@ -331,8 +331,8 @@ export default function AdminCoursesMasterPage() {
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, course: null })}
         onConfirm={handleDelete}
-        title="마스터과목 삭제"
-        message={`"${deleteModal.course?.subjectName}" 마스터과목을 삭제하시겠습니까?`}
+        title="운영과목 삭제"
+        message={`"${deleteModal.course?.subjectName}" 운영과목을 삭제하시겠습니까?`}
         warningMessage="삭제된 데이터는 복구할 수 없습니다."
         confirmText="삭제"
         loading={deleteLoading}

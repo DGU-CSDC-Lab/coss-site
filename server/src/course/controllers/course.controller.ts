@@ -171,7 +171,7 @@ export class CourseController {
   @UseGuards(RoleGuard)
   @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
-  @ApiOperation({ summary: '마스터 교과목 일괄 업로드' })
+  @ApiOperation({ summary: '운영 교과목 일괄 업로드' })
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 400, description: 'CSV 형식이 아니거나 헤더 행이 부족함' })
   @ApiResponse({ status: 401, description: '인증되지 않음' })

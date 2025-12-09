@@ -65,7 +65,7 @@ export default function AdminCourseMasterCreatePage() {
       setFormData(data)
       setOriginalData(data)
     } catch (error) {
-      alert.error('마스터 교과목 정보를 불러올 수 없습니다.')
+      alert.error('운영 교과목 정보를 불러올 수 없습니다.')
       navigate('/admin/courses/master')
     } finally {
       setInitialLoading(false)
@@ -109,7 +109,7 @@ export default function AdminCourseMasterCreatePage() {
         }
 
         await coursesApi.updateMaster(params.id, courseData)
-        alert.success('마스터 교과목이 수정되었습니다.')
+        alert.success('운영 교과목이 수정되었습니다.')
       } else {
         const courseData: CreateCourseMasterRequest = {
           semester: formData.semester,
@@ -124,12 +124,12 @@ export default function AdminCourseMasterCreatePage() {
         }
 
         await coursesApi.createMaster(courseData)
-        alert.success('마스터 교과목이 생성되었습니다.')
+        alert.success('운영 교과목이 생성되었습니다.')
       }
       navigate('/admin/courses/master')
     } catch (error) {
       alert.error(
-        `마스터 교과목 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다. \n ${error instanceof Error ? error.message : ''}`
+        `운영 교과목 ${isEdit ? '수정' : '생성'} 중 오류가 발생했습니다. \n ${error instanceof Error ? error.message : ''}`
       )
     } finally {
       setLoading(false)
@@ -152,7 +152,7 @@ export default function AdminCourseMasterCreatePage() {
     <>
       <div className="w-full h-screen flex flex-col">
         <div className="flex items-center justify-between gap-4 p-6">
-          <Title>{isEdit ? '마스터 교과목 수정' : '새 마스터 교과목 추가'}</Title>
+          <Title>{isEdit ? '운영 교과목 수정' : '새 운영 교과목 추가'}</Title>
           <Link to="/admin/courses/master">
             <Button variant="delete" size="md" radius="md">
               나가기
@@ -321,7 +321,7 @@ export default function AdminCourseMasterCreatePage() {
             radius="md"
             disabled={loading}
           >
-            {loading ? <LoadingSpinner size="md" /> : isEdit ? '마스터 교과목 수정' : '마스터 교과목 생성'}
+            {loading ? <LoadingSpinner size="md" /> : isEdit ? '운영 교과목 수정' : '운영 교과목 생성'}
           </Button>
         </div>
       </div>

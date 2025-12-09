@@ -92,15 +92,15 @@ export default function AdminCourseMasterBulkUploadPage() {
 
     const ws = XLSX.utils.aoa_to_sheet(templateData)
     const wb = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(wb, ws, '마스터교과목')
-    XLSX.writeFile(wb, '마스터교과목_업로드_양식.xlsx')
+    XLSX.utils.book_append_sheet(wb, ws, '운영교과목')
+    XLSX.writeFile(wb, '운영교과목_업로드_양식.xlsx')
   }
 
   return (
     <>
       <div className="w-full h-screen flex flex-col">
         <div className="flex items-center justify-between gap-4 p-6">
-          <Title>마스터 교과목 일괄 업로드</Title>
+          <Title>운영 교과목 일괄 업로드</Title>
           <Link to="/admin/courses/master">
             <Button variant="delete" size="md" radius="md">
               나가기
@@ -111,7 +111,7 @@ export default function AdminCourseMasterBulkUploadPage() {
         <div className="flex-1 overflow-auto p-6 bg-gray-50">
           <div className="space-y-8">
             <Information type="info">
-              Excel 파일을 업로드하여 마스터 교과목을 일괄 등록할 수 있습니다.
+              Excel 파일을 업로드하여 운영 교과목을 일괄 등록할 수 있습니다.
               먼저 양식을 다운로드하여 데이터를 입력해주세요.
             </Information>
 

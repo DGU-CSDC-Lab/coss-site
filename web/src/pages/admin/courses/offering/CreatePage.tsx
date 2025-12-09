@@ -76,7 +76,7 @@ export default function AdminCourseOfferingCreatePage() {
       })
       setMasters(response.items)
     } catch (error) {
-      alert.error('마스터 교과목 검색에 실패했습니다.')
+      alert.error('운영 교과목 검색에 실패했습니다.')
     } finally {
       setMasterLoading(false)
     }
@@ -131,7 +131,7 @@ export default function AdminCourseOfferingCreatePage() {
     e.preventDefault()
 
     if (!isEdit && !formData.masterId) {
-      alert.error('마스터 교과목을 선택해주세요.')
+      alert.error('운영 교과목을 선택해주세요.')
       return
     }
 
@@ -205,7 +205,7 @@ export default function AdminCourseOfferingCreatePage() {
                 {!isEdit && (
                   <div>
                     <Label required={true} className="mb-2">
-                      마스터 교과목
+                      운영 교과목
                     </Label>
                     <SearchableDropdown
                       options={masters.map(master => ({

@@ -55,7 +55,7 @@ export default function AdminCourseOfferingBulkUploadPage() {
 
   const downloadTemplate = () => {
     const templateData = [
-      ['마스터교과목ID', '개설년도', '학기', '수업시간', '담당교원', '강의실', '강의계획서URL'],
+      ['운영교과목ID', '개설년도', '학기', '수업시간', '담당교원', '강의실', '강의계획서URL'],
       ['master-id-1', 2024, '1학기', '월 09:00-12:00', '김교수', 'A101', 'https://example.com/syllabus1.pdf'],
       ['master-id-2', 2024, '1학기', '화 13:00-16:00', '이교수', 'B201', 'https://example.com/syllabus2.pdf'],
     ]
@@ -81,7 +81,7 @@ export default function AdminCourseOfferingBulkUploadPage() {
         <div className="flex-1 overflow-auto p-6 bg-gray-50">
           <div className="space-y-8">
             <Information type="info">
-              Excel 파일을 업로드하여 개설 교과목을 일괄 등록할 수 있습니다. 마스터교과목ID는 기존에 등록된 마스터 교과목의 ID를 입력해야 합니다.
+              Excel 파일을 업로드하여 개설 교과목을 일괄 등록할 수 있습니다. 운영교과목ID는 기존에 등록된 운영 교과목의 ID를 입력해야 합니다.
             </Information>
 
             <div className="space-y-4">

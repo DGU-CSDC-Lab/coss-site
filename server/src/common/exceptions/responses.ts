@@ -253,7 +253,7 @@ export const COURSE_ERRORS = {
   },
   COURSE_MASTER_NOT_FOUND: {
     code: 'COURSE_MASTER_NOT_FOUND',
-    message: '해당하는 마스터 교과목을 찾을 수 없습니다.',
+    message: '해당하는 운영 교과목을 찾을 수 없습니다.',
     httpStatus: HttpStatus.NOT_FOUND,
   },
   AVAILABLE_ONLY_CSV_FORMAT: {

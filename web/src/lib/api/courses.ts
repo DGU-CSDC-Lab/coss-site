@@ -1,6 +1,6 @@
 import { api, PagedResponse } from '@/lib/apiClient'
 
-// 교과목 마스터 정보 (기본 교과목 정보)
+// 교과목 운영 정보 (기본 교과목 정보)
 export interface CourseMaster {
   id: string
   semester: string // 학기 (예: "1학기")
@@ -21,14 +21,14 @@ export interface CourseOffering {
   id: string
   year: number // 개설년도
   semester: string // 학기
-  department: string // 학과명 (마스터에서 가져온 정보)
-  courseCode: string // 교과목 코드 (마스터에서 가져온 정보)
-  subjectName: string // 교과목명 (마스터에서 가져온 정보)
-  englishName?: string // 교과목 영문명 (마스터에서 가져온 정보)
-  description: string // 교과목 설명 (마스터에서 가져온 정보)
-  grade?: string // 수강학년 (마스터에서 가져온 정보)
-  credit?: number // 학점 (마스터에서 가져온 정보)
-  courseType?: string // 강의유형 (마스터에서 가져온 정보)
+  department: string // 학과명 (운영에서 가져온 정보)
+  courseCode: string // 교과목 코드 (운영에서 가져온 정보)
+  subjectName: string // 교과목명 (운영에서 가져온 정보)
+  englishName?: string // 교과목 영문명 (운영에서 가져온 정보)
+  description: string // 교과목 설명 (운영에서 가져온 정보)
+  grade?: string // 수강학년 (운영에서 가져온 정보)
+  credit?: number // 학점 (운영에서 가져온 정보)
+  courseType?: string // 강의유형 (운영에서 가져온 정보)
   classTime?: string // 수업 시간 (예: "월 09:00-12:00")
   instructor?: string // 담당교원
   classroom?: string // 강의실
@@ -50,7 +50,7 @@ export interface CoursesQuery {
   size?: number
 }
 
-// 마스터 교과목 생성 요청
+// 운영 교과목 생성 요청
 export interface CreateCourseMasterRequest {
   semester: string
   department: string
@@ -65,7 +65,7 @@ export interface CreateCourseMasterRequest {
 
 // 개설 교과목 생성 요청
 export interface CreateCourseOfferingRequest {
-  masterId: string // 마스터 교과목 ID
+  masterId: string // 운영 교과목 ID
   year: number
   semester: string
   classTime?: string
@@ -74,7 +74,7 @@ export interface CreateCourseOfferingRequest {
   syllabusUrl?: string
 }
 
-// 마스터 교과목 수정 요청
+// 운영 교과목 수정 요청
 export interface UpdateCourseMasterRequest {
   semester?: string
   department?: string
@@ -104,7 +104,7 @@ export interface CourseUploadResult {
   totalCount: number
 }
 
-// 마스터 교과목 일괄 초기화 요청
+// 운영 교과목 일괄 초기화 요청
 export interface CourseMasterBulkInitRequest {
   year: number
   semester: string
@@ -178,9 +178,9 @@ export const coursesApi = {
   bulkInitOfferings: (data: CourseOfferingBulkInitRequest): Promise<CourseUploadResult> =>
     api.auth.post('/admin/courses/offering/bulk-init', data),
 
-  // === 마스터 교과목 (Master) API ===
+  // === 운영 교과목 (Master) API ===
   
-  // 마스터 교과목 목록 조회
+  // 운영 교과목 목록 조회
   getMasters: (params: CoursesQuery = {}): Promise<PagedResponse<CourseMaster>> => {
     const searchParams = new URLSearchParams()
     Object.entries(params).forEach(([key, value]) => {
@@ -191,26 +191,26 @@ export const coursesApi = {
     return api.get(`/courses/master/search?${searchParams.toString()}`)
   },
 
-  // 마스터 교과목 생성 (관리자)
+  // 운영 교과목 생성 (관리자)
   createMaster: (data: CreateCourseMasterRequest): Promise<CourseMaster> =>
     api.auth.post('/admin/courses/master', data),
 
-  // 마스터 교과목 수정 (관리자)
+  // 운영 교과목 수정 (관리자)
   updateMaster: (id: string, data: UpdateCourseMasterRequest): Promise<CourseMaster> =>
     api.auth.put(`/admin/courses/master/${id}`, data),
 
-  // 마스터 교과목 삭제 (관리자)
+  // 운영 교과목 삭제 (관리자)
   deleteMaster: (id: string): Promise<void> =>
     api.auth.delete(`/admin/courses/master/${id}`),
 
-  // 마스터 교과목 일괄 업로드 (관리자)
+  // 운영 교과목 일괄 업로드 (관리자)
   uploadMasterExcel: (file: File): Promise<CourseUploadResult> => {
     const formData = new FormData()
     formData.append('file', file)
     return api.auth.post('/admin/courses/master/upload', formData)
   },
 
-  // 마스터 교과목 일괄 초기화 (관리자)
+  // 운영 교과목 일괄 초기화 (관리자)
   bulkInitMasters: (data: CourseMasterBulkInitRequest): Promise<CourseUploadResult> =>
     api.auth.post('/admin/courses/master/bulk-init', data),
 }

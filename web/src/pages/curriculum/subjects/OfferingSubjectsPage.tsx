@@ -95,7 +95,7 @@ export default function OfferingSubjectsPage() {
     <div className="w-full">
       <Tabs />
 
-      <Title className="mb-4">개설 과목</Title>
+      <Title className="mb-4">학기별 개설 과목</Title>
 
       <div className="flex justify-end items-start md:items-center gap-4">
         <div className="flex flex-col sm:flex-row gap-2">

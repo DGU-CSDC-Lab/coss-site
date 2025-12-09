@@ -145,26 +145,26 @@ export default function AdminPage() {
       href: '/admin/history/create',
     },
     {
-      title: '개설과목 생성',
-      description: '특정 년도/학기 개설과목을 생성합니다.',
+      title: '학기별 개설 과목 생성',
+      description: '특정 년도/학기 학기별 개설 과목을 생성합니다.',
       icon: AcademicCapIcon,
       href: '/admin/courses/offering/create',
     },
     {
-      title: '개설과목 일괄 등록',
+      title: '학기별 개설 과목 일괄 등록',
       description: 'Excel 파일로 개설 과목을 일괄 등록합니다.',
       icon: AcademicCapIcon,
       href: '/admin/courses/offering/bulk-upload',
     },
     {
-      title: '마스터 과목 생성',
+      title: '운영 교과목 생성',
       description: '기본 교과목 정보를 생성합니다.',
       icon: BookOpenIcon,
       href: '/admin/courses/master/create',
     },
     {
-      title: '마스터 과목 일괄 등록',
-      description: 'Excel 파일로 마스터 과목을 일괄 등록합니다.',
+      title: '운영 교과목 일괄 등록',
+      description: 'Excel 파일로 운영 과목을 일괄 등록합니다.',
       icon: BookOpenIcon,
       href: '/admin/courses/master/bulk-upload',
     },
@@ -233,7 +233,7 @@ export default function AdminPage() {
       title: '과목 관리',
       items: [
         {
-          name: '마스터 과목',
+          name: '운영 과목',
           href: '/admin/courses/master',
           icon: BookOpenIcon,
           count: stats.masterCourses,

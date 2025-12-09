@@ -95,7 +95,7 @@ export default function MasterSubjectPage() {
     <div className="w-full">
       <Tabs />
 
-      <Title className="mb-4">마스터 교과목</Title>
+      <Title className="mb-4">운영 교과목</Title>
 
       <div className="flex justify-end items-start md:items-center gap-4">
         <div className="flex flex-col sm:flex-row gap-2">

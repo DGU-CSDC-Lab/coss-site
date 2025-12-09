@@ -934,7 +934,7 @@ export class CourseService {
           // CSV 컬럼을 CourseCreate DTO로 매핑
           const courseCode = columns[0] || '';
           
-          // 교과목 코드로 마스터 교과목 찾기
+          // 교과목 코드로 운영 교과목 찾기
           const masterCourse = await this.courseMasterRepository.findOne({
             where: { courseCode }
           });

@@ -112,7 +112,7 @@ export default function CoursesOfferingPage() {
     try {
       setDeleteLoading(true)
       await coursesApi.deleteOffering(deleteModal.course.id)
-      alert.success('개설과목이 삭제되었습니다.')
+      alert.success('학기별 개설 과목이 삭제되었습니다.')
       setDeleteModal({ isOpen: false, course: null })
       fetchCourses()
     } catch (error) {
@@ -126,9 +126,9 @@ export default function CoursesOfferingPage() {
     <div className="w-full">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <Title>개설과목 관리</Title>
+          <Title>학기별 개설 과목 관리</Title>
           <p className="text-body-14 text-gray-600 mt-2">
-            총 {totalElements}개의 개설과목이 있습니다.
+            총 {totalElements}개의 학기별 개설 과목이 있습니다.
           </p>
         </div>
         <div className="flex gap-2">
@@ -228,7 +228,7 @@ export default function CoursesOfferingPage() {
                       colSpan={8}
                       className="px-4 py-8 text-center text-caption-14 text-gray-600"
                     >
-                      등록된 개설과목이 없습니다.
+                      등록된 학기별 개설 과목이 없습니다.
                     </td>
                   </tr>
                 ) : (
@@ -367,8 +367,8 @@ export default function CoursesOfferingPage() {
         isOpen={deleteModal.isOpen}
         onClose={() => setDeleteModal({ isOpen: false, course: null })}
         onConfirm={handleDelete}
-        title="개설과목 삭제"
-        message={`"${deleteModal.course?.subjectName}" 개설과목을 삭제하시겠습니까?`}
+        title="학기별 개설 과목 삭제"
+        message={`"${deleteModal.course?.subjectName}" 학기별 개설 과목을 삭제하시겠습니까?`}
         warningMessage="삭제된 데이터는 복구할 수 없습니다."
         confirmText="삭제"
         loading={deleteLoading}
