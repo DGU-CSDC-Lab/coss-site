@@ -199,10 +199,10 @@ export default function OfferingSubjectsPage() {
                       <td className="px-4 py-1 text-caption-14 text-gray-700 text-center whitespace-pre-line">
                         {course.classTime || '-'}
                       </td>
-                      <td className="px-2 py-2.5 text-sm text-gray-700 text-center">
+                      <td className="px-2 py-2.5 text-caption-14 text-gray-700 text-center">
                         {course.instructor || '-'}
                       </td>
-                      <td className="px-2 py-2.5 text-sm text-blue-600 text-center">
+                      <td className="px-2 py-2.5 text-caption-14 text-blue-600 text-center">
                         {course.syllabusUrl ? (
                           <a
                             href={course.syllabusUrl}
