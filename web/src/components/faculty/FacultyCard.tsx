@@ -32,11 +32,11 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
           <p className="text-body-18-regular text-gray-500">
             {faculty.jobTitle}
           </p>
-          <p className="text-body-18-regular text-gray-500">{faculty.email}</p>
+          <p className="text-body-18-regular text-gray-500 break-all">{faculty.email}</p>
           <p className="text-body-18-regular text-gray-500">
             {faculty.phoneNumber}
           </p>
-          <p className="text-body-18-regular text-gray-500">{faculty.office}</p>
+          <p className="text-body-18-regular text-gray-500 break-all">{faculty.office}</p>
         </div>
         {/** 
         <div className="h-4" />

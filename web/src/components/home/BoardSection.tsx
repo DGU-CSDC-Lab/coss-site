@@ -58,7 +58,7 @@ export default function BoardSection() {
                   </div>
                   <Link
                     to={`/news/${post.categorySlug || post.categoryName}/${post.id}`}
-                    className="pl-2 text-body-14-regular text-gray-900 hover:text-point-1 flex-1 truncate"
+                    className="pl-2 text-body-14-regular text-gray-900 hover:text-point-1 flex-1 whitespace-normal break-words"
                   >
                     {post.title}
                   </Link>
