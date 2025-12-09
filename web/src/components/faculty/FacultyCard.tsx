@@ -29,14 +29,14 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
         <h3 className="text-body-20-medium text-gray-900">{faculty.name}</h3>
         <div className="h-4" />
         <div className="space-y-1 text-gray-600">
-          <p className="text-body-18-regular text-gray-500">
+          <p className="text-body-14-regular text-gray-500">
             {faculty.jobTitle}
           </p>
-          <p className="text-body-18-regular text-gray-500 break-all">{faculty.email}</p>
-          <p className="text-body-18-regular text-gray-500">
+          <p className="text-body-14-regular text-gray-500 break-all">{faculty.email}</p>
+          <p className="text-body-14-regular text-gray-500">
             {faculty.phoneNumber}
           </p>
-          <p className="text-body-18-regular text-gray-500 break-all">{faculty.office}</p>
+          <p className="text-body-14-regular text-gray-500 break-all">{faculty.office}</p>
         </div>
         {/** 
         <div className="h-4" />
