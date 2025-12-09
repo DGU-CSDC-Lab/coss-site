@@ -115,8 +115,7 @@ jobs:
       - name: Deploy to S3
         run: |
           aws s3 sync web/out/ s3://${{ secrets.WEB_S3_BUCKET_NAME }}/ --delete \
-            --cache-control "public,max-age=300" \
-            --exclude "*.html" \
+            --cache-control "no-cache" \
             --exclude "*.js" \
             --exclude "*.css"
           aws s3 sync web/out/ s3://${{ secrets.WEB_S3_BUCKET_NAME }}/ \
@@ -124,10 +123,6 @@ jobs:
             --exclude "*" \
             --include "*.js" \
             --include "*.css"
-          aws s3 sync web/out/ s3://${{ secrets.WEB_S3_BUCKET_NAME }}/ \
-            --cache-control "no-cache" \
-            --exclude "*" \
-            --include "*.html"
       
       - name: Invalidate CloudFront
         run: |
