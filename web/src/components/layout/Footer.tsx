@@ -43,11 +43,10 @@ const Footer = () => {
               <div className="text-gray-300 text-caption-12 space-y-1">
                 <div className="flex flex-row gap-2">
                   <p className="mobile:text-caption-12">
-                    주소 04620 서울시 중구 필동로 1길 30 동국대학교 원흥관 4층
-                    E423호
+                    주소 04623 서울 중구 서애로3길 25 필동관 2층 COSS 사무실
                   </p>
                   <p className="mobile:text-caption-12">
-                    대표전화 02-2260-8957
+                    대표전화 02-2290-1841
                   </p>
                 </div>
                 <p className="text-caption-10 mt-2">
