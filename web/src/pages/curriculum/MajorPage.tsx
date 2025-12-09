@@ -28,23 +28,7 @@ export default function MajorPage() {
         />
       </div>
       <div className="h-12" />
-      <Title className="mb-4">연계 전공</Title>
-      <SubTitle className="mb-4">1) 복수전공</SubTitle>
-      <div className="flex flex-col gap-8">
-        <img
-          src="/assets/images/pages/curriculum/major/iot/2-1.png"
-          alt="학과 소개 이미지"
-          className="w-full h-auto"
-        />
-      </div>
-      <SubTitle className="my-4">2) 부전공</SubTitle>
-      <div className="flex flex-col gap-8">
-        <img
-          src="/assets/images/pages/curriculum/major/iot/2-2.png"
-          alt="학과 소개 이미지"
-          className="w-full h-auto"
-        />
-      </div>
+      <Title className="mb-4">연계·융합 전공</Title>
     </div>
   )
 }
