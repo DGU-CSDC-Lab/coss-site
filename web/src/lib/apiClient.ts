@@ -44,28 +44,41 @@ class ApiClient {
       delete (config.headers as any)['Content-Type']
     }
 
-    const response = await fetch(url, config)
+    try {
+      const response = await fetch(url, config)
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      const error = new Error(errorData.message || 'Unknown error') as any
-      error.status = response.status
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}))
+        const error = new Error(
+          errorData.message || 
+          (response.status === 500 ? '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' : '요청 처리 중 오류가 발생했습니다.')
+        ) as any
+        error.status = response.status
+        throw error
+      }
+
+      // 204 No Content 또는 빈 응답 처리
+      if (
+        response.status === 204 ||
+        response.headers.get('content-length') === '0'
+      ) {
+        return undefined as T
+      }
+
+      const result = await response.json()
+
+      // Extract data from SuccessResponse wrapper for single objects
+      // PagedResponse remains unchanged
+      return result.data !== undefined ? result.data : result
+    } catch (error: any) {
+      // 네트워크 에러 (Failed to fetch, CORS 등)
+      if (error instanceof TypeError || error.message === 'Failed to fetch') {
+        const networkError = new Error('서버에 연결할 수 없습니다. 네트워크 연결을 확인해주세요.') as any
+        networkError.status = 0
+        throw networkError
+      }
       throw error
     }
-
-    // 204 No Content 또는 빈 응답 처리
-    if (
-      response.status === 204 ||
-      response.headers.get('content-length') === '0'
-    ) {
-      return undefined as T
-    }
-
-    const result = await response.json()
-
-    // Extract data from SuccessResponse wrapper for single objects
-    // PagedResponse remains unchanged
-    return result.data !== undefined ? result.data : result
   }
 
   // 토큰 자동 주입 요청

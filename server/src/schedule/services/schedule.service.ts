@@ -326,7 +326,7 @@ export class ScheduleService {
       }
 
       this.logger.debug(
-        `Found schedule to delete: ${schedule.title} (${schedule.startDate.toISOString().split('T')[0]})`,
+        `Found schedule to delete: ${schedule.title} (${new Date(schedule.startDate).toISOString().split('T')[0]})`,
       );
 
       // 소프트 삭제 실행 (deletedAt 필드 설정)
