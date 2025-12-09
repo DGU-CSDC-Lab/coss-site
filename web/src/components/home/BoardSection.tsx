@@ -44,7 +44,7 @@ export default function BoardSection() {
         {posts.length > 0 ? (
           posts.map((post, index) => (
             <div key={post.id}>
-              <div className="flex items-center justify-between py-3">
+              <div className="flex items-center justify-between gap-2 py-3">
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center space-x-2 flex-1">
                     <span
@@ -64,7 +64,7 @@ export default function BoardSection() {
                   </Link>
                 </div>
                 {post.hasFiles && (
-                  <PaperClipIcon className="w-5 h-5 text-gray-400" />
+                  <PaperClipIcon className="w-5 h-5 text-gray-400 flex-shrink-0" />
                 )}
               </div>
               {index < posts.length - 1 && (
