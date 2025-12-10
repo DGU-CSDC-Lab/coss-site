@@ -26,7 +26,7 @@ export default function CoShowPage() {
       </ul>
       <div className="flex flex-col gap-8 items-center">
         <img
-          src="/assets/images/pages/support/programs/co-show.jpeg"
+          src="/assets/images/pages/support/programs/co-show.png"
           alt="학과 소개 이미지"
           className="max-w-5xl h-auto"
         />
