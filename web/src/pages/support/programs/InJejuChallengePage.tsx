@@ -21,7 +21,7 @@ export default function InJejuChallengePage() {
       </ul>
       <div className="flex flex-col gap-8 items-center">
         <img
-          src="/assets/images/pages/support/programs/in-jeju-challenge.png"
+          src="/assets/images/pages/support/programs/in-jeju-challenge.jpeg"
           alt="학과 소개 이미지"
           className="max-w-5xl h-auto"
         />
