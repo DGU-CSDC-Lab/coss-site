@@ -28,7 +28,6 @@ export default function MajorPage() {
         />
       </div>
       <div className="h-12" />
-      <Title className="mb-4">연계·융합 전공</Title>
     </div>
   )
 }
