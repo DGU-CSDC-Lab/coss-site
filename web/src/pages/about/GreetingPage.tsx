@@ -10,7 +10,7 @@ export default function GreetingPage() {
         {/* 왼쪽 이미지 영역 */}
         <div className="w-64 flex-shrink-0">
           <div className="aspect-[3/4] bg-gray-200 flex items-center justify-center overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 opacity-50 rounded-lg">
+            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg">
               <img
                 src="/assets/images/pages/about/greeting/department_head.jpg"
                 alt="학과장 이미지"
