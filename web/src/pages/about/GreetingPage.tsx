@@ -28,7 +28,7 @@ export default function GreetingPage() {
             <p className="mb-6">
               그리고{' '}
               <span className="text-orange-500 text-semibold">
-                사물인터넷 혁신융합대학사업단
+                지능IoT학과
               </span>
               을 사랑해주시는 모든 분들께 따뜻한 인사를 올립니다.
             </p>
