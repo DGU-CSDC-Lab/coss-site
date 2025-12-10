@@ -25,24 +25,6 @@ export default function ScholarshipPage() {
       </div>
 
       <div className="h-12" />
-
-      <Title className="mb-4">인턴십 연계</Title>
-      <SubTitle className="mb-4">1) 국내 인턴십</SubTitle>
-      <div className="flex flex-col gap-8">
-        <img
-          src="/assets/images/pages/waiting.png"
-          alt="학과 소개 이미지"
-          className="w-full h-auto"
-        />
-      </div>
-      <SubTitle className="my-4">2) 해외 인턴십</SubTitle>
-      <div className="flex flex-col gap-8">
-        <img
-          src="/assets/images/pages/waiting.png"
-          alt="학과 소개 이미지"
-          className="w-full h-auto"
-        />
-      </div>
     </div>
   )
 }
