@@ -10,7 +10,13 @@ export default function GreetingPage() {
         {/* 왼쪽 이미지 영역 */}
         <div className="w-64 flex-shrink-0">
           <div className="aspect-[3/4] bg-gray-200 flex items-center justify-center overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 opacity-50 rounded-lg"></div>
+            <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 opacity-50 rounded-lg">
+              <img
+                src="/assets/images/pages/about/greeting/department_head.jpg"
+                alt="학과장 이미지"
+                className="w-full h-full object-cover object-center"
+              />
+            </div>
           </div>
         </div>
 
@@ -71,7 +77,7 @@ export default function GreetingPage() {
             </p>
 
             <p>
-              올해에도 저희 사업단은{' '}
+              올해에도 저희 지능IoT학과는{' '}
               <span className="text-orange-500 text-semibold">
                 &apos;지속 가능한 스마트 솔루션&apos;
               </span>
@@ -95,7 +101,7 @@ export default function GreetingPage() {
 
           <div className="h-12" />
           <p className="w-full text-subheading-24 text-right">
-            동국대학교 사물인터넷 혁신융합대학사업단장 정준호
+            동국대학교 지능IoT학과 학과장 정진우
           </p>
         </div>
       </div>
