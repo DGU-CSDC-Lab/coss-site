@@ -33,7 +33,6 @@ const menuConfig = [
     name: '학생 지원',
     path: '/support',
     children: [
-      { name: '장학안내', path: '/support/scholarship' },
       { name: '인프라', path: '/support/infrastructure' },
       {
         name: '비교과 프로그램',
