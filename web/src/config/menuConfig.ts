@@ -27,18 +27,7 @@ const menuConfig = [
       {
         name: '이수체계도',
         path: '/curriculum/courses',
-      },
-      {
-        name: '학기별 개설 과목',
-        path: '/curriculum/subjects',
-        children: [
-                    {
-            name: '전체 운영 과목 교과목',
-            path: '/curriculum/subjects/single-semester',
-          },
-          { name: '학기별 개설 과목', path: '/curriculum/subjects/offered' }
-        ],
-      },
+      }
     ],
   },
   {
