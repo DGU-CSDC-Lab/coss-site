@@ -21,6 +21,7 @@ export interface CourseOffering {
   id: string
   year: number // 개설년도
   semester: string // 학기
+  section?: string // 분반
   department: string // 학과명 (운영에서 가져온 정보)
   courseCode: string // 교과목 코드 (운영에서 가져온 정보)
   subjectName: string // 교과목명 (운영에서 가져온 정보)
@@ -68,6 +69,7 @@ export interface CreateCourseOfferingRequest {
   masterId: string // 운영 교과목 ID
   year: number
   semester: string
+  section?: string
   classTime?: string
   instructor?: string
   classroom?: string
@@ -91,6 +93,7 @@ export interface UpdateCourseMasterRequest {
 export interface UpdateCourseOfferingRequest {
   year?: number
   semester?: string
+  section?: string
   classTime?: string
   instructor?: string
   classroom?: string
@@ -129,6 +132,7 @@ export interface CourseOfferingBulkInitRequest {
     masterId: string
     year: number
     semester: string
+    section?: string
     classTime?: string
     instructor?: string
     classroom?: string

@@ -55,12 +55,26 @@ export default function AdminCourseOfferingBulkUploadPage() {
 
   const downloadTemplate = () => {
     const templateData = [
-      ['운영교과목ID', '개설년도', '학기', '수업시간', '담당교원', '강의실', '강의계획서URL'],
-      ['master-id-1', 2024, '1학기', '월 09:00-12:00', '김교수', 'A101', 'https://example.com/syllabus1.pdf'],
-      ['master-id-2', 2024, '1학기', '화 13:00-16:00', '이교수', 'B201', 'https://example.com/syllabus2.pdf'],
+      ['교과목코드', '개설년도', '학기', '분반', '수업시간', '담당교원', '강의실', '강의계획서URL'],
+      ['IOT101', 2024, '1학기', '01', '월 09:00-12:00', '김교수', 'A101', 'https://example.com/syllabus1.pdf'],
+      ['IOT102', 2024, '1학기', '02', '화 13:00-16:00', '이교수', 'B201', 'https://example.com/syllabus2.pdf'],
     ]
 
     const ws = XLSX.utils.aoa_to_sheet(templateData)
+    
+    // 헤더 행에 스타일 적용 (초록색 배경, 굵은 글씨)
+    const headerRange = XLSX.utils.decode_range(ws['!ref'] || 'A1:H1')
+    for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col })
+      if (!ws[cellAddress]) continue
+      
+      ws[cellAddress].s = {
+        fill: { fgColor: { rgb: '92D050' } }, // 초록색 배경
+        font: { bold: true, color: { rgb: 'FFFFFF' } }, // 굵은 흰색 글씨
+        alignment: { horizontal: 'center', vertical: 'center' }
+      }
+    }
+    
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, '개설교과목')
     XLSX.writeFile(wb, '개설교과목_업로드_양식.xlsx')

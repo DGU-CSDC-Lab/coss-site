@@ -369,6 +369,7 @@ export class CourseService {
         master: master,
         year: createDto.year,
         semester: createDto.semester,
+        section: createDto.section,
         classTime: createDto.classTime, // DTO의 classTime -> 엔티티의 classTime
         instructor: createDto.instructor,
         classroom: createDto.classroom,
@@ -513,6 +514,7 @@ export class CourseService {
       Object.assign(course, {
         year: updateDto.year ?? course.year,
         semester: updateDto.semester ?? course.semester,
+        section: updateDto.section ?? course.section,
         time: updateDto.classTime ?? course.classTime,
         instructor: updateDto.instructor ?? course.instructor,
         classroom: updateDto.classroom ?? course.classroom,
@@ -638,6 +640,7 @@ export class CourseService {
           const courseData = {
             year,
             semester,
+            section: courses[i].section,
             classTime: courses[i].classTime,
             instructor: courses[i].instructor,
             classroom: courses[i].classroom,
@@ -950,10 +953,11 @@ export class CourseService {
             masterId: masterCourse.id,
             year: parseInt(columns[1]) || new Date().getFullYear(),
             semester: columns[2] || '1학기',
-            classTime: columns[3] || '',
-            instructor: columns[4] || '',
-            classroom: columns[5] || '',
-            syllabusUrl: columns[6] || '',
+            section: columns[3] || '',
+            classTime: columns[4] || '',
+            instructor: columns[5] || '',
+            classroom: columns[6] || '',
+            syllabusUrl: columns[7] || '',
           };
 
           // 교과목 생성
@@ -1025,6 +1029,7 @@ export class CourseService {
         id: course.id,
         year: course.year,
         semester: course.semester,
+        section: course.section,
         department: 'N/A',
         courseCode: 'N/A',
         subjectName: 'N/A',
@@ -1046,6 +1051,7 @@ export class CourseService {
       id: course.id,
       year: course.year, // 연도
       semester: course.semester, // 학기
+      section: course.section, // 분반
       department: course.master.department, // 학과
       courseCode: course.master.courseCode, // 엔티티의 code -> DTO의 courseCode
       subjectName: course.master.subjectName, // 엔티티의 name -> DTO의 subjectName

@@ -190,6 +190,15 @@ export class CourseOfferingCreate {
   semester: string;
 
   @ApiProperty({
+    description: '분반',
+    example: '01',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  section?: string;
+
+  @ApiProperty({
     description: '수업 시간',
     example: '월 09:00-12:00',
     required: false,
@@ -336,6 +345,15 @@ export class CourseOfferingUpdate {
   semester?: string;
 
   @ApiProperty({
+    description: '분반',
+    example: '01',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  section?: string;
+
+  @ApiProperty({
     description: '수업 시간',
     example: '월 09:00-12:00',
     required: false,
@@ -455,6 +473,13 @@ export class CourseOfferingResponse extends CourseMasterResponse {
     example: '1학기',
   })
   semester: string;
+
+  @ApiProperty({
+    description: '분반',
+    example: '01',
+    required: false,
+  })
+  section?: string;
 
   @ApiProperty({
     description: '수업 시간',

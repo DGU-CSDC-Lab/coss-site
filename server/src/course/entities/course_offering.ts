@@ -14,6 +14,9 @@ export class CourseOffering extends SoftDeleteEntity {
   @Column({ type: 'varchar', length: 255 })
   semester: string;
 
+  @Column({ type: 'varchar', length: 10, nullable: true })
+  section?: string;
+
   @Column({ name: 'class_time', type: 'varchar', nullable: true })
   classTime?: string;
 

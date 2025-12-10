@@ -50,6 +50,7 @@ export default function AdminCourseOfferingCreatePage() {
     masterId: '',
     year: new Date().getFullYear(),
     semester: '1학기',
+    section: '',
     classTime: '',
     instructor: '',
     classroom: '',
@@ -92,6 +93,7 @@ export default function AdminCourseOfferingCreatePage() {
         masterId: '', // API에서 masterId를 제공하지 않는 경우 빈 값
         year: courseData.year,
         semester: courseData.semester,
+        section: courseData.section || '',
         classTime: courseData.classTime || '',
         instructor: courseData.instructor || '',
         classroom: courseData.classroom || '',
@@ -142,6 +144,7 @@ export default function AdminCourseOfferingCreatePage() {
         const courseData: UpdateCourseOfferingRequest = {
           year: formData.year,
           semester: formData.semester,
+          section: formData.section || undefined,
           classTime: formData.classTime || undefined,
           instructor: formData.instructor || undefined,
           classroom: formData.classroom || undefined,
@@ -155,6 +158,7 @@ export default function AdminCourseOfferingCreatePage() {
           masterId: formData.masterId,
           year: formData.year,
           semester: formData.semester,
+          section: formData.section || undefined,
           classTime: formData.classTime || undefined,
           instructor: formData.instructor || undefined,
           classroom: formData.classroom || undefined,
@@ -254,6 +258,28 @@ export default function AdminCourseOfferingCreatePage() {
                       setFormData({ ...formData, semester: value })
                     }
                     placeholder="학기를 선택해주세요."
+                    size="lg"
+                  />
+                </div>
+
+                <div>
+                  <Label className="mb-2" optional={true}>
+                    분반
+                  </Label>
+                  <Dropdown
+                    options={[
+                      { value: '01', label: '01' },
+                      { value: '02', label: '02' },
+                      { value: '03', label: '03' },
+                      { value: '04', label: '04' },
+                      { value: '05', label: '05' },
+                       { value: '06', label: '06' },
+                    ]}
+                    value={formData.section}
+                    onChange={value =>
+                      setFormData({ ...formData, section: value })
+                    }
+                    placeholder="분반을 선택해주세요."
                     size="lg"
                   />
                 </div>

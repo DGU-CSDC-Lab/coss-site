@@ -91,6 +91,20 @@ export default function AdminCourseMasterBulkUploadPage() {
     ]
 
     const ws = XLSX.utils.aoa_to_sheet(templateData)
+    
+    // 헤더 행에 스타일 적용 (초록색 배경, 굵은 글씨)
+    const headerRange = XLSX.utils.decode_range(ws['!ref'] || 'A1:I1')
+    for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col })
+      if (!ws[cellAddress]) continue
+      
+      ws[cellAddress].s = {
+        fill: { fgColor: { rgb: '92D050' } }, // 초록색 배경
+        font: { bold: true, color: { rgb: 'FFFFFF' } }, // 굵은 흰색 글씨
+        alignment: { horizontal: 'center', vertical: 'center' }
+      }
+    }
+    
     const wb = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(wb, ws, '운영교과목')
     XLSX.writeFile(wb, '운영교과목_업로드_양식.xlsx')

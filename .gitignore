@@ -42,3 +42,5 @@ Thumbs.db
 
 # sample courses data
 server/src/sample_course.xlsx
+# Code Runner temporary files
+tempCodeRunnerFile.*

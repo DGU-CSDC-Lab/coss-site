@@ -185,7 +185,7 @@ export default function OfferingSubjectsPage() {
                         {course.department}
                       </td>
                       <td className="px-2 py-1 text-caption-14 text-gray-700 text-center">
-                        {course.courseCode}
+                        {course.section ? `${course.courseCode}-${course.section}` : course.courseCode}
                       </td>
                       <td className="px-3 py-1 text-caption-14 text-gray-700 text-center truncate">
                         {course.subjectName}
