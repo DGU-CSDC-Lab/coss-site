@@ -6,7 +6,7 @@ export default function CoShowPage() {
   return (
     <div className="w-full">
       <Tabs />
-      <Title className="mb-4">Co-Show (예정)</Title>
+      <Title className="mb-4">Co-Show</Title>
       <SubTitle className="mb-4">
         COSS 컨소시엄이 함께하는 종합 경진, 체험, 교육 페스티벌
       </SubTitle>
