@@ -7,7 +7,6 @@ const menuConfig = [
     children: [
       { name: '인사말', path: '/about/greeting' },
       { name: '학과소개', path: '/about/introduction' },
-      { name: '연혁', path: '/about/history' },
       { name: '참여 교원', path: '/about/faculty' },
       { name: '학사일정', path: '/about/schedule' },
     ],
