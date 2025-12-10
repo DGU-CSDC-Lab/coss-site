@@ -19,6 +19,13 @@ export default function InJejuChallengePage() {
         <li>시상 : 대상 1팀, 최우수상 5팀, 우수상 5팀, 입선 9팀</li>
         <li>후속 연계 : 우수팀 글로벌 프로그램, 인턴십/취, 창업 연계</li>
       </ul>
+      <div className="flex flex-col gap-8 items-center">
+        <img
+          src="/assets/images/pages/support/programs/in-jeju-challenge.png"
+          alt="학과 소개 이미지"
+          className="max-w-5xl h-auto"
+        />
+      </div>
     </div>
   )
 }

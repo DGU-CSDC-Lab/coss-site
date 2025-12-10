@@ -24,6 +24,13 @@ export default function CoShowPage() {
           통신, 드론, 데이터보안 등)
         </li>
       </ul>
+      <div className="flex flex-col gap-8 items-center">
+        <img
+          src="/assets/images/pages/support/programs/co-show.png"
+          alt="학과 소개 이미지"
+          className="max-w-5xl h-auto"
+        />
+      </div>
     </div>
   )
 }

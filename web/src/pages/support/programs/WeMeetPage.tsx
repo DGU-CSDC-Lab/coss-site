@@ -23,6 +23,13 @@ export default function WeMeetPage() {
           성과 연계 : 우수팀은 In-Class Challenge → In-Jeju Challenge 본선 진출
         </li>
       </ul>
+      <div className="flex flex-col gap-8 items-center">
+        <img
+          src="/assets/images/pages/support/programs/we-meet.png"
+          alt="학과 소개 이미지"
+          className="max-w-5xl h-auto"
+        />
+      </div>
     </div>
   )
 }
