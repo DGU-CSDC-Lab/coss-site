@@ -42,6 +42,15 @@ export class FacultyCreate {
   jobTitle: string;
 
   @ApiProperty({
+    description: '임용 유형',
+    example: '전임',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  appointmentType?: string;
+
+  @ApiProperty({
     description: '이메일',
     example: 'professor@iot.ac.kr',
     required: false,
@@ -85,6 +94,15 @@ export class FacultyCreate {
   @IsOptional()
   @IsString()
   department?: string;
+
+  @ApiProperty({
+    description: '소속 대학',
+    example: '공과대학',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  college?: string;
 
   @ApiProperty({
     description: '연구 분야',
@@ -127,6 +145,15 @@ export class FacultyUpdate {
   jobTitle?: string;
 
   @ApiProperty({
+    description: '임용 유형',
+    example: '전임',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  appointmentType?: string;
+
+  @ApiProperty({
     description: '이메일',
     example: 'professor@iot.ac.kr',
     required: false,
@@ -172,6 +199,15 @@ export class FacultyUpdate {
   department?: string;
 
   @ApiProperty({
+    description: '소속 대학',
+    example: '공과대학',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  college?: string;
+
+  @ApiProperty({
     description: '연구 분야',
     example: ['IoT', '인공지능', '빅데이터'],
     required: false,
@@ -212,6 +248,12 @@ export class FacultyResponse {
   jobTitle?: string;
 
   @ApiProperty({
+    description: '임용 유형',
+    example: '전임',
+  })
+  appointmentType?: string;
+
+  @ApiProperty({
     description: '이메일',
     example: 'professor@iot.ac.kr',
   })
@@ -240,6 +282,12 @@ export class FacultyResponse {
     example: '지능IoT학과',
   })
   department?: string;
+
+  @ApiProperty({
+    description: '소속 대학',
+    example: '공과대학',
+  })
+  college?: string;
 
   @ApiProperty({
     description: '연구 분야',

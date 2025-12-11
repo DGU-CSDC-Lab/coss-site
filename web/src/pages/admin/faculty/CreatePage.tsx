@@ -27,7 +27,9 @@ export default function AdminFacultyCreatePage() {
   const [formData, setFormData] = useState({
     name: '',
     jobTitle: '',
+    appointmentType: '',
     department: '',
+    college: '',
     email: '',
     phoneNumber: '',
     office: '',
@@ -53,7 +55,9 @@ export default function AdminFacultyCreatePage() {
       const data = {
         name: facultyData.name,
         jobTitle: facultyData.jobTitle,
+        appointmentType: facultyData.appointmentType || '',
         department: facultyData.department || '',
+        college: facultyData.college || '',
         email: facultyData.email || '',
         phoneNumber: facultyData.phoneNumber || '',
         office: facultyData.office || '',
@@ -88,9 +92,14 @@ export default function AdminFacultyCreatePage() {
 
   const positionOptions = [
     { value: '직책 선택', label: '직책 선택' },
-    { value: '교수', label: '교수' },
-    { value: 'JA교원', label: 'JA교원' },
-     { value: '비전임', label: '비전임' },
+    { value: '일반교원', label: '일반교원' },
+    { value: '산업체경력교원', label: '산업체경력교원' },
+  ]
+
+  const appointmentOptions = [
+    { value: '임용 유형 선택', label: '임용 유형 선택' },
+    { value: '전임', label: '전임' },
+    { value: '비전임', label: '비전임' },
   ]
 
   const formatPhoneNumber = (value: string) => {
@@ -115,6 +124,16 @@ export default function AdminFacultyCreatePage() {
       return
     }
 
+    if (!formData.appointmentType.trim()) {
+      alert.error('임용 유형을 선택해주세요.')
+      return
+    }
+
+    if (!formData.college.trim()) {
+      alert.error('소속 대학을 입력해주세요.')
+      return
+    }
+
     if (!formData.email.trim()) {
       alert.error('이메일을 입력해주세요.')
       return
@@ -127,7 +146,9 @@ export default function AdminFacultyCreatePage() {
         const facultyData: UpdateFacultyRequest = {
           name: formData.name,
           jobTitle: formData.jobTitle,
+          appointmentType: formData.appointmentType,
           department: formData.department,
+          college: formData.college,
           email: formData.email || undefined,
           phoneNumber: formData.phoneNumber || undefined,
           office: formData.office || undefined,
@@ -144,7 +165,9 @@ export default function AdminFacultyCreatePage() {
         const facultyData: CreateFacultyRequest = {
           name: formData.name,
           jobTitle: formData.jobTitle,
+          appointmentType: formData.appointmentType,
           department: formData.department,
+          college: formData.college,
           email: formData.email || undefined,
           phoneNumber: formData.phoneNumber || undefined,
           office: formData.office || undefined,
@@ -224,9 +247,39 @@ export default function AdminFacultyCreatePage() {
                   size="lg"
                 />
               </div>
+
+              <div>
+                <Label required={true} className="mb-2">
+                  임용 유형
+                </Label>
+                <Dropdown
+                  options={appointmentOptions}
+                  value={formData.appointmentType}
+                  onChange={value =>
+                    setFormData({ ...formData, appointmentType: value })
+                  }
+                  placeholder="임용 유형을 선택해주세요."
+                  size="lg"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div>
+                <Label required={true} className="mb-2">
+                  소속 대학
+                </Label>
+                <Input
+                  type="text"
+                  value={formData.college}
+                  onChange={value =>
+                    setFormData({ ...formData, college: value })
+                  }
+                  placeholder="소속 대학을 입력하세요"
+                  className="w-full"
+                  size="lg"
+                />
+              </div>
               <div>
                 <Label required={true} className="mb-2">
                   학과

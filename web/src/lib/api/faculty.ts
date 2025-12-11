@@ -5,7 +5,9 @@ export interface Faculty {
   id: string
   name: string
   jobTitle: string
+  appointmentType?: string
   department: string
+  college?: string
   email?: string
   phoneNumber?: string
   office?: string
@@ -27,11 +29,13 @@ export interface FacultyQuery {
 export interface CreateFacultyRequest {
   name: string
   jobTitle: string
+  appointmentType: string
   email?: string
   phoneNumber?: string
   office?: string
   profileImageUrl?: string
   department: string
+  college: string
   researchAreas?: string[]
   biography?: string
 }

@@ -84,6 +84,12 @@ export default function AdminFacultyPage() {
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
                 직책
               </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
+                임용유형
+              </th>
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
+                소속대학
+              </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-48">
                 이메일
               </th>
@@ -102,7 +108,7 @@ export default function AdminFacultyPage() {
             {faculty?.items?.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={8}
                   className="px-4 py-8 text-center text-caption-14 text-gray-600"
                 >
                   등록된 교원이 없습니다.
@@ -135,6 +141,12 @@ export default function AdminFacultyPage() {
                   </td>
                   <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {member.jobTitle || '-'}
+                  </td>
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
+                    {member.appointmentType || '-'}
+                  </td>
+                  <td className="px-4 py-3 text-caption-14 text-gray-600">
+                    {member.college || '-'}
                   </td>
                   <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {member.email || '-'}

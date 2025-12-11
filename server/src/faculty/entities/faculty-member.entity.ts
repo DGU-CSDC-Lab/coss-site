@@ -9,6 +9,9 @@ export class FacultyMember extends SoftDeleteEntity {
   @Column({ name: 'job_title', type: 'varchar', nullable: true })
   jobTitle?: string;
 
+  @Column({ name: 'appointment_type', type: 'varchar', nullable: true })
+  appointmentType?: string;
+
   @Column({ type: 'varchar', nullable: true })
   email?: string;
 
@@ -23,6 +26,9 @@ export class FacultyMember extends SoftDeleteEntity {
 
   @Column({ type: 'varchar', nullable: true })
   department?: string;
+
+  @Column({ type: 'varchar', nullable: true })
+  college?: string;
 
   @Column({ name: 'research_areas', type: 'json', nullable: true })
   researchAreas?: string[];

@@ -250,11 +250,13 @@ export class FacultyService {
       id: faculty.id,
       name: faculty.name, // 교수 이름
       jobTitle: faculty.jobTitle, // 직책 (교수, 부교수, 조교수 등)
+      appointmentType: faculty.appointmentType, // 임용 유형 (전임, 비전임 등)
       email: faculty.email, // 이메일 주소
       phoneNumber: faculty.phoneNumber, // 전화번호
       office: faculty.office, // 연구실/사무실 위치
       profileImageUrl: faculty.profileImageUrl ? this.s3Service.getFileUrl(faculty.profileImageUrl) : null, // 프로필 사진 URL
       department: faculty.department, // 소속 학과
+      college: faculty.college, // 소속 대학
       researchAreas: faculty.researchAreas, // 연구 분야
       biography: faculty.biography, // 약력/소개
       createdAt: faculty.createdAt, // 생성일시
