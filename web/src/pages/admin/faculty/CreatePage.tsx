@@ -89,10 +89,8 @@ export default function AdminFacultyCreatePage() {
   const positionOptions = [
     { value: '직책 선택', label: '직책 선택' },
     { value: '교수', label: '교수' },
-    { value: '부교수', label: '부교수' },
-    { value: '조교수', label: '조교수' },
-    { value: '겸임교수', label: '겸임교수' },
-    { value: '초빙교수', label: '초빙교수' },
+    { value: 'JA교원', label: 'JA교원' },
+     { value: '비전임', label: '비전임' },
   ]
 
   const formatPhoneNumber = (value: string) => {

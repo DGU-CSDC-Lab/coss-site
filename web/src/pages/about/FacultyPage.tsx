@@ -12,24 +12,40 @@ export default function FacultyPage() {
     queryFn: () => facultyApi.getFaculty(),
   })
 
+  const groupedFaculties = faculties?.items?.reduce((groups: any, faculty: any) => {
+    const jobTitle = faculty.jobTitle || '기타'
+    if (!groups[jobTitle]) {
+      groups[jobTitle] = []
+    }
+    groups[jobTitle].push(faculty)
+    return groups
+  }, {})
+
   return (
     <div className="w-full">
       <Tabs />
-      <Title className="mb-12">교수진</Title>
+      <Title className="mb-12">참여 교원</Title>
       {isLoading ? (
         <div className="flex justify-center py-8">
           <LoadingSpinner size="lg" />
         </div>
       ) : (
         <div>
-          {faculties?.items && faculties.items.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-              {faculties.items.map((faculty: any) => (
-                <FacultyCard key={faculty.id} faculty={faculty} />
+          {groupedFaculties && Object.keys(groupedFaculties).length > 0 ? (
+            <div className="space-y-12">
+              {Object.entries(groupedFaculties).map(([jobTitle, facultyList]: [string, any]) => (
+                <div key={jobTitle}>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-6">{jobTitle}</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                    {facultyList.map((faculty: any) => (
+                      <FacultyCard key={faculty.id} faculty={faculty} />
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
-            <EmptyState message="등록된 교수진이 없습니다." />
+            <EmptyState message="등록된 참여 교원이 없습니다." />
           )}
         </div>
       )}
