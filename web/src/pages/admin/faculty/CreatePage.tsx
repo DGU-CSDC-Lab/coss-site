@@ -91,13 +91,13 @@ export default function AdminFacultyCreatePage() {
   })
 
   const positionOptions = [
-    { value: '직책 선택', label: '직책 선택' },
+    { value: '교원 구분', label: '교원 구분' },
     { value: '일반교원', label: '일반교원' },
     { value: '산업체경력교원', label: '산업체경력교원' },
   ]
 
   const appointmentOptions = [
-    { value: '임용 유형 선택', label: '임용 유형 선택' },
+    { value: '전임 구분', label: '전임 구분' },
     { value: '전임', label: '전임' },
     { value: '비전임', label: '비전임' },
   ]
@@ -235,7 +235,7 @@ export default function AdminFacultyCreatePage() {
 
               <div>
                 <Label required={true} className="mb-2">
-                  직책
+                  교원 구분
                 </Label>
                 <Dropdown
                   options={positionOptions}
@@ -250,7 +250,7 @@ export default function AdminFacultyCreatePage() {
 
               <div>
                 <Label required={true} className="mb-2">
-                  임용 유형
+                  전임 구분
                 </Label>
                 <Dropdown
                   options={appointmentOptions}
@@ -282,7 +282,7 @@ export default function AdminFacultyCreatePage() {
               </div>
               <div>
                 <Label required={true} className="mb-2">
-                  학과
+                  소속 학과
                 </Label>
                 <Input
                   type="text"
@@ -311,7 +311,7 @@ export default function AdminFacultyCreatePage() {
 
               <div>
                 <Label className="mb-2" optional={true}>
-                  전화번호
+                  연락처
                 </Label>
                 <Input
                   type="tel"
