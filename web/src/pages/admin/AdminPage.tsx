@@ -133,8 +133,8 @@ export default function AdminPage() {
       href: '/admin/schedules/create',
     },
     {
-      title: '교수진 등록',
-      description: '교수진 정보를 추가합니다.',
+      title: '참여 교원 등록',
+      description: '참여 교원 정보를 추가합니다.',
       icon: UserGroupIcon,
       href: '/admin/faculty/create',
     },
