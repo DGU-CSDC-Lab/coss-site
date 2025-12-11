@@ -78,7 +78,7 @@ export default function AdminFacultyPage() {
         <table className="w-full min-w-[800px]">
           <thead className="bg-info-50 border-b border-info-100">
             <tr>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
                 이름
               </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
@@ -87,7 +87,7 @@ export default function AdminFacultyPage() {
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
                 교원 구분
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-48">
                 소속대학/소속학과
               </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-48">
@@ -96,7 +96,7 @@ export default function AdminFacultyPage() {
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
                 전화번호
               </th>
-              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-24">
+              <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-232">
                 연구실
               </th>
               <th className="px-4 py-3 text-center font-body-18-medium text-gray-900 w-32">
