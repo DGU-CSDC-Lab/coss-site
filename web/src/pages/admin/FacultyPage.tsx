@@ -82,13 +82,13 @@ export default function AdminFacultyPage() {
                 이름
               </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
-                직책
+                전임/비전임
               </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
-                임용유형
+                교원 구분
               </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-32">
-                소속대학
+                소속대학/소속학과
               </th>
               <th className="px-4 py-3 text-left font-body-18-medium text-gray-900 w-48">
                 이메일
@@ -146,7 +146,7 @@ export default function AdminFacultyPage() {
                     {member.appointmentType || '-'}
                   </td>
                   <td className="px-4 py-3 text-caption-14 text-gray-600">
-                    {member.college || '-'}
+                    {member.college || '-'} / {member.department || '-'}
                   </td>
                   <td className="px-4 py-3 text-caption-14 text-gray-600">
                     {member.email || '-'}
