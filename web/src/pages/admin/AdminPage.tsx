@@ -199,7 +199,7 @@ export default function AdminPage() {
           count: stats.schedules,
         },
         {
-          name: '교수진 관리',
+          name: '교원 관리',
           href: '/admin/faculty',
           icon: UserGroupIcon,
           count: stats.faculty,
