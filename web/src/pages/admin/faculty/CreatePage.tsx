@@ -125,7 +125,7 @@ export default function AdminFacultyCreatePage() {
     }
 
     if (!formData.appointmentType.trim()) {
-      alert.error('임용 유형을 선택해주세요.')
+      alert.error('전임/비전임 구분을 선택해주세요.')
       return
     }
 
@@ -250,7 +250,7 @@ export default function AdminFacultyCreatePage() {
 
               <div>
                 <Label required={true} className="mb-2">
-                  전임 구분
+                  전임/비전임 구분 구분
                 </Label>
                 <Dropdown
                   options={appointmentOptions}
@@ -258,7 +258,7 @@ export default function AdminFacultyCreatePage() {
                   onChange={value =>
                     setFormData({ ...formData, appointmentType: value })
                   }
-                  placeholder="임용 유형을 선택해주세요."
+                  placeholder="전입/비전임 구분을 선택해주세요."
                   size="lg"
                 />
               </div>
