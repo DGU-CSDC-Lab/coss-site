@@ -7,9 +7,11 @@ import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
 import EmptyState from '@/components/common/EmptyState'
 
 export default function FacultyPage() {
+  const size = 100
+
   const { data: faculties, isLoading } = useQuery({
     queryKey: ['faculties'],
-    queryFn: () => facultyApi.getFaculty(),
+    queryFn: () => facultyApi.getFaculty({ page: 1, size }),
   })
 
   const groupedFaculties = faculties?.items?.reduce((groups: any, faculty: any) => {
