@@ -262,10 +262,7 @@ export default function AdminFacultyCreatePage() {
                   size="lg"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div>
+                <div>
                 <Label required={true} className="mb-2">
                   소속 대학
                 </Label>
@@ -296,7 +293,7 @@ export default function AdminFacultyCreatePage() {
                 />
               </div>
               <div>
-                <Label required={true} className="mb-2">
+                <Label optional={true} className="mb-2">
                   이메일
                 </Label>
                 <Input
@@ -325,6 +322,9 @@ export default function AdminFacultyCreatePage() {
                   size="lg"
                 />
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div>
                 <Label className="mb-2" optional={true}>
                   연구실
