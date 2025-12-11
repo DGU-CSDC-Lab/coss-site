@@ -32,6 +32,9 @@ export default function FacultyCard({ faculty }: FacultyCardProps) {
           <p className="text-body-14-regular text-gray-500">
             {faculty.jobTitle}
           </p>
+          <p className="text-body-14-regular text-gray-500">
+            {faculty.department}
+          </p>
           <p className="text-body-14-regular text-gray-500 break-all">{faculty.email}</p>
           <p className="text-body-14-regular text-gray-500">
             {faculty.phoneNumber}
