@@ -49,7 +49,7 @@ export class FacultyService {
    */
   async findAll(query: FacultyQuery): Promise<PagedResponse<FacultyResponse>> {
     try {
-      const { name, department, page = 1, size = 20 } = query;
+      const { name, department, page = 1, size = 100 } = query;
 
       this.logger.log(
         `Finding faculty members - name: ${name || 'all'}, department: ${department || 'all'}, page: ${page}, size: ${size}`,
