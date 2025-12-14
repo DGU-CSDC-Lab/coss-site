@@ -27,7 +27,7 @@ export default function WeMeetPage() {
         <img
           src="/assets/images/pages/support/programs/we-meet.png"
           alt="학과 소개 이미지"
-          className="max-w-5xl h-auto"
+          className="w-full max-w-5xl h-auto"
         />
       </div>
     </div>

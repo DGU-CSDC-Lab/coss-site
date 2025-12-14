@@ -23,7 +23,7 @@ export default function InJejuChallengePage() {
         <img
           src="/assets/images/pages/support/programs/in-jeju-challenge.jpeg"
           alt="학과 소개 이미지"
-          className="max-w-5xl h-auto"
+          className="w-full max-w-5xl h-auto"
         />
       </div>
     </div>
