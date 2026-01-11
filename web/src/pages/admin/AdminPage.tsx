@@ -575,7 +575,7 @@ export default function AdminPage() {
                     setMigrateError('')
                     setShowConfirmDialog(false)
                   }}
-                  variant="outline"
+                  variant="cancel"
                   size="lg"
                   className="flex-1"
                 >
@@ -605,7 +605,7 @@ export default function AdminPage() {
                   <div className="flex gap-3">
                     <Button
                       onClick={() => setShowConfirmDialog(false)}
-                      variant="outline"
+                      variant="cancel"
                       size="md"
                       className="flex-1"
                     >
