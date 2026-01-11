@@ -28,6 +28,26 @@ export class RegisterRequest {
   password: string;
 }
 
+// (대표 관리자용) 계정 이관
+export class MigrateAccountRequest {
+  @ApiProperty({
+    description: '새 이메일',
+    example: 'admin@iot.ac.kr',
+  })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({
+    description: '새 비밀번호',
+    example: '1234',
+    minLength: 4,
+  })
+  @IsString()
+  @MinLength(4)
+  password: string;
+}
+
+
 // 이메일 인증 확인 DTO
 export class VerifyEmailRequest {
   @ApiProperty({

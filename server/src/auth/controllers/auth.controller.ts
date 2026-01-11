@@ -24,7 +24,11 @@ import { Roles } from '@/auth/decorators/roles.decorator';
 import { UserRole } from '@/auth/entities/user.entity';
 import { LoginRequest, LoginResponse } from '@/auth/dto/login.dto';
 import { RefreshTokenRequest } from '@/auth/dto/token.dto';
-import { AdminInfoResponse, UpdateUserInfoRequest, UserInfoResponse } from '@/auth/dto/info.dto';
+import {
+  AdminInfoResponse,
+  UpdateUserInfoRequest,
+  UserInfoResponse,
+} from '@/auth/dto/info.dto';
 import {
   RegisterRequest,
   VerifyEmailRequest,
@@ -35,6 +39,7 @@ import {
   CreateSubAdminRequest,
   UpdateUserPermissionRequest,
   SetPasswordRequest,
+  MigrateAccountRequest,
 } from '@/auth/dto/auth.dto';
 
 @ApiTags('Authentication')
@@ -104,9 +109,7 @@ export class AuthController {
   @Roles(UserRole.SUPER_ADMIN, UserRole.ADMINISTRATOR)
   @ApiBearerAuth('bearerAuth')
   @ApiOperation({ summary: '모든 유저의 관리자 권한 조회' })
-  async getAllUserPermissions(
-    @Request() auth,
-  ): Promise<(AdminInfoResponse)[]> {
+  async getAllUserPermissions(@Request() auth): Promise<AdminInfoResponse[]> {
     return this.service.getUserAdmin(auth.user.id);
   }
 
@@ -222,5 +225,22 @@ export class AuthController {
     @Body() request: { userId: string },
   ): Promise<void> {
     return this.service.resendPasswordLink(auth.user.id, request.userId);
+  }
+
+  // (대표 관리자용) - 계정 이관
+  @Post('migrate-account')
+  @UseGuards(RoleGuard)
+  @Roles(UserRole.ADMINISTRATOR)
+  @ApiBearerAuth('bearerAuth')
+  @ApiOperation({ summary: '계정 이관' })
+  @ApiResponse({ status: 200, description: '계정 이관 성공' })
+  @ApiResponse({ status: 403, description: '권한 없음' })
+  @HttpCode(HttpStatus.OK)
+  async migrateAccount(
+    @Request() auth,
+    @Body()
+    request: MigrateAccountRequest,
+  ): Promise<void> {
+    return this.service.migrateAccount(auth.user.id, request);
   }
 }

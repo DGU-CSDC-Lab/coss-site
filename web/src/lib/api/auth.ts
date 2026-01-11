@@ -55,6 +55,11 @@ export interface ChangePasswordRequest {
   newPassword: string
 }
 
+export interface MigrateAccountRequest {
+  email: string
+  password: string
+}
+
 // 인증 API 함수들
 export const authApi = {
   login: (data: LoginRequest): Promise<LoginResponse> =>
@@ -81,4 +86,7 @@ export const authApi = {
 
   setPassword: (data: { token: string; password: string }): Promise<void> =>
     api.post('/auth/set-password', data),
+
+  migrateAccount: (data: MigrateAccountRequest): Promise<void> =>
+    api.auth.post('/auth/migrate-account', data),
 }

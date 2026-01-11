@@ -15,6 +15,7 @@ import {
   VerifyEmailRequest,
   CreateSubAdminRequest,
   SetPasswordRequest,
+  MigrateAccountRequest,
 } from '@/auth/dto/auth.dto';
 import {
   Account,
@@ -1054,6 +1055,52 @@ export class AuthService {
       throw error instanceof AuthException
         ? error
         : CommonException.internalServerError(error.message);
+    }
+  }
+
+  // (대표 관리자용) - 계정 이관
+  async migrateAccount(requesterId: string, request: MigrateAccountRequest): Promise<void> {
+    try {
+      this.logger.debug('Account migration attempt');
+
+      const { email, password } = request;
+      // 기존 계정 조회
+      // 요청자 권한 확인
+      const requester = await this.userRepository.findOne({
+        where: { id: requesterId },
+        relations: ['account'],
+      });
+      if (!requester) throw AuthException.notFoundUser(requesterId);
+      if (!requester.account) throw AuthException.notFoundUser(requesterId);
+
+      // 권한 검증
+      if (requester.role != UserRole.ADMINISTRATOR) {
+        // 대표 관리자 권한이 아닌 경우
+        this.logger.warn(
+          `Account migration failed - insufficient permissions: ${requesterId}`,
+        );
+        throw AuthException.insufficientPermissions();
+      }
+
+      // 새 이메일 중복 체크
+      const existingAccount = await this.accountRepository.findOne({
+        where: { email },
+      });
+      if (existingAccount && existingAccount.id !== requester.account.id) {
+        throw AuthException.emailAlreadyExists(email);
+      }
+
+      // 새 이메일, 비밀번호로 계정 업데이트
+      const passwordHash = await bcrypt.hash(password, 10);
+      await this.accountRepository.update(
+        { id: requester.account.id },
+        { email, passwordHash },
+      );
+
+      this.logger.log(`Account migrated successfully for user: ${requesterId}`);
+    } catch (error) {
+      this.logger.error('Account migration error', error.stack);
+      throw CommonException.internalServerError(error.message);
     }
   }
 }

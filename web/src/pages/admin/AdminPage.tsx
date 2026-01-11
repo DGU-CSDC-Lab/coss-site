@@ -12,9 +12,11 @@ import {
   BookOpenIcon,
   ShieldCheckIcon,
   ChatBubbleLeftRightIcon,
+  EyeIcon,
+  EyeSlashIcon,
 } from '@heroicons/react/24/outline'
 import { postsApi } from '@/lib/api/posts'
-import { authApi, UserInfoResponse } from '@/lib/api/auth'
+import { authApi, UserInfoResponse, MigrateAccountRequest } from '@/lib/api/auth'
 import PasswordChangeModal from '@/components/admin/PasswordChangeModal'
 import { schedulesApi } from '@/lib/api/schedules'
 import { facultyApi } from '@/lib/api/faculty'
@@ -25,8 +27,11 @@ import { historyApi } from '@/lib/api/history'
 import Information from '@/components/common/Information'
 import Title from '@/components/common/title/Title'
 import LoadingSpinner from '@/components/common/loading/LoadingSpinner'
+import Input from '@/components/common/Input'
+import Button from '@/components/common/Button'
 import { useAlert } from '@/hooks/useAlert'
 import { useAuthStore } from '@/store'
+import { getErrorMessage } from '@/lib/utils/errorHandler'
 
 interface DashboardStats {
   posts: number
@@ -41,6 +46,7 @@ interface DashboardStats {
 
 export default function AdminPage() {
   const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const [showMigrateModal, setShowMigrateModal] = useState(false)
   const [userInfo, setUserInfo] = useState<UserInfoResponse | null>(null)
   const [stats, setStats] = useState<DashboardStats>({
     posts: 0,
@@ -53,7 +59,15 @@ export default function AdminPage() {
     masterCourses: 0,
   })
   const [loading, setLoading] = useState(true)
-  const { user, updateUserInfo, updateRole } = useAuthStore()
+  const [migrateLoading, setMigrateLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [migrateForm, setMigrateForm] = useState<MigrateAccountRequest>({
+    email: '',
+    password: '',
+  })
+  const [migrateError, setMigrateError] = useState('')
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const { user, updateUserInfo, updateRole, logout } = useAuthStore()
 
   const alert = useAlert()
 
@@ -116,6 +130,61 @@ export default function AdminPage() {
       )
     } catch (error) {
       alert.error('사용자 정보를 불러오는데 실패했습니다.')
+    }
+  }
+
+  const handleMigrateAccount = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!migrateForm.email.trim() || !migrateForm.password.trim()) {
+      setMigrateError('이메일과 비밀번호를 입력해주세요.')
+      return
+    }
+
+    // 이메일 유효성 검사
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(migrateForm.email)) {
+      setMigrateError('올바른 이메일 형식을 입력해주세요.')
+      return
+    }
+
+    // 비밀번호 유효성 검사
+    if (migrateForm.password.length < 4) {
+      setMigrateError('비밀번호는 최소 4자 이상이어야 합니다.')
+      return
+    }
+
+    setShowConfirmDialog(true)
+  }
+
+  const confirmMigrateAccount = async () => {
+    setMigrateLoading(true)
+    setMigrateError('')
+
+    try {
+      await authApi.migrateAccount(migrateForm)
+      
+      // 로컬스토리지와 스토어 초기화
+      localStorage.clear()
+      logout()
+      
+      alert.success('계정 이관이 완료되었습니다. 다시 로그인해주세요.')
+      setShowMigrateModal(false)
+      setShowConfirmDialog(false)
+      setMigrateForm({ email: '', password: '' })
+      
+      // 로그인 페이지로 리다이렉트
+      window.location.href = '/login'
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      if (errorMessage.includes('이미 존재하는 이메일') || errorMessage.includes('Duplicate entry')) {
+        setMigrateError('이미 존재하는 이메일입니다.');
+      } else {
+        setMigrateError(errorMessage);
+      }
+      setShowConfirmDialog(false)
+    } finally {
+      setMigrateLoading(false)
     }
   }
 
@@ -426,6 +495,15 @@ export default function AdminPage() {
                         : '권한 없음'}
                 </div>
               </div>
+              {userInfo?.role === 'ADMINISTRATOR' && (
+                <button
+                  onClick={() => setShowMigrateModal(true)}
+                  className="w-full p-1 text-caption-12 text-gray-400 hover:text-gray-600 transition-colors"
+                  style={{ fontSize: '10px', opacity: 0.3 }}
+                >
+                  ⚡
+                </button>
+              )}
               <button
                 onClick={() => setShowPasswordModal(true)}
                 className="w-full p-2 text-body-14-medium text-point-2 hover:text-point-1 hover:bg-gray-100 rounded-md transition-colors"
@@ -441,6 +519,114 @@ export default function AdminPage() {
         isOpen={showPasswordModal}
         onClose={() => setShowPasswordModal(false)}
       />
+
+      {/* 계정 이관 모달 */}
+      {showMigrateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-heading-20 text-text mb-4">계정 이관</h2>
+            
+            <form onSubmit={handleMigrateAccount} className="space-y-4">
+              <div>
+                <Input
+                  type="email"
+                  value={migrateForm.email}
+                  onChange={value => setMigrateForm({ ...migrateForm, email: value })}
+                  placeholder="새 이메일"
+                  size="lg"
+                  className="w-full"
+                />
+              </div>
+
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={migrateForm.password}
+                  onChange={value => setMigrateForm({ ...migrateForm, password: value })}
+                  placeholder="새 비밀번호"
+                  size="lg"
+                  className="w-full pr-12"
+                />
+                <Button
+                  onClick={() => setShowPassword(!showPassword)}
+                  variant="custom"
+                  iconOnly
+                  icon={
+                    showPassword ? (
+                      <EyeIcon className="h-5 w-5" />
+                    ) : (
+                      <EyeSlashIcon className="h-5 w-5" />
+                    )
+                  }
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                />
+              </div>
+
+              {migrateError && (
+                <p className="text-caption-14 text-error-500 ml-2">{migrateError}</p>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setShowMigrateModal(false)
+                    setMigrateForm({ email: '', password: '' })
+                    setMigrateError('')
+                    setShowConfirmDialog(false)
+                  }}
+                  variant="outline"
+                  size="lg"
+                  className="flex-1"
+                >
+                  취소
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={migrateLoading}
+                  size="lg"
+                  variant="point_2"
+                  className="flex-1 flex items-center justify-center"
+                >
+                  {migrateLoading ? <LoadingSpinner size="md" /> : '이관'}
+                </Button>
+              </div>
+            </form>
+
+            {/* 확인 다이얼로그 */}
+            {showConfirmDialog && (
+              <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
+                <div className="bg-white rounded-lg p-6 mx-4 max-w-sm w-full">
+                  <h3 className="text-heading-18 text-text mb-4">계정 이관 확인</h3>
+                  <p className="text-body-14 text-gray-600 mb-6">
+                    계정을 이관하시겠습니까?<br />
+                    이 작업은 되돌릴 수 없습니다.
+                  </p>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={() => setShowConfirmDialog(false)}
+                      variant="outline"
+                      size="md"
+                      className="flex-1"
+                    >
+                      아니오
+                    </Button>
+                    <Button
+                      onClick={confirmMigrateAccount}
+                      disabled={migrateLoading}
+                      variant="point_2"
+                      size="md"
+                      className="flex-1 flex items-center justify-center"
+                    >
+                      {migrateLoading ? <LoadingSpinner size="sm" /> : '예'}
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
