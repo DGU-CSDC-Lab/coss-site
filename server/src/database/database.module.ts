@@ -2,6 +2,10 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { DatabaseSeeder } from '@/database/database.seeder';
+import {
+  SecretsManagerClient,
+  GetSecretValueCommand,
+} from '@aws-sdk/client-secrets-manager';
 
 // Import entities directly from domains
 import {
@@ -23,43 +27,64 @@ import { Feedback } from '@/feedback/entities';
 
 @Module({
   imports: [
-    // forRootAsync: 비동기 설정 지원 - Global Module도 주입 필요함
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], // app.module.ts에서 ConfigModule을 가져옴
-      inject: [ConfigService], // 의존성 주입
-      useFactory: (configService: ConfigService) => ({
-        type: 'mysql', // mariaDB도 mysql 드라이버 사용
-        host: configService.get('DB_HOST'), // .env에서 가져오는 값들
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        charset: 'utf8mb4',
-        entities: [
-          Account,
-          User,
-          PendingUser,
-          PasswordResetToken,
-          BoardPost,
-          AcademicSchedule,
-          File,
-          Popup,
-          FacultyMember,
-          Feedback,
-          History,
-          CourseMaster,
-          CourseOffering,
-          Category,
-          HeaderAsset,
-        ],
-        synchronize: process.env.NODE_ENV !== 'production',
-        // 임시로 활성화
-        logging:
-          process.env.NODE_ENV === 'production' ? ['error', 'warn'] : true, // 프로덕션에서는 에러/경고만
-        dropSchema: false, // production에서는 false로 설정
-      }),
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => {
+        let username = configService.get('DB_USERNAME');
+        let password = configService.get('DB_PASSWORD');
+
+        // AWS Secrets Manager에서 자격 증명 가져오기
+        const secretName = configService.get('AWS_SECRET_NAME');
+        if (secretName) {
+          try {
+            const client = new SecretsManagerClient({
+              region: configService.get('AWS_REGION') || 'ap-northeast-2',
+            });
+            const response = await client.send(
+              new GetSecretValueCommand({ SecretId: secretName }),
+            );
+            const secret = JSON.parse(response.SecretString);
+            username = secret.username;
+            password = secret.password;
+          } catch (error) {
+            console.warn('Failed to fetch from Secrets Manager:', error.message);
+          }
+        }
+
+        return {
+          type: 'mysql',
+          host: configService.get('DB_HOST'),
+          port: configService.get('DB_PORT'),
+          username,
+          password,
+          database: configService.get('DB_DATABASE'),
+          charset: 'utf8mb4',
+          entities: [
+            Account,
+            User,
+            PendingUser,
+            PasswordResetToken,
+            BoardPost,
+            AcademicSchedule,
+            File,
+            Popup,
+            FacultyMember,
+            Feedback,
+            History,
+            CourseMaster,
+            CourseOffering,
+            Category,
+            HeaderAsset,
+          ],
+          synchronize: process.env.NODE_ENV !== 'production',
+          logging:
+            process.env.NODE_ENV === 'production' ? ['error', 'warn'] : true,
+          dropSchema: false,
+        };
+      },
     }),
   ],
-  providers: [DatabaseSeeder], // DI 컨테이너에 등록
+  providers: [DatabaseSeeder],
 })
 export class DatabaseModule {}
